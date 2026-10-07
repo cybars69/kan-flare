@@ -500,9 +500,25 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Rate limits hold across Worker instances with no Redis.
 **Estimate:** 0.5–1 day
 
-- [ ] `11.1` Add Rate Limiting bindings for the limits in `rateLimit.ts`
-- [ ] `11.2` Rewrite `packages/api/src/utils/rateLimit.ts` on the binding; keep its API for the ten callers
-- [ ] `11.3` Remove `ioredis`, `rate-limiter-flexible`, `packages/db/src/redis.ts` and `REDIS_URL`
+- [x] `11.1` Add Rate Limiting bindings for the limits in `rateLimit.ts`
+- [x] `11.2` Rewrite `packages/api/src/utils/rateLimit.ts` on the binding; keep its API for the ten callers
+- [x] `11.3` Remove `ioredis`, `rate-limiter-flexible`, `packages/db/src/redis.ts` and `REDIS_URL`
+
+**Status notes (2026-10-08):**
+
+- `11.1`: three Workers Rate Limiting bindings, one per limit in use: `RATE_LIMIT_100`, `RATE_LIMIT_300` and `RATE_LIMIT_600` requests per 60 seconds. Staging has its own namespaces (2100/2300/2600 vs 1100/1300/1600), so counters don't mix. Wrangler only allows 10- or 60-second periods.
+- `11.2`: `withRateLimit` keeps its signature, so its 11 callers are unchanged.
+  - **Lookup:** it picks the binding by `RATE_LIMIT_<points>`.
+  - **Keys:** each key is `<scope>:<caller>`. The scope defaults to the first two path segments (`/api/trpc`, `/api/files`…), so each route family keeps its own budget, as each upstream limiter instance had. Pass `scope` to override.
+  - **Fallback:** with no matching binding (unit tests, or a new limit not yet configured), it uses a per-instance in-memory window and logs this at debug level.
+  - **Limiter failures:** if the limiter itself fails, the request is let through.
+  - **Fixes to upstream behaviour:**
+    - When the wrapped handler threw, upstream's `catch` ran the handler a second time. It now runs once.
+    - The caller's IP now comes from `cf-connecting-ip` first. Upstream trusted `x-forwarded-for` first, which a client can set to dodge limits.
+  - **Behaviour change:** `/api/upload/avatar` and `/api/upload/attachment` now share the `/api/upload` budget of 100 requests a minute.
+- `11.3`: `ioredis`, `rate-limiter-flexible`, `packages/db/src/redis.ts` (and its `./redis` export) and `REDIS_URL` are removed. The MCP paid-workspace check also used Redis, but already fell back to in-memory, so it's in-memory only now. It's a Kan-cloud feature with a 30-second lifetime.
+- **Tests:** 5 new ones, covering the binding with scoped keys, the in-memory fallback and per-scope budgets, `cf-connecting-ip` priority, the handler running once, and the fail-open path. In `wrangler dev`, 110 requests to a 100-per-minute route returned 100 × 200 and 10 × 429.
+- **Dependency order:** upstream's `sherif` check (run after every install) fails if a `package.json` dependency list isn't sorted alphabetically.
 
 **Files:** `packages/api/src/utils/rateLimit.ts`, `packages/db/src/redis.ts`
 

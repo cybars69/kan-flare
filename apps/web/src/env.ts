@@ -73,7 +73,6 @@ export const env = createEnv({
     APPLE_CLIENT_SECRET: z.string().optional(),
     APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
     EMAIL_FROM: z.string().optional(),
-    REDIS_URL: z.string().url().optional().or(z.literal("")),
   },
 
   /**

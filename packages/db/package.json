@@ -23,11 +23,8 @@
     "./repository/*": {
       "types": "./src/repository/*.ts",
       "default": "./src/repository/*.ts"
-    },
-    "./redis": {
-      "types": "./src/redis.ts",
-      "default": "./src/redis.ts"
     }
+
   },
   "license": "GPL-3.0",
   "scripts": {
@@ -47,7 +44,6 @@
     "@opennextjs/cloudflare": "1.20.9",
     "drizzle-orm": "^0.42.0",
     "drizzle-zod": "^0.5.1",
-    "ioredis": "^5.9.2",
     "uuid": "^11.1.0",
     "zod": "catalog:"
   },

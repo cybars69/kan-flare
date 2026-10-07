@@ -75,8 +75,8 @@
     "@kan/logger": "workspace:^",
     "@kan/shared": "workspace:^",
     "@kan/stripe": "workspace:^",
+    "@opennextjs/cloudflare": "1.20.9",
     "@trpc/server": "catalog:",
-    "rate-limiter-flexible": "^9.0.1",
     "superjson": "2.2.1",
     "trpc-to-openapi": "^2.3.2",
     "zod": "catalog:"
