@@ -122,8 +122,6 @@
     "BETTER_AUTH_TRUSTED_ORIGINS",
     "REDIS_URL",
     "LOG_LEVEL",
-    "AXIOM_TOKEN",
-    "AXIOM_DATASET",
     "KAN_BASE_URL",
     "KAN_API_TOKEN"
   ],

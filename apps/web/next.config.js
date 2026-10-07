@@ -79,7 +79,6 @@ const config = {
       },
     },
   },
-  serverExternalPackages: ["pino"],
 
   experimental: {
     // instrumentationHook: true,
@@ -108,7 +107,12 @@ if (
   });
 }
 
-// Exposes Cloudflare bindings (D1, R2, …) to `next dev` through getCloudflareContext().
-initOpenNextCloudflareForDev();
+// Exposes Cloudflare bindings (D1, R2, …) to `next dev` through
+// getCloudflareContext(). Skipped for `next build`: it loads this file in
+// several workers at once, and each would start a local runtime on the same
+// D1 state, failing with SQLITE_BUSY.
+if (process.env.NODE_ENV !== "production") {
+  initOpenNextCloudflareForDev();
+}
 
 export default config;

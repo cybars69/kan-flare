@@ -406,9 +406,22 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Logging needs no Node streams, and the 23 files that log stay the same.
 **Estimate:** 0.5 days
 
-- [ ] `8.1` Rewrite `packages/logger/src/index.ts` as a console logger that prints JSON lines, honours `LOG_LEVEL` and keeps `createLogger(name)`
-- [ ] `8.2` Remove `pino`, `pino-pretty` and `@axiomhq/js`; drop `serverExternalPackages`
-- [ ] `8.3` Turn on Workers Logs
+- [x] `8.1` Rewrite `packages/logger/src/index.ts` as a console logger that prints JSON lines, honours `LOG_LEVEL` and keeps `createLogger(name)`
+- [x] `8.2` Remove `pino`, `pino-pretty` and `@axiomhq/js`; drop `serverExternalPackages`
+- [x] `8.3` Turn on Workers Logs
+
+**Status notes (2026-10-08):**
+
+- `8.1`: `packages/logger/src/index.ts` is now a dependency-free logger built on `console`.
+  - **Same API:** `createLogger(module)` and `logger.child()`, with pino's call signatures: `(msg)`, `(fields, msg)`, and `(error, msg)`, which logs the error under `err`.
+  - **Errors** are serialized with type, message, stack and cause.
+  - **Output in production:** each entry is one object passed to `console.<level>`, which Workers Logs indexes as structured fields (level, time, module, requestId, procedure, duration and so on).
+  - **Output in development:** one readable line.
+  - **Level:** `LOG_LEVEL` is read when logging, because Workers populate `process.env` per request.
+- `8.2`: `pino`, `pino-pretty` and `@axiomhq/js` are removed, along with `serverExternalPackages: ["pino"]` and `AXIOM_TOKEN`/`AXIOM_DATASET`. Axiom shipping was only for Kan's hosted cloud.
+- `8.3`: Workers Logs was turned on in Phase 5 (`observability.logs.enabled`).
+- **Fix found here:** `initOpenNextCloudflareForDev()` now runs only outside production. `next build` loads `next.config.js` in several workers at once. Each started a local runtime on the same D1 state, and builds failed intermittently with `SQLITE_BUSY`. Two builds in a row now pass.
+- **Bundle size:** **2.77 MiB gzipped**. The smoke test passes.
 
 **Files:** `packages/logger/src/index.ts`, `apps/web/next.config.js`
 
