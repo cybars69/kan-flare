@@ -1,13 +1,13 @@
-import { and, eq, isNull, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
+import type { Permission, Role } from "@kan/shared";
 import {
   workspaceMemberPermissions,
   workspaceMembers,
   workspaceRolePermissions,
   workspaceRoles,
 } from "@kan/db/schema";
-import type { Permission, Role } from "@kan/shared";
 import { generateUID, getDefaultPermissions } from "@kan/shared";
 
 /**
@@ -267,23 +267,20 @@ export const clearAllMemberPermissionOverridesForWorkspace = async (
   db: dbClient,
   workspaceId: number,
 ) => {
-  const memberIds = await db
-    .select({ id: workspaceMembers.id })
-    .from(workspaceMembers)
-    .where(
-      and(
-        eq(workspaceMembers.workspaceId, workspaceId),
-        isNull(workspaceMembers.deletedAt),
-      ),
-    );
-
-  if (memberIds.length === 0) return;
-
-  const ids = memberIds.map((m) => m.id);
-
-  await db
-    .delete(workspaceMemberPermissions)
-    .where(inArray(workspaceMemberPermissions.workspaceMemberId, ids));
+  await db.delete(workspaceMemberPermissions).where(
+    inArray(
+      workspaceMemberPermissions.workspaceMemberId,
+      db
+        .select({ id: workspaceMembers.id })
+        .from(workspaceMembers)
+        .where(
+          and(
+            eq(workspaceMembers.workspaceId, workspaceId),
+            isNull(workspaceMembers.deletedAt),
+          ),
+        ),
+    ),
+  );
 };
 
 /**
@@ -491,5 +488,3 @@ export const getRolesByWorkspaceId = async (
     .from(workspaceRoles)
     .where(eq(workspaceRoles.workspaceId, workspaceId));
 };
-
-

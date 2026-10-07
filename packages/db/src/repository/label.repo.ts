@@ -4,6 +4,8 @@ import type { dbClient } from "@kan/db/client";
 import { cardsToLabels, labels } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
+import { runBatch, splitByParameters } from "../utils/d1";
+
 export const getCount = async (db: dbClient) => {
   const result = await db
     .select({ count: count() })
@@ -59,12 +61,14 @@ export const bulkCreate = async (
     createdBy: string;
   }[],
 ) => {
-  const results = await db
-    .insert(labels)
-    .values(labelsInput)
-    .returning({ id: labels.id });
+  const results = await runBatch(
+    db,
+    splitByParameters(labelsInput, (rows) =>
+      db.insert(labels).values(rows).returning({ id: labels.id }),
+    ),
+  );
 
-  return results;
+  return (results as { id: number }[][]).flat();
 };
 
 export const getAllByPublicIds = (db: dbClient, labelPublicIds: string[]) => {

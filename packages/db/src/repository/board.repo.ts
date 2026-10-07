@@ -1,3 +1,4 @@
+import type { SQLiteInsertValue } from "drizzle-orm/sqlite-core";
 import {
   and,
   asc,
@@ -10,6 +11,7 @@ import {
   isNull,
   lt,
   or,
+  sql,
 } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
@@ -30,6 +32,8 @@ import {
   workspaceMembers,
 } from "@kan/db/schema";
 import { generateUID, normalizeDescription } from "@kan/shared/utils";
+
+import { runBatch, splitByParameters } from "../utils/d1";
 
 export const getCount = async (db: dbClient) => {
   const result = await db
@@ -158,40 +162,39 @@ export const getByPublicId = async (
     type: "regular" | "template" | undefined;
   },
 ) => {
-  let cardIds: string[] = [];
-
-  if (filters.labels.length > 0 || filters.members.length > 0) {
-    const filteredCards = await db
-      .select({
-        publicId: cards.publicId,
-      })
-      .from(cards)
-      .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
-      .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
-      .leftJoin(
-        cardToWorkspaceMembers,
-        eq(cards.id, cardToWorkspaceMembers.cardId),
-      )
-      .leftJoin(
-        workspaceMembers,
-        eq(cardToWorkspaceMembers.workspaceMemberId, workspaceMembers.id),
-      )
-      .where(
-        and(
-          isNull(cards.deletedAt),
-          or(
-            filters.labels.length > 0
-              ? inArray(labels.publicId, filters.labels)
-              : undefined,
-            filters.members.length > 0
-              ? inArray(workspaceMembers.publicId, filters.members)
-              : undefined,
-          ),
-        ),
-      );
-
-    cardIds = filteredCards.map((card) => card.publicId);
-  }
+  // A subquery rather than a list of ids: a list could pass D1's
+  // 100-parameter limit on boards with many matching cards.
+  const filteredCardIds =
+    filters.labels.length > 0 || filters.members.length > 0
+      ? db
+          .select({
+            publicId: cards.publicId,
+          })
+          .from(cards)
+          .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
+          .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
+          .leftJoin(
+            cardToWorkspaceMembers,
+            eq(cards.id, cardToWorkspaceMembers.cardId),
+          )
+          .leftJoin(
+            workspaceMembers,
+            eq(cardToWorkspaceMembers.workspaceMemberId, workspaceMembers.id),
+          )
+          .where(
+            and(
+              isNull(cards.deletedAt),
+              or(
+                filters.labels.length > 0
+                  ? inArray(labels.publicId, filters.labels)
+                  : undefined,
+                filters.members.length > 0
+                  ? inArray(workspaceMembers.publicId, filters.members)
+                  : undefined,
+              ),
+            ),
+          )
+      : undefined;
 
   const board = await db.query.boards.findFirst({
     columns: {
@@ -330,7 +333,9 @@ export const getByPublicId = async (
               },
             },
             where: and(
-              cardIds.length > 0 ? inArray(cards.publicId, cardIds) : undefined,
+              filteredCardIds
+                ? inArray(cards.publicId, filteredCardIds)
+                : undefined,
               isNull(cards.deletedAt),
               buildDueDateWhere(filters.dueDate),
             ),
@@ -393,27 +398,25 @@ export const getBySlug = async (
     dueDate: DueDateFilter[];
   },
 ) => {
-  let cardIds: string[] = [];
-
-  if (filters.labels.length) {
-    const filteredCards = await db
-      .select({
-        publicId: cards.publicId,
-      })
-      .from(cards)
-      .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
-      .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
-      .where(
-        and(
-          isNull(cards.deletedAt),
-          filters.labels.length > 0
-            ? inArray(labels.publicId, filters.labels)
-            : undefined,
-        ),
-      );
-
-    cardIds = filteredCards.map((card) => card.publicId);
-  }
+  // A subquery rather than a list of ids: a list could pass D1's
+  // 100-parameter limit on boards with many matching cards.
+  const filteredCardIds = filters.labels.length
+    ? db
+        .select({
+          publicId: cards.publicId,
+        })
+        .from(cards)
+        .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
+        .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
+        .where(
+          and(
+            isNull(cards.deletedAt),
+            filters.labels.length > 0
+              ? inArray(labels.publicId, filters.labels)
+              : undefined,
+          ),
+        )
+    : undefined;
 
   const board = await db.query.boards.findFirst({
     columns: {
@@ -506,7 +509,9 @@ export const getBySlug = async (
               },
             },
             where: and(
-              cardIds.length > 0 ? inArray(cards.publicId, cardIds) : undefined,
+              filteredCardIds
+                ? inArray(cards.publicId, filteredCardIds)
+                : undefined,
               isNull(cards.deletedAt),
               buildDueDateWhere(filters.dueDate),
             ),
@@ -809,11 +814,136 @@ export const createFromSnapshot = async (
     sourceBoardId?: number;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const [newBoard] = await tx
+  // Everything is written in one atomic D1 batch. Rows reference their
+  // parents through `publicId` subqueries, since database ids are not known
+  // until the batch runs.
+  const idOf = (
+    table: "board" | "label" | "list" | "card" | "card_checklist",
+    publicId: string,
+  ) =>
+    sql`(SELECT id FROM ${sql.identifier(table)} WHERE "publicId" = ${publicId})`;
+
+  const boardPublicId = generateUID();
+
+  const labelPublicIds = new Map<string, string>();
+  const labelRows: SQLiteInsertValue<typeof labels>[] = args.source.labels.map(
+    (l) => {
+      const publicId = generateUID();
+      labelPublicIds.set(l.publicId, publicId);
+      return {
+        publicId,
+        name: l.name,
+        colourCode: l.colourCode ?? null,
+        createdBy: args.createdBy,
+        boardId: idOf("board", boardPublicId),
+      };
+    },
+  );
+
+  const listRows: SQLiteInsertValue<typeof lists>[] = [];
+  const cardRows: SQLiteInsertValue<typeof cards>[] = [];
+  const cardLabelRows: SQLiteInsertValue<typeof cardsToLabels>[] = [];
+  const checklistRows: SQLiteInsertValue<typeof checklists>[] = [];
+  const itemRows: SQLiteInsertValue<typeof checklistItems>[] = [];
+  const activityRows: SQLiteInsertValue<typeof cardActivities>[] = [];
+
+  const srcLists = [...args.source.lists].sort((a, b) => a.index - b.index);
+  for (const list of srcLists) {
+    const listPublicId = generateUID();
+    listRows.push({
+      publicId: listPublicId,
+      name: list.name,
+      createdBy: args.createdBy,
+      boardId: idOf("board", boardPublicId),
+      index: list.index,
+    });
+
+    const sortedCards = [...list.cards].sort((a, b) => a.index - b.index);
+    for (const card of sortedCards) {
+      const cardPublicId = generateUID();
+      const cardId = idOf("card", cardPublicId);
+      cardRows.push({
+        publicId: cardPublicId,
+        title: card.title,
+        description: normalizeDescription(card.description),
+        createdBy: args.createdBy,
+        listId: idOf("list", listPublicId),
+        index: card.index,
+      });
+      activityRows.push({
+        publicId: generateUID(),
+        type: "card.created",
+        cardId,
+        createdBy: args.createdBy,
+        sourceBoardId: args.sourceBoardId,
+      });
+
+      for (const label of card.labels) {
+        const newLabelPublicId = labelPublicIds.get(label.publicId);
+        if (!newLabelPublicId) continue;
+        const labelId = idOf("label", newLabelPublicId);
+        cardLabelRows.push({ cardId, labelId });
+        activityRows.push({
+          publicId: generateUID(),
+          type: "card.updated.label.added",
+          cardId,
+          labelId,
+          createdBy: args.createdBy,
+          sourceBoardId: args.sourceBoardId,
+        });
+      }
+
+      const sortedChecklists = [...(card.checklists ?? [])].sort(
+        (a, b) => a.index - b.index,
+      );
+      for (const checklist of sortedChecklists) {
+        const checklistPublicId = generateUID();
+        checklistRows.push({
+          publicId: checklistPublicId,
+          name: checklist.name,
+          createdBy: args.createdBy,
+          cardId,
+          index: checklist.index,
+        });
+        activityRows.push({
+          publicId: generateUID(),
+          type: "card.updated.checklist.added",
+          cardId,
+          toTitle: checklist.name,
+          createdBy: args.createdBy,
+          sourceBoardId: args.sourceBoardId,
+        });
+
+        const sortedItems = [...checklist.items].sort(
+          (a, b) => a.index - b.index,
+        );
+        for (const item of sortedItems) {
+          itemRows.push({
+            publicId: generateUID(),
+            title: item.title,
+            createdBy: args.createdBy,
+            checklistId: idOf("card_checklist", checklistPublicId),
+            index: item.index,
+            completed: !!item.completed,
+          });
+          activityRows.push({
+            publicId: generateUID(),
+            type: "card.updated.checklist.item.added",
+            cardId,
+            toTitle: item.title,
+            createdBy: args.createdBy,
+            sourceBoardId: args.sourceBoardId,
+          });
+        }
+      }
+    }
+  }
+
+  const [insertedBoards] = await runBatch(db, [
+    db
       .insert(boards)
       .values({
-        publicId: generateUID(),
+        publicId: boardPublicId,
         name: args.name ?? args.source.name,
         slug: args.slug,
         createdBy: args.createdBy,
@@ -825,173 +955,32 @@ export const createFromSnapshot = async (
         id: boards.id,
         publicId: boards.publicId,
         name: boards.name,
-      });
+      }),
+    ...splitByParameters(labelRows, (rows) => db.insert(labels).values(rows)),
+    ...splitByParameters(listRows, (rows) => db.insert(lists).values(rows)),
+    ...splitByParameters(cardRows, (rows) => db.insert(cards).values(rows)),
+    ...splitByParameters(cardLabelRows, (rows) =>
+      db.insert(cardsToLabels).values(rows),
+    ),
+    ...splitByParameters(checklistRows, (rows) =>
+      db.insert(checklists).values(rows),
+    ),
+    ...splitByParameters(itemRows, (rows) =>
+      db.insert(checklistItems).values(rows),
+    ),
+    ...splitByParameters(activityRows, (rows) =>
+      db.insert(cardActivities).values(rows),
+    ),
+  ]);
 
-    if (!newBoard) throw new Error("Failed to create board");
+  const [newBoard] = insertedBoards as {
+    id: number;
+    publicId: string;
+    name: string;
+  }[];
+  if (!newBoard) throw new Error("Failed to create board");
 
-    // Labels
-    const srcLabels = args.source.labels;
-    const labelMap = new Map<string, number>();
-
-    if (srcLabels.length) {
-      const inserted = await tx
-        .insert(labels)
-        .values(
-          srcLabels.map((l) => ({
-            publicId: generateUID(),
-            name: l.name,
-            colourCode: l.colourCode ?? null,
-            createdBy: args.createdBy,
-            boardId: newBoard.id,
-          })),
-        )
-        .returning({ id: labels.id });
-
-      for (let i = 0; i < srcLabels.length; i++) {
-        const src = srcLabels[i];
-
-        if (!src) throw new Error("Source label not found");
-
-        const created = inserted[i];
-        if (created) labelMap.set(src.publicId, created.id);
-      }
-    }
-
-    // Lists
-    const listIndexToId = new Map<number, number>();
-    const srcLists = [...args.source.lists].sort((a, b) => a.index - b.index);
-    if (srcLists.length) {
-      const insertedLists = await tx
-        .insert(lists)
-        .values(
-          srcLists.map((list) => ({
-            publicId: generateUID(),
-            name: list.name,
-            createdBy: args.createdBy,
-            boardId: newBoard.id,
-            index: list.index,
-          })),
-        )
-        .returning({ id: lists.id, index: lists.index });
-
-      for (const list of insertedLists) listIndexToId.set(list.index, list.id);
-    }
-
-    // Cards, card-labels, checklists
-    for (const list of srcLists) {
-      const newListId = listIndexToId.get(list.index);
-      if (!newListId) continue;
-      const sortedCards = [...list.cards].sort((a, b) => a.index - b.index);
-
-      for (const card of sortedCards) {
-        const [createdCard] = await tx
-          .insert(cards)
-          .values({
-            publicId: generateUID(),
-            title: card.title,
-            description: normalizeDescription(card.description),
-            createdBy: args.createdBy,
-            listId: newListId,
-            index: card.index,
-          })
-          .returning({ id: cards.id });
-
-        if (!createdCard) throw new Error("Failed to create card");
-
-        // Create card.created activity
-        await tx.insert(cardActivities).values({
-          publicId: generateUID(),
-          type: "card.created",
-          cardId: createdCard.id,
-          createdBy: args.createdBy,
-          sourceBoardId: args.sourceBoardId,
-        });
-
-        if (card.labels.length) {
-          const cardLabels: { cardId: number; labelId: number }[] = [];
-          for (const label of card.labels) {
-            const newLabelId = labelMap.get(label.publicId);
-            if (newLabelId)
-              cardLabels.push({ cardId: createdCard.id, labelId: newLabelId });
-          }
-          if (cardLabels.length) {
-            await tx.insert(cardsToLabels).values(cardLabels);
-
-            // Create card.updated.label.added activities for each label
-            const labelActivities = cardLabels.map((cardLabel) => ({
-              publicId: generateUID(),
-              type: "card.updated.label.added" as const,
-              cardId: cardLabel.cardId,
-              labelId: cardLabel.labelId,
-              createdBy: args.createdBy,
-              sourceBoardId: args.sourceBoardId,
-            }));
-            await tx.insert(cardActivities).values(labelActivities);
-          }
-        }
-
-        if (card.checklists?.length) {
-          const sortedChecklists = [...card.checklists].sort(
-            (a, b) => a.index - b.index,
-          );
-          for (const checklist of sortedChecklists) {
-            const [createdChecklist] = await tx
-              .insert(checklists)
-              .values({
-                publicId: generateUID(),
-                name: checklist.name,
-                createdBy: args.createdBy,
-                cardId: createdCard.id,
-                index: checklist.index,
-              })
-              .returning({ id: checklists.id });
-
-            if (!createdChecklist) continue;
-
-            // Create card.updated.checklist.added activity
-            await tx.insert(cardActivities).values({
-              publicId: generateUID(),
-              type: "card.updated.checklist.added",
-              cardId: createdCard.id,
-              toTitle: checklist.name,
-              createdBy: args.createdBy,
-              sourceBoardId: args.sourceBoardId,
-            });
-
-            if (checklist.items.length) {
-              const itemValues = [...checklist.items]
-                .sort((a, b) => a.index - b.index)
-                .map((checklistItem) => ({
-                  publicId: generateUID(),
-                  title: checklistItem.title,
-                  createdBy: args.createdBy,
-                  checklistId: createdChecklist.id,
-                  index: checklistItem.index,
-                  completed: !!checklistItem.completed,
-                }));
-
-              if (itemValues.length) {
-                await tx.insert(checklistItems).values(itemValues);
-
-                // Create card.updated.checklist.item.added activities for each item
-                const itemActivities = itemValues.map((item) => ({
-                  publicId: generateUID(),
-                  type: "card.updated.checklist.item.added" as const,
-                  cardId: createdCard.id,
-                  toTitle: item.title,
-                  createdBy: args.createdBy,
-                  sourceBoardId: args.sourceBoardId,
-                }));
-                await tx.insert(cardActivities).values(itemActivities);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return newBoard;
-  });
+  return newBoard;
 };
 
 export const moveToWorkspace = async (
@@ -1000,9 +989,9 @@ export const moveToWorkspace = async (
   targetWorkspaceId: number,
   newSlug?: string,
 ) => {
-  return db.transaction(async (tx) => {
+  const [moved] = await runBatch(db, [
     // Update the board's workspace (and slug if provided)
-    const [updatedBoard] = await tx
+    db
       .update(boards)
       .set({
         workspaceId: targetWorkspaceId,
@@ -1013,40 +1002,35 @@ export const moveToWorkspace = async (
       .returning({
         publicId: boards.publicId,
         name: boards.name,
-      });
+      }),
+    // Clear card member assignments on every card ever belonging to this
+    // board, including soft-deleted cards under soft-deleted lists. Member
+    // assignments point at workspace-scoped members that no longer exist after
+    // the move; if we leave assignments on soft-deleted cards, a later restore
+    // would resurrect rogue references to the old workspace.
+    db.delete(cardToWorkspaceMembers).where(
+      inArray(
+        cardToWorkspaceMembers.cardId,
+        db
+          .select({ id: cards.id })
+          .from(cards)
+          .where(
+            inArray(
+              cards.listId,
+              db
+                .select({ id: lists.id })
+                .from(lists)
+                .where(eq(lists.boardId, boardId)),
+            ),
+          ),
+      ),
+    ),
+  ]);
 
-    if (!updatedBoard) throw new Error("Failed to move board");
+  const [updatedBoard] = moved as { publicId: string; name: string }[];
+  if (!updatedBoard) throw new Error("Failed to move board");
 
-    // Get every card ID ever belonging to this board, including
-    // soft-deleted cards under soft-deleted lists. Member assignments
-    // point at workspace-scoped members that no longer exist after
-    // the move; if we leave assignments on soft-deleted cards, a later
-    // restore would resurrect rogue references to the old workspace.
-    const boardLists = await tx
-      .select({ id: lists.id })
-      .from(lists)
-      .where(eq(lists.boardId, boardId));
-
-    if (boardLists.length > 0) {
-      const listIds = boardLists.map((l) => l.id);
-
-      const boardCards = await tx
-        .select({ id: cards.id })
-        .from(cards)
-        .where(inArray(cards.listId, listIds));
-
-      if (boardCards.length > 0) {
-        const cardIds = boardCards.map((c) => c.id);
-
-        // Clear all card member assignments (they reference workspace-scoped members)
-        await tx
-          .delete(cardToWorkspaceMembers)
-          .where(inArray(cardToWorkspaceMembers.cardId, cardIds));
-      }
-    }
-
-    return updatedBoard;
-  });
+  return updatedBoard;
 };
 
 export const addUserFavorite = async (

@@ -32,11 +32,9 @@ const config = {
   /**
    * Packages that are only imported under the Workers condition, so Next's
    * file tracing misses them and the OpenNext Worker bundle can't resolve them.
-   * pg-cloudflare goes away with pg in Phase 3 of the Cloudflare migration.
    */
   outputFileTracingIncludes: {
     "/**": [
-      "../../node_modules/pg-cloudflare/**",
       "../../node_modules/uncrypto/**",
       "../../node_modules/@react-email/render/**",
       "../../node_modules/stripe/**",

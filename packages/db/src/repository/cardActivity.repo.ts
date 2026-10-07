@@ -5,6 +5,8 @@ import type { ActivityType } from "@kan/db/schema";
 import { cardActivities, comments } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
+import { runBatch, splitByParameters } from "../utils/d1";
+
 export const getCount = async (db: dbClient) => {
   const result = await db.select({ count: count() }).from(cardActivities);
 
@@ -93,12 +95,17 @@ export const bulkCreate = async (
     publicId: generateUID(),
   }));
 
-  const results = await db
-    .insert(cardActivities)
-    .values(activitiesWithPublicIds)
-    .returning({ id: cardActivities.id });
+  const results = await runBatch(
+    db,
+    splitByParameters(activitiesWithPublicIds, (rows) =>
+      db
+        .insert(cardActivities)
+        .values(rows)
+        .returning({ id: cardActivities.id }),
+    ),
+  );
 
-  return results;
+  return (results as { id: number }[][]).flat();
 };
 
 export const getPaginatedActivities = async (
@@ -112,12 +119,10 @@ export const getPaginatedActivities = async (
   const limit = options?.limit ?? 20;
   const cursor = options?.cursor;
 
-  const validComments = await db
+  const validCommentIds = db
     .select({ id: comments.id })
     .from(comments)
     .where(and(eq(comments.cardId, cardId), isNull(comments.deletedAt)));
-
-  const validCommentIds = validComments.map((comment) => comment.id);
 
   const activities = await db.query.cardActivities.findMany({
     columns: {

@@ -210,14 +210,47 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Every query runs on D1, and card and list order stays correct.
 **Estimate:** 5–7 days
 
-- [ ] `3.1` Rewrite the 15 `db.transaction()` blocks as `db.batch()`, using the three patterns above (card, list, checklist and board repos)
-- [ ] `3.2` Replace `tx.execute(sql`…`)` with `db.run(sql`…`)` and check the 27 raw SQL snippets for quoting and Postgres-only syntax
-- [ ] `3.3` Use subqueries for values that used to be read first: new card numbers, a list's last index, a checklist's last item
-- [ ] `3.4` Add a renumber statement to the end of every move or delete batch
-- [ ] `3.5` Split bulk inserts and `inArray` lists into chunks under D1's parameter limit; add one shared `chunk()` helper
-- [ ] `3.6` Replace `similarity()` and `ILIKE` in `workspace.repo.ts` with `LIKE`; keep the exact-match-first ordering
-- [ ] `3.7` Check that `.returning()` and `onConflictDoUpdate` calls behave the same on SQLite
-- [ ] `3.8` Make `createDrizzleClient` take the D1 binding from the request context; remove `pg` and PGlite
+- [x] `3.1` Rewrite the 15 `db.transaction()` blocks as `db.batch()`, using the three patterns above (card, list, checklist and board repos)
+- [x] `3.2` Replace `tx.execute(sql`…`)` with `db.run(sql`…`)` and check the 27 raw SQL snippets for quoting and Postgres-only syntax
+- [x] `3.3` Use subqueries for values that used to be read first: new card numbers, a list's last index, a checklist's last item
+- [x] `3.4` Add a renumber statement to the end of every move or delete batch
+- [x] `3.5` Split bulk inserts and `inArray` lists into chunks under D1's parameter limit; add one shared `chunk()` helper
+- [x] `3.6` Replace `similarity()` and `ILIKE` in `workspace.repo.ts` with `LIKE`; keep the exact-match-first ordering
+- [x] `3.7` Check that `.returning()` and `onConflictDoUpdate` calls behave the same on SQLite
+- [x] `3.8` Make `createDrizzleClient` take the D1 binding from the request context; remove `pg` and PGlite
+
+**Status notes (2026-10-08):**
+
+- **Shared helpers in `packages/db/src/utils/d1.ts`:**
+  - `runBatch`: runs statements as one atomic D1 batch.
+  - `splitByParameters`: splits multi-row inserts so each statement stays under 100 bound parameters, measured from Drizzle's own `toSQL()` output.
+  - `renumberIndexes`: rewrites positions to 0…n-1 per parent, using a window function and `UPDATE … FROM`.
+  - `nextIndex`: a `COALESCE(MAX("index"), -1) + 1` subquery.
+  - `idList`: builds the parenthesised id list after `IN`.
+- **Drizzle bug worked around in `runBatch`:** in drizzle-orm 0.42, raw `db.run(sql…)` queries never get a prepared statement. Batching one with parameters fails with `Cannot read properties of undefined (reading 'bind')`. `runBatch` attaches the statement first.
+- **`3.1` / `3.3` / `3.4`: all 15 transactions are gone.**
+  - **Card create:** one batch that makes room, bumps `workspace.cardCounter`, inserts with `cardNumber` read by subquery inside the batch, logs the activity by `publicId` subquery, then renumbers the list.
+  - **Bulk card create:** card numbers are the counter plus *n*, read inside the batch, and the counter is bumped after the inserts.
+  - **Card and list reorder:** the earlier reads stay, then one batch does the moves, the renumber and the final read.
+  - **Soft deletes:** a single batch of the update plus a renumber, with the parent found by subquery.
+  - **Checklist and list create:** a single insert, with the index from a subquery.
+  - **Board snapshot copy:** one batch. Labels, lists, cards, checklists, items and activities refer to their parents by `publicId` subqueries.
+  - **Board move:** a single batch, with the card-member cleanup done by nested subqueries.
+- **Small behaviour changes:**
+  - List reorder now ignores deleted lists when shifting positions. Upstream also shifted deleted lists.
+  - Card reorder's "last card in target list" read now ignores deleted cards.
+- **`3.2`:** no `tx.execute` is left. Raw SQL quotes `"index"` everywhere, because `index` is a keyword.
+- **`3.5`:** every bulk insert is split by parameter count: cards, lists, checklists, items, labels, activities, card-label and card-member links. Three id lists that could grow large now use subqueries instead of `IN (…)` lists: the board view's label and member filter, valid comments in the activity feed, and the member-permission reset.
+  - **Behaviour change:** a board filter that matches no cards now shows no cards. Upstream showed every card in that case.
+- **`3.6`:** search matches when every word of the query (up to 8) appears in the text, using `LIKE … ESCAPE`, so `%` and `_` are literal. Results rank exact match, then prefix, then substring, then most recently updated. Ticket-id prefixes compare case-insensitively.
+- **`3.7`:** every `onConflictDoUpdate` target has a matching unique index or primary key, and the integration-provider upsert is covered by a test.
+- **`3.8`:** `pg`, `@types/pg` and PGlite are removed. `POSTGRES_URL` is gone from `env.ts`, `turbo.json` and `.env.example`; the Docker files go in Phase 13.
+- **Tests on local D1:**
+  - `integration-tests/ordering.integration.test.ts` has 12 tests covering cards, lists, checklist items, bulk inserts past the parameter limit, board copy and board move. Every test asserts indexes are exactly 0…n-1.
+  - `integration-tests/search.integration.test.ts` has 5 tests.
+  - With the existing tests, that's 33 integration tests, all passing.
+- **Not yet tested:** a real Trello import of a large board. Its bulk paths (`bulkCreate` for lists, cards and labels, plus the link tables) are covered by the tests above. A full import still needs a Trello API key, so it moves to Phase 12 (`12.4`).
+- **Known limit:** copying a very large template (thousands of rows) is a single batch. D1 limits how many queries one request may run, so a copy may need splitting into several batches if that limit is ever hit.
 
 **Files:** `packages/db/src/repository/`* (20 files), `packages/db/src/client.ts`, `packages/db/package.json`
 
@@ -235,7 +268,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 - [ ] `4.1` Switch Better Auth's `drizzleAdapter` from `provider: "pg"` to `"sqlite"` and regenerate its tables
 - [ ] `4.2` Build the auth instance per request (or lazily) so it gets the D1 binding
 - [ ] `4.3` Pass the D1 client through the tRPC context
-- [ ] `4.4` Replace PGlite in `packages/api/integration-tests/test-db.ts` with an in-memory SQLite database that applies the same migrations
+- [x] `4.4` Replace PGlite in `packages/api/integration-tests/test-db.ts` with an in-memory SQLite database that applies the same migrations
 
 **Files:** `packages/auth/src/auth.ts`, `packages/api/src/trpc.ts`, `packages/api/integration-tests/test-db.ts`
 
@@ -349,7 +382,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** The Workers build behaves like the Docker build, especially card order.
 **Estimate:** 3–4 days
 
-- [ ] `12.1` Write ordering tests first (before Phase 3): create at position, move within a list, move between lists, delete, bulk import
+- [x] `12.1` Write ordering tests first (before Phase 3): create at position, move within a list, move between lists, delete, bulk import
 - [ ] `12.2` Add a check that every list's indexes are exactly 0…n-1 after each test
 - [ ] `12.3` Run the Playwright suite in self-hosted mode against the preview
 - [ ] `12.4` Test uploads, image variants, every email and each login method you use

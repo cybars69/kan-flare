@@ -7,11 +7,11 @@ interface __BaseEnv_CloudflareEnv {
 	NEXTJS_ENV: string;
 	NEXT_PUBLIC_BASE_URL: string;
 	BETTER_AUTH_SECRET: string;
-	WORKER_SELF_REFERENCE: Service<typeof import("./.open-next/worker").default>;
+	WORKER_SELF_REFERENCE: Service;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
-		mainModule: typeof import("./.open-next/worker");
+		mainModule: unknown;
 	}
 	interface Env extends __BaseEnv_CloudflareEnv {}
 }

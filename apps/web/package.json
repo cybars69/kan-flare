@@ -16,7 +16,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts && node -e \"const f='cloudflare-env.d.ts',fs=require('fs');fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/Service<typeof import\\(\\\"\\.\\/\\.open-next\\/worker\\\"\\)\\.default>/g,'Service').replace(/typeof import\\(\\\"\\.\\/\\.open-next\\/worker\\\"\\)/g,'unknown'))\"",
     "db:migrate": "wrangler d1 migrations apply kan-flare --local",
     "db:migrate:remote": "wrangler d1 migrations apply kan-flare --remote",
     "with-env": "dotenv -e ../../.env --",

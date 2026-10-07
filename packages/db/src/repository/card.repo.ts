@@ -1,3 +1,4 @@
+import type { SQLiteInsertValue } from "drizzle-orm/sqlite-core";
 import {
   and,
   asc,
@@ -26,6 +27,15 @@ import {
 } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
+import type { D1BatchItem } from "../utils/d1";
+import {
+  idList,
+  nextIndex,
+  renumberIndexes,
+  runBatch,
+  splitByParameters,
+} from "../utils/d1";
+
 export const getCount = async (db: dbClient) => {
   const result = await db
     .select({ count: count() })
@@ -47,64 +57,35 @@ export const create = async (
     dueDate?: Date | null;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    let index = 0;
+  const publicId = generateUID();
+  const atStart = cardInput.position === "start";
 
-    if (cardInput.position === "end") {
-      const lastCard = await tx.query.cards.findFirst({
-        columns: {
-          index: true,
-        },
-        where: and(eq(cards.listId, cardInput.listId), isNull(cards.deletedAt)),
-        orderBy: desc(cards.index),
-      });
-
-      if (lastCard) index = lastCard.index + 1;
-    }
-
-    const getExistingCardAtIndex = async () =>
-      tx.query.cards.findFirst({
-        columns: {
-          id: true,
-        },
-        where: and(
-          eq(cards.listId, cardInput.listId),
-          eq(cards.index, index),
-          isNull(cards.deletedAt),
-        ),
-      });
-
-    const existingCardAtIndex = await getExistingCardAtIndex();
-
-    if (existingCardAtIndex?.id) {
-      await tx.execute(sql`
-        UPDATE card
-        SET index = index + 1
-        WHERE "listId" = ${cardInput.listId} AND index >= ${index} AND "deletedAt" IS NULL;
-      `);
-    }
-
-    const [counterResult] = await tx
+  // One atomic batch: make room, take the next card number, insert, log the
+  // activity, then renumber the list so positions stay 0..n-1.
+  const statements: D1BatchItem[] = [];
+  if (atStart) {
+    statements.push(
+      db.run(sql`
+        UPDATE card SET "index" = "index" + 1
+        WHERE "listId" = ${cardInput.listId} AND "deletedAt" IS NULL`),
+    );
+  }
+  statements.push(
+    db
       .update(workspaces)
       .set({ cardCounter: sql`${workspaces.cardCounter} + 1` })
       .where(eq(workspaces.id, cardInput.workspaceId))
-      .returning({ cardCounter: workspaces.cardCounter });
-
-    if (!counterResult)
-      throw new Error(`Workspace ${cardInput.workspaceId} not found`);
-
-    const cardNumber = counterResult.cardCounter;
-
-    const result = await tx
+      .returning({ cardCounter: workspaces.cardCounter }),
+    db
       .insert(cards)
       .values({
-        publicId: generateUID(),
+        publicId,
         title: cardInput.title,
         description: cardInput.description,
         createdBy: cardInput.createdBy,
         listId: cardInput.listId,
-        index: index,
-        cardNumber,
+        index: atStart ? 0 : nextIndex("card", "listId", cardInput.listId),
+        cardNumber: sql`(SELECT "cardCounter" FROM workspace WHERE id = ${cardInput.workspaceId})`,
         dueDate: cardInput.dueDate ?? null,
       })
       .returning({
@@ -112,60 +93,30 @@ export const create = async (
         listId: cards.listId,
         publicId: cards.publicId,
         cardNumber: cards.cardNumber,
-      });
-
-    if (!result[0]) throw new Error("Unable to create card");
-
-    await tx.insert(cardActivities).values({
+      }),
+    db.insert(cardActivities).values({
       publicId: generateUID(),
-      cardId: result[0].id,
+      cardId: sql`(SELECT id FROM card WHERE "publicId" = ${publicId})`,
       type: "card.created",
       createdBy: cardInput.createdBy,
-    });
+    }),
+    db.run(renumberIndexes("card", "listId", idList([cardInput.listId]))),
+  );
 
-    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+  const results = await runBatch(db, statements);
+  const offset = atStart ? 1 : 0;
+  const [counter] = results[offset] as { cardCounter: number }[];
+  const [card] = results[offset + 1] as {
+    id: number;
+    listId: number;
+    publicId: string;
+    cardNumber: number | null;
+  }[];
 
-    const duplicateIndices = await tx
-      .select({
-        index: cards.index,
-        count: countExpr,
-      })
-      .from(cards)
-      .where(and(eq(cards.listId, result[0].listId), isNull(cards.deletedAt)))
-      .groupBy(cards.listId, cards.index)
-      .having(gt(countExpr, 1));
+  if (!counter) throw new Error(`Workspace ${cardInput.workspaceId} not found`);
+  if (!card) throw new Error("Unable to create card");
 
-    if (duplicateIndices.length > 0) {
-      // Compact indices for this list to sequential values (0..n-1) preserving order
-      await tx.execute(sql`
-        WITH ordered AS (
-          SELECT id, ROW_NUMBER() OVER (ORDER BY "index", id) - 1 AS new_index
-          FROM "card"
-          WHERE "listId" = ${result[0].listId} AND "deletedAt" IS NULL
-        )
-        UPDATE "card" c
-        SET "index" = o.new_index
-        FROM ordered o
-        WHERE c.id = o.id;
-      `);
-
-      // Last resort: verify fix; rollback if duplicates persist
-      const postFixDupes = await tx
-        .select({ index: cards.index, count: countExpr })
-        .from(cards)
-        .where(and(eq(cards.listId, result[0].listId), isNull(cards.deletedAt)))
-        .groupBy(cards.listId, cards.index)
-        .having(gt(countExpr, 1));
-
-      if (postFixDupes.length > 0) {
-        throw new Error(
-          `Invariant violation: duplicate card indices remain after compaction in list ${result[0].listId}`,
-        );
-      }
-    }
-
-    return result[0];
-  });
+  return card;
 };
 
 export const bulkCreateCardLabelRelationships = async (
@@ -175,12 +126,13 @@ export const bulkCreateCardLabelRelationships = async (
     labelId: number;
   }[],
 ) => {
-  const result = await db
-    .insert(cardsToLabels)
-    .values(cardLabelRelationshipInput)
-    .returning();
-
-  return result;
+  const results = await runBatch(
+    db,
+    splitByParameters(cardLabelRelationshipInput, (rows) =>
+      db.insert(cardsToLabels).values(rows).returning(),
+    ),
+  );
+  return (results as (typeof cardsToLabels.$inferSelect)[][]).flat();
 };
 
 export const bulkCreateCardWorkspaceMemberRelationships = async (
@@ -190,12 +142,13 @@ export const bulkCreateCardWorkspaceMemberRelationships = async (
     workspaceMemberId: number;
   }[],
 ) => {
-  const result = await db
-    .insert(cardToWorkspaceMembers)
-    .values(cardWorkspaceMemberRelationshipInput)
-    .returning();
-
-  return result;
+  const results = await runBatch(
+    db,
+    splitByParameters(cardWorkspaceMemberRelationshipInput, (rows) =>
+      db.insert(cardToWorkspaceMembers).values(rows).returning(),
+    ),
+  );
+  return (results as (typeof cardToWorkspaceMembers.$inferSelect)[][]).flat();
 };
 
 export const update = async (
@@ -299,128 +252,60 @@ export const bulkCreate = async (
 ) => {
   if (cardInput.length === 0) return [];
 
-  return db.transaction(async (tx) => {
-    // Group incoming cards by list to compute safe, sequential indices per list
-    const byList = new Map<number, typeof cardInput>();
-    for (const item of cardInput) {
-      const arr = byList.get(item.listId) ?? [];
-      arr.push(item);
-      byList.set(item.listId, arr);
-    }
+  // Group incoming cards by list to compute sequential indices per list
+  const byList = new Map<number, typeof cardInput>();
+  for (const item of cardInput) {
+    const arr = byList.get(item.listId) ?? [];
+    arr.push(item);
+    byList.set(item.listId, arr);
+  }
 
-    // Atomically reserve a contiguous range of cardNumbers per workspace by
-    // bumping cardCounter once per workspace.
-    const countsByWorkspace = new Map<number, number>();
-    for (const item of cardInput) {
-      countsByWorkspace.set(
-        item.workspaceId,
-        (countsByWorkspace.get(item.workspaceId) ?? 0) + 1,
-      );
-    }
+  const values: SQLiteInsertValue<typeof cards>[] = [];
+  // Card numbers are counter + n, read from the workspace inside the batch;
+  // the counter is bumped after the inserts in the same batch.
+  const countsByWorkspace = new Map<number, number>();
 
-    const cardNumberByWorkspaceQueue = new Map<number, number[]>();
-    for (const [workspaceId, count] of countsByWorkspace.entries()) {
-      const [counterResult] = await tx
+  // For each list, append incoming cards after current max index, preserving incoming order
+  for (const [listId, items] of byList.entries()) {
+    const last = await db.query.cards.findFirst({
+      columns: { index: true },
+      where: and(eq(cards.listId, listId), isNull(cards.deletedAt)),
+      orderBy: [desc(cards.index)],
+    });
+
+    let next = last ? last.index + 1 : 0;
+    const sorted = [...items].sort((a, b) => a.index - b.index);
+    for (const it of sorted) {
+      const n = (countsByWorkspace.get(it.workspaceId) ?? 0) + 1;
+      countsByWorkspace.set(it.workspaceId, n);
+      values.push({
+        publicId: it.publicId,
+        title: it.title,
+        description: it.description,
+        createdBy: it.createdBy,
+        listId: it.listId,
+        index: next++,
+        cardNumber: sql`(SELECT "cardCounter" FROM workspace WHERE id = ${it.workspaceId}) + ${n}`,
+        importId: it.importId,
+      });
+    }
+  }
+
+  const inserts = splitByParameters(values, (rows) =>
+    db.insert(cards).values(rows).returning({ id: cards.id }),
+  );
+  const results = await runBatch(db, [
+    ...inserts,
+    ...[...countsByWorkspace.entries()].map(([workspaceId, count]) =>
+      db
         .update(workspaces)
         .set({ cardCounter: sql`${workspaces.cardCounter} + ${count}` })
-        .where(eq(workspaces.id, workspaceId))
-        .returning({ cardCounter: workspaces.cardCounter });
+        .where(eq(workspaces.id, workspaceId)),
+    ),
+    db.run(renumberIndexes("card", "listId", idList([...byList.keys()]))),
+  ]);
 
-      if (!counterResult) throw new Error(`Workspace ${workspaceId} not found`);
-
-      const last = counterResult.cardCounter;
-      const start = last - count + 1;
-      const queue: number[] = [];
-      for (let n = start; n <= last; n++) queue.push(n);
-      cardNumberByWorkspaceQueue.set(workspaceId, queue);
-    }
-
-    const allValuesToInsert: {
-      publicId: string;
-      title: string;
-      description: string | null;
-      createdBy: string;
-      listId: number;
-      index: number;
-      cardNumber: number;
-      importId?: number;
-    }[] = [];
-
-    // For each list, append incoming cards after current max index, preserving incoming order
-    for (const [listId, items] of byList.entries()) {
-      const last = await tx.query.cards.findFirst({
-        columns: { index: true },
-        where: and(eq(cards.listId, listId), isNull(cards.deletedAt)),
-        orderBy: [desc(cards.index)],
-      });
-
-      let nextIndex = last ? last.index + 1 : 0;
-      const sorted = [...items].sort((a, b) => a.index - b.index);
-      for (const it of sorted) {
-        const queue = cardNumberByWorkspaceQueue.get(it.workspaceId);
-        const cardNumber = queue?.shift();
-        if (cardNumber === undefined)
-          throw new Error(
-            `Failed to allocate cardNumber for workspace ${it.workspaceId}`,
-          );
-        allValuesToInsert.push({
-          publicId: it.publicId,
-          title: it.title,
-          description: it.description,
-          createdBy: it.createdBy,
-          listId: it.listId,
-          index: nextIndex++,
-          cardNumber,
-          importId: it.importId,
-        });
-      }
-    }
-
-    const inserted = await tx
-      .insert(cards)
-      .values(allValuesToInsert)
-      .returning({ id: cards.id });
-
-    // Post-insert: compact per list if duplicates exist; then verify
-    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
-    for (const listId of byList.keys()) {
-      const duplicateIndices = await tx
-        .select({ index: cards.index, count: countExpr })
-        .from(cards)
-        .where(and(eq(cards.listId, listId), isNull(cards.deletedAt)))
-        .groupBy(cards.listId, cards.index)
-        .having(gt(countExpr, 1));
-
-      if (duplicateIndices.length > 0) {
-        await tx.execute(sql`
-          WITH ordered AS (
-            SELECT id, ROW_NUMBER() OVER (ORDER BY "index", id) - 1 AS new_index
-            FROM "card"
-            WHERE "listId" = ${listId} AND "deletedAt" IS NULL
-          )
-          UPDATE "card" c
-          SET "index" = o.new_index
-          FROM ordered o
-          WHERE c.id = o.id;
-        `);
-
-        const postFixDupes = await tx
-          .select({ index: cards.index, count: countExpr })
-          .from(cards)
-          .where(and(eq(cards.listId, listId), isNull(cards.deletedAt)))
-          .groupBy(cards.listId, cards.index)
-          .having(gt(countExpr, 1));
-
-        if (postFixDupes.length > 0) {
-          throw new Error(
-            `Invariant violation: duplicate card indices remain after compaction in list ${listId}`,
-          );
-        }
-      }
-    }
-
-    return inserted;
-  });
+  return (results.slice(0, inserts.length) as { id: number }[][]).flat();
 };
 
 export const createCardLabelRelationship = async (
@@ -442,10 +327,10 @@ export const bulkCreateCardLabelRelationship = async (
   db: dbClient,
   cardLabelRelationshipInput: { cardId: number; labelId: number }[],
 ) => {
-  const [result] = await db
-    .insert(cardsToLabels)
-    .values(cardLabelRelationshipInput)
-    .returning();
+  const [result] = await bulkCreateCardLabelRelationships(
+    db,
+    cardLabelRelationshipInput,
+  );
 
   return result;
 };
@@ -711,168 +596,104 @@ export const reorder = async (
     cardId: number;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const card = await tx.query.cards.findFirst({
-      columns: {
-        id: true,
-        index: true,
-      },
-      where: and(eq(cards.id, args.cardId), isNull(cards.deletedAt)),
-      with: {
-        list: {
-          columns: {
-            id: true,
-            index: true,
-          },
-        },
-      },
-    });
-
-    if (!card?.list)
-      throw new Error(`Card not found for public ID ${args.cardId}`);
-
-    const currentList = card.list;
-    const currentIndex = card.index;
-    let newList:
-      | { id: number; index: number; cards: { id: number; index: number }[] }
-      | undefined;
-
-    if (args.newListId) {
-      newList = await tx.query.lists.findFirst({
+  const card = await db.query.cards.findFirst({
+    columns: {
+      id: true,
+      index: true,
+    },
+    where: and(eq(cards.id, args.cardId), isNull(cards.deletedAt)),
+    with: {
+      list: {
         columns: {
           id: true,
           index: true,
         },
-        with: {
-          cards: {
-            columns: {
-              id: true,
-              index: true,
-            },
-            orderBy: desc(cards.index),
-            limit: 1,
+      },
+    },
+  });
+
+  if (!card?.list)
+    throw new Error(`Card not found for public ID ${args.cardId}`);
+
+  const currentList = card.list;
+  const currentIndex = card.index;
+  let newList:
+    | { id: number; index: number; cards: { id: number; index: number }[] }
+    | undefined;
+
+  if (args.newListId) {
+    newList = await db.query.lists.findFirst({
+      columns: {
+        id: true,
+        index: true,
+      },
+      with: {
+        cards: {
+          columns: {
+            id: true,
+            index: true,
           },
+          where: isNull(cards.deletedAt),
+          orderBy: desc(cards.index),
+          limit: 1,
         },
-        where: and(eq(lists.id, args.newListId), isNull(lists.deletedAt)),
-      });
+      },
+      where: and(eq(lists.id, args.newListId), isNull(lists.deletedAt)),
+    });
 
-      if (!newList)
-        throw new Error(`List not found for public ID ${args.newListId}`);
-    }
+    if (!newList)
+      throw new Error(`List not found for public ID ${args.newListId}`);
+  }
 
-    let newIndex = args.newIndex;
+  let newIndex = args.newIndex;
 
-    if (newIndex === undefined) {
-      const lastCardIndex = newList?.cards.length
-        ? newList.cards[0]?.index
-        : undefined;
+  if (newIndex === undefined) {
+    const lastCardIndex = newList?.cards.length
+      ? newList.cards[0]?.index
+      : undefined;
 
-      newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
-    }
+    newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
+  }
 
-    if (currentList.id === newList?.id) {
-      await tx.execute(sql`
+  // Moves run as one batch that ends by renumbering the affected lists, so
+  // positions stay 0..n-1 even if another write landed after our reads.
+  const statements: D1BatchItem[] = [];
+  const affectedListIds = [currentList.id];
+
+  if (!newList || currentList.id === newList.id) {
+    statements.push(
+      db.run(sql`
         UPDATE card
-        SET index =
+        SET "index" =
           CASE
-            WHEN index = ${currentIndex} THEN ${newIndex}
-            WHEN ${currentIndex} < ${newIndex} AND index > ${currentIndex} AND index <= ${newIndex} THEN index - 1
-            WHEN ${currentIndex} > ${newIndex} AND index >= ${newIndex} AND index < ${currentIndex} THEN index + 1
-            ELSE index
+            WHEN id = ${card.id} THEN ${newIndex}
+            WHEN ${currentIndex} < ${newIndex} AND "index" > ${currentIndex} AND "index" <= ${newIndex} THEN "index" - 1
+            WHEN ${currentIndex} > ${newIndex} AND "index" >= ${newIndex} AND "index" < ${currentIndex} THEN "index" + 1
+            ELSE "index"
           END
-        WHERE "listId" = ${currentList.id} AND "deletedAt" IS NULL;
-      `);
-    } else {
-      await tx.execute(sql`
+        WHERE "listId" = ${currentList.id} AND "deletedAt" IS NULL`),
+    );
+  } else {
+    affectedListIds.push(newList.id);
+    statements.push(
+      db.run(sql`
         UPDATE card
-        SET index = index + 1
-        WHERE "listId" = ${newList?.id} AND index >= ${newIndex} AND "deletedAt" IS NULL;
-      `);
-
-      await tx.execute(sql`
+        SET "index" = "index" + 1
+        WHERE "listId" = ${newList.id} AND "index" >= ${newIndex} AND "deletedAt" IS NULL`),
+      db.run(sql`
         UPDATE card
-        SET index = index - 1
-        WHERE "listId" = ${currentList.id} AND index >= ${currentIndex} AND "deletedAt" IS NULL;
-      `);
-
-      await tx.execute(sql`
+        SET "index" = "index" - 1
+        WHERE "listId" = ${currentList.id} AND "index" > ${currentIndex} AND "deletedAt" IS NULL`),
+      db.run(sql`
         UPDATE card
-        SET "listId" = ${newList?.id}, index = ${newIndex}
-        WHERE id = ${card.id} AND "deletedAt" IS NULL;
-      `);
-    }
+        SET "listId" = ${newList.id}, "index" = ${newIndex}
+        WHERE id = ${card.id} AND "deletedAt" IS NULL`),
+    );
+  }
 
-    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
-
-    const duplicateIndices = await tx
-      .select({
-        index: cards.index,
-        count: countExpr,
-      })
-      .from(cards)
-      .where(
-        and(
-          inArray(
-            cards.listId,
-            [currentList.id, newList?.id].filter((id) => id !== undefined),
-          ),
-          isNull(cards.deletedAt),
-        ),
-      )
-      .groupBy(cards.listId, cards.index)
-      .having(gt(countExpr, 1));
-
-    if (duplicateIndices.length > 0) {
-      // Auto-heal by compacting indices for the affected list(s)
-      const affectedListIds = [currentList.id, newList?.id].filter(
-        (id): id is number => id !== undefined,
-      );
-
-      if (affectedListIds.length === 1) {
-        await tx.execute(sql`
-          WITH ordered AS (
-            SELECT id, ROW_NUMBER() OVER (ORDER BY "index", id) - 1 AS new_index
-            FROM "card"
-            WHERE "listId" = ${affectedListIds[0]} AND "deletedAt" IS NULL
-          )
-          UPDATE "card" c
-          SET "index" = o.new_index
-          FROM ordered o
-          WHERE c.id = o.id;
-        `);
-      } else if (affectedListIds.length === 2) {
-        await tx.execute(sql`
-          WITH ordered AS (
-            SELECT id,
-                   ROW_NUMBER() OVER (PARTITION BY "listId" ORDER BY "index", id) - 1 AS new_index
-            FROM "card"
-            WHERE "listId" IN (${sql.join(affectedListIds, sql`,`)}) AND "deletedAt" IS NULL
-          )
-          UPDATE "card" c
-          SET "index" = o.new_index
-          FROM ordered o
-          WHERE c.id = o.id;
-        `);
-      }
-
-      // Verify fix and rollback if necessary
-      const postFixDupes = await tx
-        .select({ index: cards.index, count: countExpr })
-        .from(cards)
-        .where(
-          and(inArray(cards.listId, affectedListIds), isNull(cards.deletedAt)),
-        )
-        .groupBy(cards.listId, cards.index)
-        .having(gt(countExpr, 1));
-
-      if (postFixDupes.length > 0) {
-        throw new Error(
-          `Invariant violation: duplicate card indices remain after compaction for card ${card.id}`,
-        );
-      }
-    }
-
-    const updatedCard = await tx.query.cards.findFirst({
+  statements.push(
+    db.run(renumberIndexes("card", "listId", idList(affectedListIds))),
+    db.query.cards.findFirst({
       columns: {
         id: true,
         publicId: true,
@@ -881,10 +702,19 @@ export const reorder = async (
         dueDate: true,
       },
       where: eq(cards.id, card.id),
-    });
+    }),
+  );
 
-    return updatedCard;
-  });
+  const results = await runBatch(db, statements);
+  return results[results.length - 1] as
+    | {
+        id: number;
+        publicId: string;
+        title: string;
+        description: string | null;
+        dueDate: Date | null;
+      }
+    | undefined;
 };
 
 export const softDelete = async (
@@ -895,8 +725,8 @@ export const softDelete = async (
     deletedBy: string;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const [result] = await tx
+  const [deleted] = await runBatch(db, [
+    db
       .update(cards)
       .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
       .where(eq(cards.id, args.cardId))
@@ -904,37 +734,20 @@ export const softDelete = async (
         id: cards.id,
         listId: cards.listId,
         index: cards.index,
-      });
+      }),
+    db.run(
+      renumberIndexes(
+        "card",
+        "listId",
+        sql`(SELECT "listId" FROM card WHERE id = ${args.cardId})`,
+      ),
+    ),
+  ]);
 
-    if (!result)
-      throw new Error(`Unable to soft delete card ID ${args.cardId}`);
+  const [result] = deleted as { id: number; listId: number; index: number }[];
+  if (!result) throw new Error(`Unable to soft delete card ID ${args.cardId}`);
 
-    await tx.execute(sql`
-      UPDATE card
-      SET index = index - 1
-      WHERE "listId" = ${result.listId} AND index > ${result.index} AND "deletedAt" IS NULL;
-    `);
-
-    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
-
-    const duplicateIndices = await tx
-      .select({
-        index: cards.index,
-        count: countExpr,
-      })
-      .from(cards)
-      .where(and(eq(cards.listId, result.listId), isNull(cards.deletedAt)))
-      .groupBy(cards.listId, cards.index)
-      .having(gt(countExpr, 1));
-
-    if (duplicateIndices.length > 0) {
-      throw new Error(
-        `Duplicate indices found after soft deleting ${result.id}`,
-      );
-    }
-
-    return result;
-  });
+  return result;
 };
 
 export const softDeleteAllByListIds = async (

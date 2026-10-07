@@ -4,6 +4,14 @@ import type { dbClient } from "@kan/db/client";
 import { checklistItems, checklists } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
+import {
+  idList,
+  nextIndex,
+  renumberIndexes,
+  runBatch,
+  splitByParameters,
+} from "../utils/d1";
+
 export const getCount = async (db: dbClient) => {
   const result = await db
     .select({ count: count() })
@@ -28,32 +36,22 @@ export const create = async (
     createdBy: string;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const card = await tx.query.checklists.findFirst({
-      where: and(
-        eq(checklists.cardId, checklistInput.cardId),
-        isNull(checklists.deletedAt),
-      ),
-      orderBy: desc(checklists.index),
+  const [result] = await db
+    .insert(checklists)
+    .values({
+      publicId: generateUID(),
+      name: checklistInput.name,
+      createdBy: checklistInput.createdBy,
+      cardId: checklistInput.cardId,
+      index: nextIndex("card_checklist", "cardId", checklistInput.cardId),
+    })
+    .returning({
+      id: checklists.id,
+      publicId: checklists.publicId,
+      name: checklists.name,
     });
 
-    const [result] = await tx
-      .insert(checklists)
-      .values({
-        publicId: generateUID(),
-        name: checklistInput.name,
-        createdBy: checklistInput.createdBy,
-        cardId: checklistInput.cardId,
-        index: card ? card.index + 1 : 0,
-      })
-      .returning({
-        id: checklists.id,
-        publicId: checklists.publicId,
-        name: checklists.name,
-      });
-
-    return result;
-  });
+  return result;
 };
 
 export const createItem = async (
@@ -65,34 +63,28 @@ export const createItem = async (
     completed?: boolean;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const lastItem = await tx.query.checklistItems.findFirst({
-      where: and(
-        eq(checklistItems.checklistId, checklistItemInput.checklistId),
-        isNull(checklistItems.deletedAt),
+  const [result] = await db
+    .insert(checklistItems)
+    .values({
+      publicId: generateUID(),
+      title: checklistItemInput.title,
+      createdBy: checklistItemInput.createdBy,
+      checklistId: checklistItemInput.checklistId,
+      index: nextIndex(
+        "card_checklist_item",
+        "checklistId",
+        checklistItemInput.checklistId,
       ),
-      orderBy: desc(checklistItems.index),
+      completed: checklistItemInput.completed ?? false,
+    })
+    .returning({
+      id: checklistItems.id,
+      publicId: checklistItems.publicId,
+      title: checklistItems.title,
+      completed: checklistItems.completed,
     });
 
-    const [result] = await tx
-      .insert(checklistItems)
-      .values({
-        publicId: generateUID(),
-        title: checklistItemInput.title,
-        createdBy: checklistItemInput.createdBy,
-        checklistId: checklistItemInput.checklistId,
-        index: lastItem ? lastItem.index + 1 : 0,
-        completed: checklistItemInput.completed ?? false,
-      })
-      .returning({
-        id: checklistItems.id,
-        publicId: checklistItems.publicId,
-        title: checklistItems.title,
-        completed: checklistItems.completed,
-      });
-
-    return result;
-  });
+  return result;
 };
 
 export const getChecklistByPublicId = async (
@@ -243,7 +235,7 @@ export const bulkCreate = async (
 ) => {
   if (checklistInput.length === 0) return [];
 
-  return db.transaction(async (tx) => {
+  {
     const byCard = groupByKey(checklistInput, "cardId");
 
     const allValuesToInsert: {
@@ -255,7 +247,7 @@ export const bulkCreate = async (
     }[] = [];
 
     for (const [cardId, items] of byCard.entries()) {
-      const last = await tx.query.checklists.findFirst({
+      const last = await db.query.checklists.findFirst({
         columns: { index: true },
         where: and(eq(checklists.cardId, cardId), isNull(checklists.deletedAt)),
         orderBy: [desc(checklists.index)],
@@ -274,13 +266,18 @@ export const bulkCreate = async (
       }
     }
 
-    const inserted = await tx
-      .insert(checklists)
-      .values(allValuesToInsert)
-      .returning({ id: checklists.id, publicId: checklists.publicId });
+    const results = await runBatch(
+      db,
+      splitByParameters(allValuesToInsert, (rows) =>
+        db
+          .insert(checklists)
+          .values(rows)
+          .returning({ id: checklists.id, publicId: checklists.publicId }),
+      ),
+    );
 
-    return inserted;
-  });
+    return (results as { id: number; publicId: string }[][]).flat();
+  }
 };
 
 export const bulkCreateItems = async (
@@ -295,7 +292,7 @@ export const bulkCreateItems = async (
 ) => {
   if (checklistItemInput.length === 0) return [];
 
-  return db.transaction(async (tx) => {
+  {
     const byChecklist = groupByKey(checklistItemInput, "checklistId");
 
     const allValuesToInsert: {
@@ -308,7 +305,7 @@ export const bulkCreateItems = async (
     }[] = [];
 
     for (const [checklistId, items] of byChecklist.entries()) {
-      const last = await tx.query.checklistItems.findFirst({
+      const last = await db.query.checklistItems.findFirst({
         columns: { index: true },
         where: and(
           eq(checklistItems.checklistId, checklistId),
@@ -330,18 +327,27 @@ export const bulkCreateItems = async (
       }
     }
 
-    const inserted = await tx
-      .insert(checklistItems)
-      .values(allValuesToInsert)
-      .returning({
-        id: checklistItems.id,
-        publicId: checklistItems.publicId,
-        title: checklistItems.title,
-        completed: checklistItems.completed,
-      });
+    const results = await runBatch(
+      db,
+      splitByParameters(allValuesToInsert, (rows) =>
+        db.insert(checklistItems).values(rows).returning({
+          id: checklistItems.id,
+          publicId: checklistItems.publicId,
+          title: checklistItems.title,
+          completed: checklistItems.completed,
+        }),
+      ),
+    );
 
-    return inserted;
-  });
+    return (
+      results as {
+        id: number;
+        publicId: string;
+        title: string;
+        completed: boolean;
+      }[][]
+    ).flat();
+  }
 };
 
 const groupByKey = <T extends Record<string, unknown>>(
@@ -365,67 +371,56 @@ export const reorderItem = async (
     newIndex: number;
   },
 ) => {
-  return db.transaction(async (tx) => {
-    const item = await tx.query.checklistItems.findFirst({
-      columns: {
-        id: true,
-        index: true,
-        checklistId: true,
-      },
-      where: and(
-        eq(checklistItems.id, args.itemId),
-        isNull(checklistItems.deletedAt),
-      ),
-    });
+  const item = await db.query.checklistItems.findFirst({
+    columns: {
+      id: true,
+      index: true,
+      checklistId: true,
+      publicId: true,
+      title: true,
+      completed: true,
+    },
+    where: and(
+      eq(checklistItems.id, args.itemId),
+      isNull(checklistItems.deletedAt),
+    ),
+  });
 
-    if (!item) {
-      throw new Error(`Checklist item not found for ID ${args.itemId}`);
-    }
+  if (!item) {
+    throw new Error(`Checklist item not found for ID ${args.itemId}`);
+  }
 
-    const currentIndex = item.index;
-    const newIndex = args.newIndex;
+  const currentIndex = item.index;
+  const newIndex = args.newIndex;
 
-    if (currentIndex === newIndex) {
-      const unchanged = await tx.query.checklistItems.findFirst({
-        columns: {
-          publicId: true,
-          title: true,
-          completed: true,
-        },
-        where: and(
-          eq(checklistItems.id, args.itemId),
-          isNull(checklistItems.deletedAt),
-        ),
-      });
+  if (currentIndex === newIndex) {
+    return {
+      publicId: item.publicId,
+      title: item.title,
+      completed: item.completed,
+    };
+  }
 
-      if (!unchanged) {
-        throw new Error(`Checklist item not found for ID ${args.itemId}`);
-      }
-
-      return unchanged;
-    }
-
-    if (currentIndex < newIndex) {
-      await tx.execute(sql`
+  const shift =
+    currentIndex < newIndex
+      ? sql`
         UPDATE card_checklist_item
-        SET index = index - 1
+        SET "index" = "index" - 1
         WHERE "checklistId" = ${item.checklistId}
-        AND index > ${currentIndex}
-        AND index <= ${newIndex}
-        AND "deletedAt" IS NULL
-        `);
-    } else {
-      await tx.execute(sql`
+        AND "index" > ${currentIndex}
+        AND "index" <= ${newIndex}
+        AND "deletedAt" IS NULL`
+      : sql`
         UPDATE card_checklist_item
-        SET index = index + 1
+        SET "index" = "index" + 1
         WHERE "checklistId" = ${item.checklistId}
-        AND index >= ${newIndex}
-        AND index < ${currentIndex}
-        AND "deletedAt" IS NULL
-        `);
-    }
+        AND "index" >= ${newIndex}
+        AND "index" < ${currentIndex}
+        AND "deletedAt" IS NULL`;
 
-    const [updated] = await tx
+  const results = await runBatch(db, [
+    db.run(shift),
+    db
       .update(checklistItems)
       .set({ index: newIndex })
       .where(eq(checklistItems.id, args.itemId))
@@ -433,12 +428,25 @@ export const reorderItem = async (
         publicId: checklistItems.publicId,
         title: checklistItems.title,
         completed: checklistItems.completed,
-      });
+      }),
+    db.run(
+      renumberIndexes(
+        "card_checklist_item",
+        "checklistId",
+        idList([item.checklistId]),
+      ),
+    ),
+  ]);
 
-    if (!updated) {
-      throw new Error(`Failed to update checklist item with ID ${args.itemId}`);
-    }
+  const [updated] = results[1] as {
+    publicId: string;
+    title: string;
+    completed: boolean;
+  }[];
 
-    return updated;
-  });
+  if (!updated) {
+    throw new Error(`Failed to update checklist item with ID ${args.itemId}`);
+  }
+
+  return updated;
 };

@@ -28,7 +28,7 @@ import { createS3Client } from "@kan/shared/utils";
 
 const checkDatabaseConnection = async (db: dbClient) => {
   try {
-    await db.execute(sql`SELECT 1`);
+    await db.run(sql`SELECT 1`);
     return true;
   } catch {
     return false;

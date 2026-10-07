@@ -1,10 +1,10 @@
+import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import {
   and,
   asc,
   count,
   desc,
   eq,
-  ilike,
   inArray,
   isNull,
   ne,
@@ -385,7 +385,9 @@ export const isWorkspaceSlugAvailable = async (
         // so no other workspace may claim it as a custom slug either.
         and(
           eq(workspaces.publicId, workspaceSlug),
-          excludeWorkspaceId ? ne(workspaces.id, excludeWorkspaceId) : undefined,
+          excludeWorkspaceId
+            ? ne(workspaces.id, excludeWorkspaceId)
+            : undefined,
         ),
       ),
     ),
@@ -430,9 +432,27 @@ export const searchBoardsAndCards = async (
   query: string,
   limit = 20,
 ) => {
-  const searchQuery = `%${query}%`;
-
   const ticketId = parseTicketId(query.trim());
+
+  // SQLite has no pg_trgm similarity(). Match when every word of the query
+  // appears in the text (LIKE is case-insensitive for ASCII), and rank exact
+  // matches first, then prefix matches, then other matches.
+  const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+  const trimmed = query.trim();
+  const words = trimmed.split(/\s+/).filter(Boolean).slice(0, 8);
+  const matchesAllWords = (column: SQLiteColumn) =>
+    and(
+      ...words.map(
+        (word) => sql`${column} LIKE ${`%${escapeLike(word)}%`} ESCAPE '\\'`,
+      ),
+    );
+  const relevance = (column: SQLiteColumn) =>
+    sql`CASE
+      WHEN lower(${column}) = lower(${trimmed}) THEN 0
+      WHEN ${column} LIKE ${`${escapeLike(trimmed)}%`} ESCAPE '\\' THEN 1
+      WHEN ${column} LIKE ${`%${escapeLike(trimmed)}%`} ESCAPE '\\' THEN 2
+      ELSE 3
+    END`;
 
   // Search for boards
   const boardResults = await db
@@ -448,19 +468,11 @@ export const searchBoardsAndCards = async (
     .where(
       and(
         eq(boards.workspaceId, workspaceId),
-        // Combine exact and fuzzy matching
-        or(
-          ilike(boards.name, `%${query}%`), // Exact substring match
-          sql`similarity(${boards.name}, ${query}) > 0.2`, // Fuzzy match
-        ),
+        matchesAllWords(boards.name),
         isNull(boards.deletedAt),
       ),
     )
-    .orderBy(
-      sql`CASE WHEN ${boards.name} ILIKE ${`%${query}%`} THEN 1 ELSE 0 END DESC`,
-      sql`similarity(${boards.name}, ${query}) DESC`,
-      desc(boards.updatedAt),
-    )
+    .orderBy(relevance(boards.name), desc(boards.updatedAt))
     .limit(ticketId ? 0 : Math.ceil(limit * 0.4));
 
   // Search for cards by ticket ID or by title
@@ -468,17 +480,14 @@ export const searchBoardsAndCards = async (
     ? and(
         eq(boards.workspaceId, workspaceId),
         eq(cards.cardNumber, ticketId.number),
-        ilike(workspaces.cardPrefix, ticketId.prefix),
+        sql`lower(${workspaces.cardPrefix}) = lower(${ticketId.prefix})`,
         isNull(cards.deletedAt),
         isNull(lists.deletedAt),
         isNull(boards.deletedAt),
       )
     : and(
         eq(boards.workspaceId, workspaceId),
-        or(
-          ilike(cards.title, searchQuery),
-          sql`similarity(${cards.title}, ${query}) > 0.2`,
-        ),
+        matchesAllWords(cards.title),
         isNull(cards.deletedAt),
         isNull(lists.deletedAt),
         isNull(boards.deletedAt),
@@ -504,11 +513,7 @@ export const searchBoardsAndCards = async (
     .orderBy(
       ...(ticketId
         ? [desc(cards.createdAt)]
-        : [
-            sql`CASE WHEN ${cards.title} ILIKE ${searchQuery} THEN 1 ELSE 0 END DESC`,
-            sql`similarity(${cards.title}, ${query}) DESC`,
-            desc(cards.updatedAt),
-          ]),
+        : [relevance(cards.title), desc(cards.updatedAt)]),
     )
     .limit(ticketId ? limit : Math.floor(limit * 0.6));
 
