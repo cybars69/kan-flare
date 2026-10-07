@@ -5,7 +5,11 @@ import { createNextApiContext } from "@kan/api/trpc-context";
 import { withApiLogging } from "@kan/api/utils/apiLogging";
 import { withRateLimit } from "@kan/api/utils/rateLimit";
 import * as userRepo from "@kan/db/repository/user.repo";
-import { isStorageConfigured, putObject } from "@kan/shared/storage";
+import {
+  deleteImageVariants,
+  isStorageConfigured,
+  putObject,
+} from "@kan/shared/storage";
 
 const MAX_SIZE_BYTES = parseInt(
   process.env.AVATAR_UPLOAD_LIMIT || "2097152",
@@ -81,6 +85,8 @@ export default withRateLimit(
         contentType,
         contentLength,
       });
+      // The key is reused on re-upload; drop variants of the old image.
+      await deleteImageVariants("avatars", s3Key);
 
       // Update user image in database
       const updatedUser = await userRepo.update(db, user.id, {

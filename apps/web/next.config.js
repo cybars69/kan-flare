@@ -5,7 +5,6 @@ import createJiti from "jiti";
 // Import env files to validate at build time. Use jiti so we can load .ts files in here.
 createJiti(fileURLToPath(import.meta.url))("./src/env");
 
-
 /** @type {import("next").NextConfig} */
 const config = {
   output:
@@ -54,19 +53,14 @@ const config = {
   // temporarily ignore eslint errors during build until we fix all the errors sigh
   eslint: { ignoreDuringBuilds: true },
 
+  /**
+   * All images go through /api/image (src/utils/image-loader.ts), which
+   * converts them once with Cloudflare Images and keeps the result in R2.
+   * Which sources are allowed is decided there.
+   */
   images: {
-    remotePatterns: (() => {
-      /** @type {Array<{protocol: "http" | "https", hostname: string}>} */
-      const patterns = [
-        { protocol: "https", hostname: "**" },
-        {
-          protocol: "http",
-          hostname: "localhost",
-        },
-      ];
-
-      return patterns;
-    })(),
+    loader: "custom",
+    loaderFile: "./src/utils/image-loader.ts",
   },
   turbopack: {
     rules: {
@@ -91,18 +85,6 @@ const config = {
     ];
   },
 };
-
-// Only allow external images when OIDC is configured (for OIDC provider avatars)
-if (
-  process.env.OIDC_CLIENT_ID &&
-  process.env.OIDC_CLIENT_SECRET &&
-  process.env.OIDC_DISCOVERY_URL
-) {
-  config.images?.remotePatterns?.push({
-    protocol: "https",
-    hostname: "**",
-  });
-}
 
 // Exposes Cloudflare bindings (D1, R2, …) to `next dev` through
 // getCloudflareContext(). Skipped for `next build`: it loads this file in

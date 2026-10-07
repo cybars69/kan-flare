@@ -48,7 +48,8 @@ const check = (label, ok, detail = "") => {
 };
 const raw = (path, init = {}) =>
   fetch(B + path, { redirect: "manual", ...init, headers: { origin: B, cookie, ...(init.headers ?? {}) } });
-const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, ...Array(64).fill(7)]);
+// A real 1x1 PNG, so image conversion has something valid to work on.
+const png = Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
 
 const avatarRes = await raw("/api/upload/avatar", {
   method: "POST",
@@ -97,6 +98,23 @@ check("non-inline type forced to download", txtGet.status === 200 && txtGet.head
 await mutate("attachment.delete", { attachmentPublicId: att.publicId });
 const afterDelete = await raw(signedPath);
 check("deleted attachment gone from R2", afterDelete.status === 404, String(afterDelete.status));
+
+// Image optimisation (Phase 10)
+const b64url = (str) => Buffer.from(str).toString("base64url");
+const imageUrl = (src, w = 64) => `/api/image?s=${b64url(src)}&w=${w}&q=75`;
+const avatarPath = `/api/files/avatars/${avatar.key}`;
+const img1 = await raw(imageUrl(avatarPath), { headers: { accept: "image/avif,image/webp,*/*" } });
+await img1.arrayBuffer();
+const img2 = await raw(imageUrl(avatarPath), { headers: { accept: "image/avif,image/webp,*/*" } });
+await img2.arrayBuffer();
+check("image route serves an avatar", img1.status === 200, `${img1.status} ${img1.headers.get("content-type")} ${img1.headers.get("x-image-cache")}`);
+check("second request reuses the stored variant (or bypasses)", img2.status === 200 && ["hit", "bypass"].includes(img2.headers.get("x-image-cache")), img2.headers.get("x-image-cache"));
+const unsignedImg = await raw(imageUrl("/api/files/attachments/1/x/y.png"));
+check("image route rejects unsigned attachments", unsignedImg.status === 403, String(unsignedImg.status));
+const httpImg = await raw(imageUrl("http://example.com/a.png"));
+check("image route rejects plain-http sources", httpImg.status === 403, String(httpImg.status));
+const badImg = await raw("/api/image?s=%%%&w=0");
+check("image route rejects bad parameters", badImg.status === 400, String(badImg.status));
 
 const health = await query("health.health").catch((e) => ({ error: String(e).slice(0, 120) }));
 check("health reports storage ok", health.storage === "ok" && health.database === "ok", JSON.stringify(health).slice(0, 120));

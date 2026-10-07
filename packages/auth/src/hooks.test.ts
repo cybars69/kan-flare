@@ -4,7 +4,6 @@ import * as memberRepo from "@kan/db/repository/member.repo";
 
 import { createDatabaseHooks } from "./hooks";
 
-
 vi.mock("@kan/db/repository/member.repo", () => ({
   getByEmailAndStatus: vi.fn(),
   getByPublicId: vi.fn(),
@@ -21,6 +20,7 @@ vi.mock("@kan/email", () => ({
 }));
 
 vi.mock("@kan/shared/storage", () => ({
+  deleteImageVariants: vi.fn(),
   generateAvatarUrl: vi.fn(() => Promise.resolve(null)),
   isStorageConfigured: vi.fn(() => false),
   putObject: vi.fn(),

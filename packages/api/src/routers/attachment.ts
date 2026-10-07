@@ -6,6 +6,7 @@ import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as cardAttachmentRepo from "@kan/db/repository/cardAttachment.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import {
+  deleteImageVariants,
   deleteObject,
   generateUploadUrl,
   isStorageConfigured,
@@ -196,6 +197,7 @@ export const attachmentRouter = createTRPCRouter({
 
       try {
         await deleteObject("attachments", attachment.s3Key);
+        await deleteImageVariants("attachments", attachment.s3Key);
       } catch (error) {
         console.error(
           `Failed to delete attachment from storage: ${attachment.s3Key}`,

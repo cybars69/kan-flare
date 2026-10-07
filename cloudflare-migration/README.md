@@ -463,10 +463,29 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Images are converted once, stored in R2, then served from cache.
 **Estimate:** 2 days
 
-- [ ] `10.1` Add an image route keyed by source, width, quality and format
-- [ ] `10.2` On a hit, stream from R2 with long cache headers; on a miss, transform with Cloudflare image transformations, store, return
-- [ ] `10.3` Add a custom `next/image` loader for the six components that use it
-- [ ] `10.4` Delete variants when the source file is deleted
+- [x] `10.1` Add an image route keyed by source, width, quality and format
+- [x] `10.2` On a hit, stream from R2 with long cache headers; on a miss, transform with Cloudflare image transformations, store, return
+- [x] `10.3` Add a custom `next/image` loader for the six components that use it
+- [x] `10.4` Delete variants when the source file is deleted
+
+**Status notes (2026-10-08):**
+
+- `10.1`: `/api/image?s=<base64url source>&w=<width>&q=<quality>` is in `apps/web/src/pages/api/image.ts`.
+  - **Allowed sources:** stored avatars; attachments, only when their signature is valid; static assets, fetched through the `ASSETS` binding; and external `https` images. Anything else gets 403.
+  - **Limits:** widths up to 3840 and source images up to 20 MB.
+  - The source is base64url-encoded because of the Workers query-decoding quirk found in Phase 6.
+- `10.2`:
+  - **Format:** AVIF or WebP when the browser's `Accept` header allows it, otherwise JPEG or PNG.
+  - **Storage:** variants live in a new `IMAGE_VARIANTS` R2 bucket, keyed by source plus version (R2 etag), width, quality and format. A hit streams from R2; a miss converts once with the Images binding (`env.IMAGES`) and stores the result.
+  - **Fallbacks:** SVG and GIF pass through untouched. If conversion fails or the binding is missing, the original is served.
+  - **Response headers:** `X-Image-Cache: hit|miss|bypass`, `Vary: Accept`, the sandbox policy and `nosniff`. Avatars, static and external images are publicly cacheable for a day; attachments are private.
+- `10.3`: `src/utils/image-loader.ts` is the custom `next/image` loader, set with `images.loader: "custom"` in `next.config.js`. The old `remotePatterns` and OIDC block are gone, because the route decides what's allowed. All six components keep using `next/image` unchanged.
+- `10.4`: deleting an attachment, uploading an avatar, or copying a social-login avatar deletes that image's variants. Variants share a per-source prefix (`deleteImageVariants` in `@kan/shared/storage`).
+- **Bindings:** `images` (`IMAGES`) and the `IMAGE_VARIANTS` bucket, for both production and staging. Nothing needs creating by hand.
+- **Billing:** image transformations are billed per unique transformation each month, which storing variants keeps low. Locally, `wrangler dev` uses a simplified Images simulator (width, height, rotate and format only).
+- **Checked:**
+  - Unit tests round-trip the loader's encoding, including signed URLs and non-ASCII names.
+  - The smoke test confirms an avatar is served as AVIF on the first request (`miss`) and from R2 on the second (`hit`). It also confirms unsigned attachment sources (403), plain-`http` sources (403) and bad parameters (400) are rejected.
 
 **Files:** `apps/web/src/pages/api/image` (new), `apps/web/src/utils/image-loader.ts` (new), `apps/web/next.config.js`
 

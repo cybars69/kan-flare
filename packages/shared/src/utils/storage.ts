@@ -8,11 +8,13 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
  * - `attachments` (binding ATTACHMENTS): served at /api/files/attachments/<key>
  *   only with a signed, expiring query string, replacing S3 presigned URLs.
  */
-export type StorageKind = "avatars" | "attachments";
+export type StorageKind = "avatars" | "attachments" | "imageVariants";
 
 const BINDINGS: Record<StorageKind, string> = {
   avatars: "AVATARS",
   attachments: "ATTACHMENTS",
+  // Resized/converted copies made by /api/image (see Phase 10).
+  imageVariants: "IMAGE_VARIANTS",
 };
 
 /** The subset of the R2 bucket binding this module uses. */
@@ -24,6 +26,14 @@ export interface StorageObject {
 }
 
 interface StorageBucket {
+  list(options: {
+    prefix: string;
+    cursor?: string;
+  }): Promise<{
+    objects: { key: string }[];
+    truncated: boolean;
+    cursor?: string;
+  }>;
   put(
     key: string,
     value: ReadableStream | ArrayBuffer | Uint8Array,
@@ -211,4 +221,29 @@ export async function generateAttachmentUrl(
   } catch {
     return null;
   }
+}
+
+const sha256Hex = async (value: string) =>
+  toHex(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
+
+/**
+ * R2 prefix for all image variants of one stored object. Variants live
+ * under it so they can be removed together when the source changes.
+ */
+export const imageVariantPrefix = async (kind: StorageKind, key: string) =>
+  `${kind}/${await sha256Hex(`${kind}:${key}`)}/`;
+
+/** Removes every resized/converted copy of a stored image. */
+export async function deleteImageVariants(kind: StorageKind, key: string) {
+  if (!isStorageConfigured("imageVariants")) return;
+  const bucket = getBucket("imageVariants");
+  const prefix = await imageVariantPrefix(kind, key);
+  let cursor: string | undefined;
+  do {
+    const page = await bucket.list({ prefix, cursor });
+    if (page.objects.length) {
+      await bucket.delete(page.objects.map((object) => object.key));
+    }
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
 }

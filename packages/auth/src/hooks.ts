@@ -6,6 +6,7 @@ import * as userRepo from "@kan/db/repository/user.repo";
 import { createSubscriber, triggerSubscriberWorkflow } from "@kan/email";
 import { createLogger } from "@kan/logger";
 import {
+  deleteImageVariants,
   generateAvatarUrl,
   isStorageConfigured,
   putObject,
@@ -31,7 +32,9 @@ export function createDatabaseHooks(db: dbClient) {
     user: {
       create: {
         async before(user: BetterAuthUser, _context: unknown) {
-          if (process.env.NEXT_PUBLIC_DISABLE_SIGN_UP?.toLowerCase() === "true") {
+          if (
+            process.env.NEXT_PUBLIC_DISABLE_SIGN_UP?.toLowerCase() === "true"
+          ) {
             const pendingInvitation = await memberRepo.getByEmailAndStatus(
               db,
               user.email,
@@ -76,6 +79,7 @@ export function createDatabaseHooks(db: dbClient) {
               await putObject("avatars", key, imageBuffer, {
                 contentType: `image/${!allowedFileExtensions.includes(fileExtension) ? "jpeg" : fileExtension}`,
               });
+              await deleteImageVariants("avatars", key);
 
               avatarKey = key;
 

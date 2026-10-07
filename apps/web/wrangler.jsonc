@@ -6,16 +6,16 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "observability": {
-    "logs": { "enabled": true }
+    "logs": { "enabled": true },
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "kan-flare"
-    }
+      "service": "kan-flare",
+    },
   ],
   "d1_databases": [
     {
@@ -23,18 +23,26 @@
       "database_name": "kan-flare",
       // No database_id: `wrangler deploy` provisions the database on first
       // deploy and reuses it afterwards. Local dev uses .wrangler/state.
-      "migrations_dir": "../../packages/db/migrations"
-    }
+      "migrations_dir": "../../packages/db/migrations",
+    },
   ],
   // Buckets are created on first deploy when they don't exist yet.
   "r2_buckets": [
     { "binding": "AVATARS", "bucket_name": "kan-flare-avatars" },
-    { "binding": "ATTACHMENTS", "bucket_name": "kan-flare-attachments" }
+    { "binding": "ATTACHMENTS", "bucket_name": "kan-flare-attachments" },
+    // Resized/converted images made by /api/image.
+    {
+      "binding": "IMAGE_VARIANTS",
+      "bucket_name": "kan-flare-image-variants",
+    },
   ],
+  // Cloudflare Images, used by /api/image to resize and convert. Billed per
+  // unique transformation; variants are stored in R2 so each is made once.
+  "images": { "binding": "IMAGES" },
   // Transactional email through Cloudflare Email Service. The EMAIL_FROM
   // domain must be onboarded (`wrangler email sending enable <domain>`).
   "send_email": [{ "name": "EMAIL" }],
-  // Images (Phase 10) and rate limiting
+  // Rate limiting
   // (Phase 11) bindings are added by their phases. Bindings are not
   // inherited by environments, so add each one to env.staging as well.
   "env": {
@@ -43,24 +51,29 @@
       "services": [
         {
           "binding": "WORKER_SELF_REFERENCE",
-          "service": "kan-flare-staging"
-        }
+          "service": "kan-flare-staging",
+        },
       ],
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "kan-flare-staging",
-          "migrations_dir": "../../packages/db/migrations"
-        }
+          "migrations_dir": "../../packages/db/migrations",
+        },
       ],
       "send_email": [{ "name": "EMAIL" }],
       "r2_buckets": [
         { "binding": "AVATARS", "bucket_name": "kan-flare-staging-avatars" },
         {
           "binding": "ATTACHMENTS",
-          "bucket_name": "kan-flare-staging-attachments"
-        }
-      ]
-    }
-  }
+          "bucket_name": "kan-flare-staging-attachments",
+        },
+        {
+          "binding": "IMAGE_VARIANTS",
+          "bucket_name": "kan-flare-staging-image-variants",
+        },
+      ],
+      "images": { "binding": "IMAGES" },
+    },
+  },
 }
