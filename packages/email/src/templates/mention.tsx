@@ -95,7 +95,7 @@ export const MentionTemplate = ({
             target="_blank"
             style={{ color: "#7e7e7e", textDecoration: "underline" }}
           >
-            Kan
+            kan-flare
           </Link>
           , the open source Trello alternative.
         </Text>

@@ -8,7 +8,7 @@ import PatternedBackground from "~/components/PatternedBackground";
 export default function NotFoundPage() {
   return (
     <>
-      <PageHead title={t`404 - Page Not Found | kan.bn`} />
+      <PageHead title={t`404 - Page Not Found | kan-flare`} />
       <main className="h-screen bg-light-100 pt-20 dark:bg-dark-50 sm:pt-0">
         <div className="justify-top flex h-full flex-col items-center px-4 sm:justify-center">
           <div className="z-10 flex w-full flex-col items-center">

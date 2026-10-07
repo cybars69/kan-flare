@@ -42,7 +42,7 @@ export const JoinWorkspaceTemplate = ({
             color: "#232323",
           }}
         >
-          {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" && "Kan"}
+          {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" && "kan-flare"}
         </Heading>
         <Heading
           style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
@@ -105,7 +105,7 @@ export const JoinWorkspaceTemplate = ({
                 target="_blank"
                 style={{ color: "#7e7e7e", textDecoration: "underline" }}
               >
-                Kan
+                kan-flare
               </Link>
               , the open source Trello alternative.
             </Text>

@@ -178,12 +178,12 @@
     "origin": [["src/views/board/components/CalendarView.tsx", 558]],
     "translation": "14-dniowy bezpłatny okres próbny · anuluj w dowolnym momencie"
   },
-  "4obmDr": {
-    "message": "404 - Page Not Found | kan.bn",
+  "vK90Bm": {
+    "message": "404 - Page Not Found | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [["src/pages/404.tsx", 11]],
-    "translation": "404 - Strona nie znaleziona | kan.bn"
+    "translation": "404 - Strona nie znaleziona | kan-flare"
   },
   "/rn4RE": {
     "message": "A powerful, flexible kanban app that helps you organise work, track progress, and deliver results—all in one place.",
@@ -3729,12 +3729,12 @@
     ],
     "translation": "Dołącz do workspace"
   },
-  "A23Y7X": {
-    "message": "Join workspace | kan.bn",
+  "Ny2AxP": {
+    "message": "Join workspace | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [["src/views/invite/index.tsx", 102]],
-    "translation": "Dołącz do workspace | kan.bn"
+    "translation": "Dołącz do workspace | kan-flare"
   },
   "wM8xd8": {
     "message": "Junior",
@@ -3970,12 +3970,12 @@
     "origin": [["src/views/card/components/ActivityList.tsx", 579]],
     "translation": "Ładowanie..."
   },
-  "N/bcWA": {
-    "message": "Login | kan.bn",
+  "dhq0/w": {
+    "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [["src/views/auth/login/index.tsx", 33]],
-    "translation": "Logowanie | kan.bn"
+    "translation": "Logowanie | kan-flare"
   },
   "nOhz3x": {
     "message": "Logout",
@@ -5675,15 +5675,15 @@
     "origin": [["src/views/invite/index.tsx", 173]],
     "translation": "Zarejestruj się"
   },
-  "sUZo7y": {
-    "message": "Sign up | kan.bn",
+  "dZD1ME": {
+    "message": "Sign up | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
       ["src/views/auth/signup/index.tsx", 36],
       ["src/views/auth/signup/index.tsx", 61]
     ],
-    "translation": "Rejestracja | kan.bn"
+    "translation": "Rejestracja | kan-flare"
   },
   "WRkpB1": {
     "message": "Sign up disabled",

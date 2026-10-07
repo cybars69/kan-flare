@@ -310,8 +310,8 @@
     ],
     "translation": "14-day free trial · cancel anytime"
   },
-  "4obmDr": {
-    "message": "404 - Page Not Found | kan.bn",
+  "vK90Bm": {
+    "message": "404 - Page Not Found | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -320,7 +320,7 @@
         11
       ]
     ],
-    "translation": "404 - Page Not Found | kan.bn"
+    "translation": "404 - Page Not Found | kan-flare"
   },
   "/rn4RE": {
     "message": "A powerful, flexible kanban app that helps you organise work, track progress, and deliver results—all in one place.",
@@ -6257,8 +6257,8 @@
     ],
     "translation": "Join workspace"
   },
-  "A23Y7X": {
-    "message": "Join workspace | kan.bn",
+  "Ny2AxP": {
+    "message": "Join workspace | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -6267,7 +6267,7 @@
         102
       ]
     ],
-    "translation": "Join workspace | kan.bn"
+    "translation": "Join workspace | kan-flare"
   },
   "wM8xd8": {
     "message": "Junior",
@@ -6663,8 +6663,8 @@
     ],
     "translation": "Loading..."
   },
-  "N/bcWA": {
-    "message": "Login | kan.bn",
+  "dhq0/w": {
+    "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -6673,7 +6673,7 @@
         33
       ]
     ],
-    "translation": "Login | kan.bn"
+    "translation": "Login | kan-flare"
   },
   "nOhz3x": {
     "message": "Logout",
@@ -9667,8 +9667,8 @@
     ],
     "translation": "Sign Up"
   },
-  "sUZo7y": {
-    "message": "Sign up | kan.bn",
+  "dZD1ME": {
+    "message": "Sign up | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -9681,7 +9681,7 @@
         61
       ]
     ],
-    "translation": "Sign up | kan.bn"
+    "translation": "Sign up | kan-flare"
   },
   "WRkpB1": {
     "message": "Sign up disabled",

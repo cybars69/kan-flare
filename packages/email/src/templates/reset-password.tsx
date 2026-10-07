@@ -19,7 +19,7 @@ export const ResetPasswordTemplate = ({
 }) => (
   <Html>
     <Head />
-    <Preview>Reset your Kan password</Preview>
+    <Preview>Reset your kan-flare password</Preview>
     <Body style={{ backgroundColor: "white" }}>
       <Container
         style={{
@@ -44,7 +44,7 @@ export const ResetPasswordTemplate = ({
         <Heading
           style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
         >
-          Reset your Kan password
+          Reset your kan-flare password
         </Heading>
         <Text
           style={{
@@ -96,7 +96,7 @@ export const ResetPasswordTemplate = ({
             target="_blank"
             style={{ color: "#7e7e7e", textDecoration: "underline" }}
           >
-            Kan
+            kan-flare
           </Link>
           , the open source Trello alternative.
         </Text>

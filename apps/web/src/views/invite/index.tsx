@@ -99,7 +99,7 @@ export default function InvitePage() {
   const PageWrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <>
-        <PageHead title={t`Join workspace | kan.bn`} />
+        <PageHead title={t`Join workspace | kan-flare`} />
         {children}
       </>
     );

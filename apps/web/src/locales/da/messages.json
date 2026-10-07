@@ -310,8 +310,8 @@
     ],
     "translation": ""
   },
-  "4obmDr": {
-    "message": "404 - Page Not Found | kan.bn",
+  "vK90Bm": {
+    "message": "404 - Page Not Found | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -320,7 +320,7 @@
         11
       ]
     ],
-    "translation": "404 - Siden blev ikke fundet | kan.bn"
+    "translation": "404 - Siden blev ikke fundet | kan-flare"
   },
   "/rn4RE": {
     "message": "A powerful, flexible kanban app that helps you organise work, track progress, and deliver results—all in one place.",
@@ -6192,8 +6192,8 @@
     ],
     "translation": "Deltag i arbejdsområde"
   },
-  "A23Y7X": {
-    "message": "Join workspace | kan.bn",
+  "Ny2AxP": {
+    "message": "Join workspace | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -6202,7 +6202,7 @@
         102
       ]
     ],
-    "translation": "Deltag i arbejdsområde | kan.bn"
+    "translation": "Deltag i arbejdsområde | kan-flare"
   },
   "wM8xd8": {
     "message": "Junior",
@@ -6585,8 +6585,8 @@
     ],
     "translation": "Indlæser..."
   },
-  "N/bcWA": {
-    "message": "Login | kan.bn",
+  "dhq0/w": {
+    "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -6595,7 +6595,7 @@
         33
       ]
     ],
-    "translation": "Login | kan.bn"
+    "translation": "Login | kan-flare"
   },
   "nOhz3x": {
     "message": "Logout",
@@ -9589,8 +9589,8 @@
     ],
     "translation": "Opret konto"
   },
-  "sUZo7y": {
-    "message": "Sign up | kan.bn",
+  "dZD1ME": {
+    "message": "Sign up | kan-flare",
     "placeholders": {},
     "comments": [],
     "origin": [
@@ -9603,7 +9603,7 @@
         61
       ]
     ],
-    "translation": "Opret konto | kan.bn"
+    "translation": "Opret konto | kan-flare"
   },
   "WRkpB1": {
     "message": "Sign up disabled",

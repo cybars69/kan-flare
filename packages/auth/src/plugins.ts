@@ -227,7 +227,7 @@ export function createPlugins(db: dbClient) {
               email,
               process.env.NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY === "true"
                 ? "Sign in to your account"
-                : "Sign in to Kan",
+                : "Sign in to kan-flare",
               "MAGIC_LINK",
               {
                 magicLoginUrl: url,
