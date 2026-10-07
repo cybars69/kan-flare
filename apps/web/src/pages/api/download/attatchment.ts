@@ -32,15 +32,6 @@ export default withRateLimit(
       return res.status(403).json({ message: "URL not allowed" });
     }
 
-    // On Workers the encoded `&` inside `url` arrives decoded, so the signed
-    // URL's own parameters show up as top-level ones. Put them back.
-    for (const param of ["exp", "sig", "method"]) {
-      const value = req.query[param];
-      if (typeof value === "string" && !target.searchParams.has(param)) {
-        target.searchParams.set(param, value);
-      }
-    }
-
     target.searchParams.set(
       "download",
       typeof filename === "string" ? filename : "attachment",

@@ -27,6 +27,7 @@ import {
   getDefaultPermissions,
 } from "@kan/shared";
 
+import { runBatch } from "../utils/d1";
 import * as permissionRepo from "./permission.repo";
 
 // System role definitions
@@ -362,9 +363,20 @@ export const getAllMembersByPublicIds = (
 };
 
 export const hardDelete = (db: dbClient, workspacePublicId: string) => {
-  return db
-    .delete(workspaces)
+  const workspaceId = db
+    .select({ id: workspaces.id })
+    .from(workspaces)
     .where(eq(workspaces.publicId, workspacePublicId));
+
+  // Members first: workspace_members.roleId is ON DELETE RESTRICT, and SQLite
+  // checks RESTRICT as soon as the cascade reaches a role, even though the
+  // members pointing at it are being deleted by the same cascade.
+  return runBatch(db, [
+    db
+      .delete(workspaceMembers)
+      .where(inArray(workspaceMembers.workspaceId, workspaceId)),
+    db.delete(workspaces).where(eq(workspaces.publicId, workspacePublicId)),
+  ]);
 };
 
 export const isWorkspaceSlugAvailable = async (

@@ -22,6 +22,7 @@ import {
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { mergeActivities } from "../utils/activities";
 import { createAvatarUrlResolver } from "../utils/avatarUrls";
+import { runInBackground } from "../utils/background";
 import { sendMentionEmails } from "../utils/notifications";
 import {
   assertCanDelete,
@@ -178,41 +179,45 @@ export const cardRouter = createTRPCRouter({
       }
 
       if (input.description) {
-        void sendMentionEmails({
-          db: ctx.db,
-          cardPublicId: newCard.publicId,
-          previousHtml: null,
-          nextHtml: input.description,
-          commenterUserId: userId,
-        });
+        runInBackground(
+          sendMentionEmails({
+            db: ctx.db,
+            cardPublicId: newCard.publicId,
+            previousHtml: null,
+            nextHtml: input.description,
+            commenterUserId: userId,
+          }),
+        );
       }
 
       // Fire webhooks (non-blocking)
-      sendWebhooksForWorkspace(
-        ctx.db,
-        list.workspaceId,
-        createCardWebhookPayload(
-          "card.created",
-          {
-            id: String(newCard.id),
-            publicId: newCard.publicId,
-            title: input.title,
-            description: input.description,
-            dueDate: input.dueDate ?? null,
-            listId: list.publicId,
-          },
-          {
-            boardId: list.boardPublicId,
-            boardName: list.boardName,
-            listName: list.name,
-            user: ctx.user
-              ? { id: ctx.user.id, name: ctx.user.name }
-              : undefined,
-          },
-        ),
-      ).catch((error) => {
-        console.error("Webhook delivery failed:", error);
-      });
+      runInBackground(
+        sendWebhooksForWorkspace(
+          ctx.db,
+          list.workspaceId,
+          createCardWebhookPayload(
+            "card.created",
+            {
+              id: String(newCard.id),
+              publicId: newCard.publicId,
+              title: input.title,
+              description: input.description,
+              dueDate: input.dueDate ?? null,
+              listId: list.publicId,
+            },
+            {
+              boardId: list.boardPublicId,
+              boardName: list.boardName,
+              listName: list.name,
+              user: ctx.user
+                ? { id: ctx.user.id, name: ctx.user.name }
+                : undefined,
+            },
+          ),
+        ).catch((error) => {
+          console.error("Webhook delivery failed:", error);
+        }),
+      );
 
       return newCard;
     }),
@@ -281,14 +286,16 @@ export const cardRouter = createTRPCRouter({
         createdBy: userId,
       });
 
-      void sendMentionEmails({
-        db: ctx.db,
-        cardPublicId: input.cardPublicId,
-        previousHtml: null,
-        nextHtml: input.comment,
-        commenterUserId: userId,
-        commentId: newComment.id,
-      });
+      runInBackground(
+        sendMentionEmails({
+          db: ctx.db,
+          cardPublicId: input.cardPublicId,
+          previousHtml: null,
+          nextHtml: input.comment,
+          commenterUserId: userId,
+          commentId: newComment.id,
+        }),
+      );
 
       return newComment;
     }),
@@ -370,14 +377,16 @@ export const cardRouter = createTRPCRouter({
         createdBy: userId,
       });
 
-      void sendMentionEmails({
-        db: ctx.db,
-        cardPublicId: input.cardPublicId,
-        previousHtml: existingComment.comment,
-        nextHtml: input.comment,
-        commenterUserId: userId,
-        commentId: updatedComment.id,
-      });
+      runInBackground(
+        sendMentionEmails({
+          db: ctx.db,
+          cardPublicId: input.cardPublicId,
+          previousHtml: existingComment.comment,
+          nextHtml: input.comment,
+          commenterUserId: userId,
+          commentId: updatedComment.id,
+        }),
+      );
 
       return updatedComment;
     }),
@@ -1006,13 +1015,15 @@ export const cardRouter = createTRPCRouter({
         });
 
         if (normalizedDescription) {
-          void sendMentionEmails({
-            db: ctx.db,
-            cardPublicId: input.cardPublicId,
-            previousHtml: existingCard.description,
-            nextHtml: normalizedDescription,
-            commenterUserId: userId,
-          });
+          runInBackground(
+            sendMentionEmails({
+              db: ctx.db,
+              cardPublicId: input.cardPublicId,
+              previousHtml: existingCard.description,
+              nextHtml: normalizedDescription,
+              commenterUserId: userId,
+            }),
+          );
         }
       }
 
@@ -1091,35 +1102,37 @@ export const cardRouter = createTRPCRouter({
       }
 
       // Fire webhooks (non-blocking)
-      sendWebhooksForWorkspace(
-        ctx.db,
-        card.workspaceId,
-        createCardWebhookPayload(
-          movedToNewList ? "card.moved" : "card.updated",
-          {
-            id: String(result.id),
-            publicId: result.publicId,
-            title: result.title,
-            description: result.description,
-            dueDate: result.dueDate,
-            listId: currentWebhookListPublicId,
-          },
-          {
-            boardId: card.boardPublicId,
-            boardName: card.boardName,
-            listName: currentWebhookListName,
-            user: ctx.user
-              ? { id: ctx.user.id, name: ctx.user.name }
-              : undefined,
-            changes:
-              Object.keys(webhookChanges).length > 0
-                ? webhookChanges
+      runInBackground(
+        sendWebhooksForWorkspace(
+          ctx.db,
+          card.workspaceId,
+          createCardWebhookPayload(
+            movedToNewList ? "card.moved" : "card.updated",
+            {
+              id: String(result.id),
+              publicId: result.publicId,
+              title: result.title,
+              description: result.description,
+              dueDate: result.dueDate,
+              listId: currentWebhookListPublicId,
+            },
+            {
+              boardId: card.boardPublicId,
+              boardName: card.boardName,
+              listName: currentWebhookListName,
+              user: ctx.user
+                ? { id: ctx.user.id, name: ctx.user.name }
                 : undefined,
-          },
-        ),
-      ).catch((error) => {
-        console.error("Webhook delivery failed:", error);
-      });
+              changes:
+                Object.keys(webhookChanges).length > 0
+                  ? webhookChanges
+                  : undefined,
+            },
+          ),
+        ).catch((error) => {
+          console.error("Webhook delivery failed:", error);
+        }),
+      );
 
       return result;
     }),
@@ -1187,31 +1200,33 @@ export const cardRouter = createTRPCRouter({
 
       // Fire webhooks (non-blocking)
       if (fullCard) {
-        sendWebhooksForWorkspace(
-          ctx.db,
-          card.workspaceId,
-          createCardWebhookPayload(
-            "card.deleted",
-            {
-              id: String(fullCard.id),
-              publicId: fullCard.publicId,
-              title: fullCard.title,
-              description: fullCard.description,
-              dueDate: fullCard.dueDate,
-              listId: fullCard.list.publicId,
-            },
-            {
-              boardId: card.boardPublicId,
-              boardName: card.boardName,
-              listName: fullCard.list.name,
-              user: ctx.user
-                ? { id: ctx.user.id, name: ctx.user.name }
-                : undefined,
-            },
-          ),
-        ).catch((error) => {
-          console.error("Webhook delivery failed:", error);
-        });
+        runInBackground(
+          sendWebhooksForWorkspace(
+            ctx.db,
+            card.workspaceId,
+            createCardWebhookPayload(
+              "card.deleted",
+              {
+                id: String(fullCard.id),
+                publicId: fullCard.publicId,
+                title: fullCard.title,
+                description: fullCard.description,
+                dueDate: fullCard.dueDate,
+                listId: fullCard.list.publicId,
+              },
+              {
+                boardId: card.boardPublicId,
+                boardName: card.boardName,
+                listName: fullCard.list.name,
+                user: ctx.user
+                  ? { id: ctx.user.id, name: ctx.user.name }
+                  : undefined,
+              },
+            ),
+          ).catch((error) => {
+            console.error("Webhook delivery failed:", error);
+          }),
+        );
       }
 
       return { success: true };

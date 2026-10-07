@@ -4,9 +4,8 @@ import type { ImageLoaderProps } from "next/image";
  * next/image loader: every image goes through /api/image, which resizes and
  * converts it once with Cloudflare Images and keeps the result in R2.
  *
- * The source travels base64url-encoded: signed attachment URLs carry their
- * own query string, and on Workers an encoded `&` inside a query parameter
- * arrives decoded, which would split the signature off.
+ * The source travels base64url-encoded, so a signed attachment URL's own
+ * query string can't be confused with this route's parameters.
  */
 export const encodeImageSource = (src: string) =>
   btoa(

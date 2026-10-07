@@ -29,6 +29,10 @@ export default withRateLimit(
       return;
     }
 
+    // tRPC only applies its error status (401/403/400…) when statusCode is
+    // still 200. OpenNext's response object starts without one, so set it,
+    // or every tRPC error reaches the client as 200.
+    res.statusCode = 200;
     const result = await nextApiHandler(req, res);
     return result;
   },

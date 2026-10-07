@@ -1,0 +1,19 @@
+diff --git a/dist/core/routing/util.js b/dist/core/routing/util.js
+--- a/dist/core/routing/util.js
++++ b/dist/core/routing/util.js
+@@ -131,11 +131,13 @@
+ export function convertToQueryString(query) {
+     const queryStrings = [];
+     Object.entries(query).forEach(([key, value]) => {
++        // Re-encode: values are already decoded, so a raw "&", "=" or "#"
++        // inside one would otherwise split or truncate the parameter.
+         if (Array.isArray(value)) {
+-            value.forEach((entry) => queryStrings.push(`${key}=${entry}`));
++            value.forEach((entry) => queryStrings.push(`${encodeURIComponent(key)}=${encodeURIComponent(entry)}`));
+         }
+         else {
+-            queryStrings.push(`${key}=${value}`);
++            queryStrings.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+         }
+     });
+     return queryStrings.length > 0 ? `?${queryStrings.join("&")}` : "";

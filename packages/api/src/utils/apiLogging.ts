@@ -22,12 +22,12 @@ export function withApiLogging(
     const requestId = randomUUID();
     const route = req.url?.split("?")[0] ?? "unknown";
     // `sig` on signed file URLs grants access until it expires; keep it out of logs.
-    const query =
-      req.query && "sig" in req.query
-        ? { ...req.query, sig: "[redacted]" }
-        : req.query;
+    const query: Record<string, string | string[] | undefined> = {
+      ...req.query,
+    };
+    if (query.sig !== undefined) query.sig = "[redacted]";
     const input = {
-      ...(query && Object.keys(query).length > 0 && { query }),
+      ...(Object.keys(query).length > 0 && { query }),
       ...(req.body &&
         typeof req.body === "object" &&
         Object.keys(req.body).length > 0 && { body: req.body }),

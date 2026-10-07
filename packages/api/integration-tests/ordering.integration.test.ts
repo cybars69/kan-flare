@@ -5,6 +5,7 @@ import * as boardRepo from "@kan/db/repository/board.repo";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as checklistRepo from "@kan/db/repository/checklist.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
+import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import * as schema from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
@@ -463,5 +464,32 @@ describe("board copy and move on D1", () => {
     expect(
       await ctx.db.select().from(schema.cardToWorkspaceMembers),
     ).toHaveLength(0);
+  });
+});
+
+describe("workspace deletion on D1", () => {
+  it("hard-deletes a workspace that has members, roles and content", async () => {
+    const ctx = await setup();
+    await addCards(ctx, ctx.listA.id, ["a"]);
+    const [role] = await ctx.db
+      .insert(schema.workspaceRoles)
+      .values({
+        publicId: generateUID(),
+        workspaceId: ctx.workspace.id,
+        name: "custom",
+        hierarchyLevel: 1,
+      })
+      .returning();
+    await ctx.db
+      .update(schema.workspaceMembers)
+      .set({ roleId: role!.id })
+      .where(eq(schema.workspaceMembers.workspaceId, ctx.workspace.id));
+
+    await workspaceRepo.hardDelete(ctx.db, ctx.workspace.publicId);
+
+    expect(await ctx.db.select().from(schema.workspaces)).toHaveLength(0);
+    expect(await ctx.db.select().from(schema.workspaceMembers)).toHaveLength(0);
+    expect(await ctx.db.select().from(schema.workspaceRoles)).toHaveLength(0);
+    expect(await ctx.db.select().from(schema.cards)).toHaveLength(0);
   });
 });

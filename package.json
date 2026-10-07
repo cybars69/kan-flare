@@ -42,6 +42,9 @@
     "overrides": {
       "@types/minimatch": "npm:minimatch@*",
       "@types/glob": "npm:@types/glob@^8.1.0"
+    },
+    "patchedDependencies": {
+      "@opennextjs/aws@4.1.8": "patches/@opennextjs__aws@4.1.8.patch"
     }
   }
 }
