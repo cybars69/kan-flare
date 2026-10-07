@@ -20,7 +20,7 @@ export const initAuth = (db: dbClient) => {
     baseURL,
     trustedOrigins: [...(baseURL ? [baseURL] : []), ...trustedOrigins],
     database: drizzleAdapter(db, {
-      provider: "pg",
+      provider: "sqlite",
       schema: {
         ...schema,
         user: schema.users,

@@ -265,10 +265,26 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Better Auth and tRPC use the request's D1 client, and integration tests run without Postgres.
 **Estimate:** 1–1.5 days
 
-- [ ] `4.1` Switch Better Auth's `drizzleAdapter` from `provider: "pg"` to `"sqlite"` and regenerate its tables
-- [ ] `4.2` Build the auth instance per request (or lazily) so it gets the D1 binding
-- [ ] `4.3` Pass the D1 client through the tRPC context
+- [x] `4.1` Switch Better Auth's `drizzleAdapter` from `provider: "pg"` to `"sqlite"` and regenerate its tables
+- [x] `4.2` Build the auth instance per request (or lazily) so it gets the D1 binding
+- [x] `4.3` Pass the D1 client through the tRPC context
 - [x] `4.4` Replace PGlite in `packages/api/integration-tests/test-db.ts` with an in-memory SQLite database that applies the same migrations
+
+**Status notes (2026-10-08):**
+
+- `4.1`: the Better Auth Drizzle adapter uses `provider: "sqlite"`. Its tables (`user`, `session`, `account`, `verification`, `apiKey`) are already in the SQLite baseline. ID generation stays with the database (`generateId: false`): integer auto-increment for sessions and accounts, and `crypto.randomUUID()` for users.
+- `4.2` / `4.3`: no code change needed. `createDrizzleClient()` returns a lazy client that looks up the D1 binding per request, so the auth instance and tRPC context created at module scope keep working.
+- `4.4`: the integration tests use local D1 through `getPlatformProxy()`, not plain in-memory SQLite. That's closer to production, because batch semantics and the parameter limit match.
+- **End-to-end check:** `cloudflare-migration/smoke.mjs` runs against `wrangler dev`.
+  - **What it does:** signs up with email and password, then creates a workspace, a board with lists and labels, and cards at the end and the start. It moves a card between lists, then searches.
+  - **What it checks:** the final positions are exactly `Todo: zero@0, one@1, three@2 | Done: two@0`.
+  - **Result:** it passes with no errors in the Worker log.
+  - **To run it:**
+    1. `pnpm db:migrate`
+    2. An OpenNext build
+    3. `wrangler dev`, with `NEXT_PUBLIC_ALLOW_CREDENTIALS=true` in `.dev.vars`
+    4. `node cloudflare-migration/smoke.mjs`
+- **Generated types:** `cf-typegen` now rewrites the generated `cloudflare-env.d.ts` so it no longer imports `./.open-next/worker`. Otherwise `tsc` typechecks OpenNext's generated JavaScript whenever a build exists.
 
 **Files:** `packages/auth/src/auth.ts`, `packages/api/src/trpc.ts`, `packages/api/integration-tests/test-db.ts`
 
