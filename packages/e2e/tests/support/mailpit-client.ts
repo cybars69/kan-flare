@@ -1,49 +1,64 @@
-const mailpitBaseUrl = `http://127.0.0.1:${process.env.MAILPIT_HTTP_PORT ?? "8025"}`;
+/**
+ * Reads email sent by the app under test. The app sends through the Cloudflare
+ * Email Service binding; `wrangler dev` simulates it locally by logging each
+ * message (From/To/Subject) with the path of a file holding its HTML. The
+ * e2e web server tees wrangler's output to WRANGLER_LOG (see
+ * playwright.config.ts), and this module parses that log.
+ *
+ * The exported names are kept from the Mailpit client this replaced, so the
+ * specs did not have to change.
+ */
+import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-interface MailpitMessageSummary {
-  ID: string;
+export const WRANGLER_LOG = join(tmpdir(), "kan-e2e-wrangler.log");
+
+interface SentMessage {
+  to: string;
+  htmlPath?: string;
 }
 
-interface MailpitSearchResponse {
-  messages: MailpitMessageSummary[];
-}
+/** Log offset of the last clearMailpitInbox(); older messages are ignored. */
+let inboxStart = 0;
 
-interface MailpitMessage {
-  HTML: string;
-}
+const ANSI = /\u001b\[[0-9;]*m/g;
 
-async function searchMessages(email: string): Promise<MailpitMessageSummary[]> {
-  const response = await fetch(
-    `${mailpitBaseUrl}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`,
-  );
-
-  if (!response.ok) {
-    throw new Error(`Mailpit search failed with status ${response.status}`);
+function readLog(): string {
+  try {
+    return readFileSync(WRANGLER_LOG, "utf8").replace(ANSI, "");
+  } catch {
+    return "";
   }
-
-  const { messages } = (await response.json()) as MailpitSearchResponse;
-  return messages;
 }
+
+function sentMessages(): SentMessage[] {
+  const blocks = readLog()
+    .slice(inboxStart)
+    .split("send_email binding called with MessageBuilder:")
+    .slice(1);
+  return blocks.map((block) => ({
+    to: /^To: (.*)$/m.exec(block)?.[1]?.trim().toLowerCase() ?? "",
+    htmlPath: /^HTML: (.*)$/m.exec(block)?.[1]?.trim(),
+  }));
+}
+
+const messagesTo = (email: string) =>
+  sentMessages().filter((message) => message.to.includes(email.toLowerCase()));
 
 async function waitForMessageHtml(email: string): Promise<string> {
   const deadline = Date.now() + 15_000;
 
   while (Date.now() < deadline) {
-    const messages = await searchMessages(email);
-    const latest = messages[0];
-
-    if (latest) {
-      const messageResponse = await fetch(
-        `${mailpitBaseUrl}/api/v1/message/${latest.ID}`,
-      );
-      const message = (await messageResponse.json()) as MailpitMessage;
-      return message.HTML;
+    const latest = messagesTo(email).at(-1);
+    if (latest?.htmlPath) {
+      return readFileSync(latest.htmlPath, "utf8");
     }
 
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  throw new Error(`No Mailpit message arrived for ${email} within 15s`);
+  throw new Error(`No email arrived for ${email} within 15s`);
 }
 
 export async function getMagicLinkUrl(email: string): Promise<string> {
@@ -57,12 +72,13 @@ export async function getMagicLinkUrl(email: string): Promise<string> {
   return match[1].replace(/&amp;/g, "&");
 }
 
-export async function clearMailpitInbox() {
-  await fetch(`${mailpitBaseUrl}/api/v1/messages`, { method: "DELETE" });
+export function clearMailpitInbox() {
+  inboxStart = readLog().length;
+  return Promise.resolve();
 }
 
-export async function getMailpitMessageCount(email: string): Promise<number> {
-  return (await searchMessages(email)).length;
+export function getMailpitMessageCount(email: string): Promise<number> {
+  return Promise.resolve(messagesTo(email).length);
 }
 
 export async function waitForMailpitMessageCount(

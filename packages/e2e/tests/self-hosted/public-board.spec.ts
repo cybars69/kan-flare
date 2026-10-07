@@ -51,10 +51,16 @@ test(
     const publicBoardSlug = await getBoardSlug(page);
 
     await page.getByRole("button", { name: "Visibility" }).click();
+    // Wait for the change to be saved: navigating away mid-request aborts it,
+    // and on Workers an aborted request can be cancelled before it writes.
+    const visibilitySaved = page.waitForResponse(
+      (response) => response.url().includes("board.update") && response.ok(),
+    );
     await page
       .getByRole("checkbox", { name: "Public" })
       .filter({ visible: true })
       .click();
+    await visibilitySaved;
 
     await page.goto("/boards");
     await board.createBoard("Private Board Test");

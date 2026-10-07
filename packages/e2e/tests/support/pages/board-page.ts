@@ -88,6 +88,9 @@ export class BoardPage {
       .getByRole("button", { name: "Board options", exact: true })
       .click();
     await this.page.getByRole("menuitem", { name: "Archive board" }).click();
+    // Wait for the save to finish. Navigating away mid-request aborts it,
+    // and on Workers an aborted request can be cancelled before it writes.
+    await this.page.waitForURL(/\/boards$/);
   }
 
   async deleteBoard() {

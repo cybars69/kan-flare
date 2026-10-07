@@ -227,7 +227,14 @@ export class CardPage {
       .filter({ visible: true })
       .click();
 
-    const today = new Date().toISOString().slice(0, 10);
+    // Local date, as the date picker shows it. toISOString() gives the UTC
+    // date, which is a different day for part of the day outside UTC.
+    const now = new Date();
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("-");
     await this.page
       .locator(`time[datetime="${today}"]`)
       .filter({ visible: true })

@@ -1,4 +1,6 @@
 import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { config as loadDotenv } from "dotenv";
 
@@ -19,32 +21,31 @@ function resolveStripeListenSecret(apiKey: string): string | undefined {
   }
 }
 
-const mailpitSmtpPort = process.env.MAILPIT_SMTP_PORT ?? "1025";
-const mailpitHttpPort = process.env.MAILPIT_HTTP_PORT ?? "8025";
 const trelloMockPort = process.env.TRELLO_MOCK_PORT ?? "4025";
-const minioPort = process.env.MINIO_PORT ?? "9500";
-const minioConsolePort = process.env.MINIO_CONSOLE_PORT ?? "9501";
-const minioRootUser = process.env.MINIO_ROOT_USER ?? "minioadmin";
-const minioRootPassword = process.env.MINIO_ROOT_PASSWORD ?? "minioadmin";
-const attachmentsBucket =
-  process.env.NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME ?? "e2e-attachments";
 
-const sharedEnv = {
+// The app runs on the Cloudflare Workers runtime (`wrangler dev`) against a
+// fresh local D1/R2 state for every run. Wrangler's output is teed to a log,
+// which tests/support/mailpit-client.ts reads to find sent email.
+const wranglerState = join(tmpdir(), "kan-e2e-wrangler-state");
+const wranglerLog = join(tmpdir(), "kan-e2e-wrangler.log");
+const betterAuthSecret =
+  process.env.BETTER_AUTH_SECRET ?? "e2e-test-only-secret-not-for-prod-use";
+
+/** Read by the Worker at runtime; passed with `wrangler dev --var`. */
+const sharedVars: Record<string, string> = {
+  BETTER_AUTH_SECRET: betterAuthSecret,
   DISABLE_RATE_LIMIT: "true",
-  NEXT_PUBLIC_DISABLE_EMAIL: "false",
-  SMTP_HOST: "127.0.0.1",
-  SMTP_PORT: mailpitSmtpPort,
-  SMTP_USER: "",
-  SMTP_PASSWORD: "",
-  SMTP_SECURE: "false",
+  EMAIL_FROM: "kan-flare e2e <e2e@kan-test.local>",
   TRELLO_API_URL: `http://127.0.0.1:${trelloMockPort}`,
   TRELLO_APP_API_KEY: "e2e-mock-trello-key",
-  S3_REGION: "us-east-1",
-  S3_ENDPOINT: `http://127.0.0.1:${minioPort}`,
-  S3_ACCESS_KEY_ID: minioRootUser,
-  S3_SECRET_ACCESS_KEY: minioRootPassword,
-  S3_FORCE_PATH_STYLE: "true",
-  NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME: attachmentsBucket,
+};
+
+/** Compiled into the build (NEXT_PUBLIC_*) or needed by env validation. */
+const sharedBuildEnv: Record<string, string> = {
+  BETTER_AUTH_SECRET: betterAuthSecret,
+  NEXT_PUBLIC_ALLOW_CREDENTIALS: "true",
+  NEXT_PUBLIC_DISABLE_SIGN_UP: "false",
+  NEXT_PUBLIC_DISABLE_EMAIL: "false",
 };
 
 const realStripeSecretKey =
@@ -109,7 +110,6 @@ const remoteBaseURL = process.env.PLAYWRIGHT_BASE_URL;
 const baseURL = remoteBaseURL ?? `http://localhost:${port}`;
 
 export default defineConfig({
-  globalSetup: "./tests/support/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
@@ -130,16 +130,6 @@ export default defineConfig({
   webServer: remoteBaseURL
     ? undefined
     : [
-        ...(process.env.CI
-          ? []
-          : [
-              {
-                command: `mailpit --smtp 0.0.0.0:${mailpitSmtpPort} --listen 0.0.0.0:${mailpitHttpPort}`,
-                url: `http://127.0.0.1:${mailpitHttpPort}/api/v1/info`,
-                reuseExistingServer: true,
-                timeout: 30_000,
-              },
-            ]),
         {
           command: "node tests/support/trello-mock-server.js",
           url: `http://127.0.0.1:${trelloMockPort}/health`,
@@ -148,25 +138,23 @@ export default defineConfig({
           env: { TRELLO_MOCK_PORT: trelloMockPort },
         },
         {
-          command: `minio server /tmp/kan-e2e-minio-data --address :${minioPort} --console-address :${minioConsolePort}`,
-          url: `http://127.0.0.1:${minioPort}/minio/health/live`,
-          reuseExistingServer: true,
-          timeout: 30_000,
-          env: {
-            MINIO_ROOT_USER: minioRootUser,
-            MINIO_ROOT_PASSWORD: minioRootPassword,
-          },
-        },
-        {
-          command: `pnpm --filter @kan/web build && pnpm --filter @kan/web with-env next start -p ${port}`,
+          command: [
+            `rm -rf ${wranglerState}`,
+            "pnpm --filter @kan/web exec opennextjs-cloudflare build",
+            `pnpm --filter @kan/web exec wrangler d1 migrations apply kan-flare --local --persist-to ${wranglerState}`,
+            `pnpm --filter @kan/web exec wrangler dev --port ${port} --inspector-port 9459 --persist-to ${wranglerState} ${Object.entries(
+              { ...sharedVars, NEXT_PUBLIC_BASE_URL: baseURL },
+            )
+              .map(([key, value]) => `--var ${key}:${JSON.stringify(value)}`)
+              .join(" ")} 2>&1 | tee ${wranglerLog}`,
+          ].join(" && "),
           cwd: "../..",
           url: baseURL,
           reuseExistingServer: !process.env.CI,
-          timeout: 180_000,
+          timeout: 300_000,
           env: {
+            ...sharedBuildEnv,
             NEXT_PUBLIC_BASE_URL: baseURL,
-            NEXT_PUBLIC_USE_STANDALONE_OUTPUT: "",
-            ...sharedEnv,
             ...modeEnv,
           },
         },
