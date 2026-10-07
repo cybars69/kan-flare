@@ -1,4 +1,4 @@
-import { generateAvatarUrl } from "@kan/shared/utils";
+import { generateAvatarUrl } from "@kan/shared/storage";
 
 export const createAvatarUrlResolver = () => {
   const urlsByImageKey = new Map<string, Promise<string | null>>();

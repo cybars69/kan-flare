@@ -72,11 +72,6 @@ export const env = createEnv({
     APPLE_CLIENT_ID: z.string().optional(),
     APPLE_CLIENT_SECRET: z.string().optional(),
     APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
-    S3_ACCESS_KEY_ID: z.string().optional(),
-    S3_SECRET_ACCESS_KEY: z.string().optional(),
-    S3_REGION: z.string().optional(),
-    S3_ENDPOINT: z.string().optional(),
-    S3_FORCE_PATH_STYLE: z.string().optional(),
     EMAIL_FROM: z.string().optional(),
     REDIS_URL: z.string().url().optional().or(z.literal("")),
   },
@@ -92,17 +87,6 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
     NEXT_PUBLIC_USE_STANDALONE_OUTPUT: z.string().optional(),
     NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_STORAGE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_AVATAR_BUCKET_NAME: z.string().optional(),
-    NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME: z.string().optional(),
-    NEXT_PUBLIC_STORAGE_DOMAIN: z.string().optional(),
-    NEXT_PUBLIC_USE_VIRTUAL_HOSTED_URLS: z
-      .string()
-      .transform((s) => (s === "" ? undefined : s))
-      .refine(
-        (s) => !s || s.toLowerCase() === "true" || s.toLowerCase() === "false",
-      )
-      .optional(),
     NEXT_PUBLIC_APP_VERSION: z.string().optional(),
     NEXT_PUBLIC_ALLOW_CREDENTIALS: z
       .string()
@@ -136,13 +120,6 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
-    NEXT_PUBLIC_AVATAR_BUCKET_NAME: process.env.NEXT_PUBLIC_AVATAR_BUCKET_NAME,
-    NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME:
-      process.env.NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME,
-    NEXT_PUBLIC_STORAGE_DOMAIN: process.env.NEXT_PUBLIC_STORAGE_DOMAIN,
-    NEXT_PUBLIC_USE_VIRTUAL_HOSTED_URLS:
-      process.env.NEXT_PUBLIC_USE_VIRTUAL_HOSTED_URLS,
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
     NEXT_PUBLIC_ALLOW_CREDENTIALS: process.env.NEXT_PUBLIC_ALLOW_CREDENTIALS,
     NEXT_PUBLIC_DISABLE_SIGN_UP: process.env.NEXT_PUBLIC_DISABLE_SIGN_UP,

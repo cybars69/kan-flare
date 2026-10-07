@@ -1,4 +1,3 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { createAuthMiddleware } from "better-auth/api";
 import { env } from "next-runtime-env";
 
@@ -7,7 +6,11 @@ import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import { createSubscriber, triggerSubscriberWorkflow } from "@kan/email";
 import { createLogger } from "@kan/logger";
-import { createS3Client } from "@kan/shared";
+import {
+  generateAvatarUrl,
+  isStorageConfigured,
+  putObject,
+} from "@kan/shared/storage";
 
 import { downloadImage } from "./utils";
 
@@ -56,15 +59,13 @@ export function createDatabaseHooks(db: dbClient) {
         },
         async after(user: BetterAuthUser, _context: unknown) {
           let avatarKey = user.image;
-          const storageDomain = process.env.NEXT_PUBLIC_STORAGE_DOMAIN;
+          // Copy avatars from external providers into our own storage.
           if (
             user.image &&
-            storageDomain &&
-            !user.image.includes(storageDomain)
+            /^https?:\/\//.test(user.image) &&
+            isStorageConfigured("avatars")
           ) {
             try {
-              const client = createS3Client();
-
               const allowedFileExtensions = ["jpg", "jpeg", "png", "webp"];
 
               const fileExtension =
@@ -73,15 +74,9 @@ export function createDatabaseHooks(db: dbClient) {
 
               const imageBuffer = await downloadImage(user.image);
 
-              await client.send(
-                new PutObjectCommand({
-                  Bucket: env("NEXT_PUBLIC_AVATAR_BUCKET_NAME") ?? "",
-                  Key: key,
-                  Body: imageBuffer,
-                  ContentType: `image/${!allowedFileExtensions.includes(fileExtension) ? "jpeg" : fileExtension}`,
-                  ACL: "public-read",
-                }),
-              );
+              await putObject("avatars", key, imageBuffer, {
+                contentType: `image/${!allowedFileExtensions.includes(fileExtension) ? "jpeg" : fileExtension}`,
+              });
 
               avatarKey = key;
 
@@ -99,9 +94,7 @@ export function createDatabaseHooks(db: dbClient) {
           const lastName = rest.length ? rest.join(" ") : undefined;
 
           try {
-            const avatarUrl = avatarKey
-              ? `${env("NEXT_PUBLIC_STORAGE_URL")}/${env("NEXT_PUBLIC_AVATAR_BUCKET_NAME")}/${avatarKey}`
-              : undefined;
+            const avatarUrl = (await generateAvatarUrl(avatarKey)) ?? undefined;
 
             await createSubscriber({
               publicId: user.id,

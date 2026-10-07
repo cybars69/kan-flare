@@ -1,7 +1,5 @@
-import { HeadBucketCommand } from "@aws-sdk/client-s3";
 import { TRPCError } from "@trpc/server";
 import { sql } from "drizzle-orm";
-import { env } from "next-runtime-env";
 import { z } from "zod";
 
 import type { dbClient } from "@kan/db/client";
@@ -18,13 +16,13 @@ import * as listRepo from "@kan/db/repository/list.repo";
 import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
+import { getBucket, isStorageConfigured } from "@kan/shared/storage";
 
 import {
   adminProtectedProcedure,
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
-import { createS3Client } from "@kan/shared/utils";
 
 const checkDatabaseConnection = async (db: dbClient) => {
   try {
@@ -37,23 +35,9 @@ const checkDatabaseConnection = async (db: dbClient) => {
 
 const checkS3Connection = async () => {
   try {
-    // Check if S3 is configured
-    if (
-      !process.env.S3_ENDPOINT ||
-      !process.env.S3_ACCESS_KEY_ID ||
-      !process.env.S3_SECRET_ACCESS_KEY
-    ) {
-      // S3 is optional, so return true if not configured
-      return true;
-    }
-
-    const client = createS3Client();
-    const avatarBucketName = env("NEXT_PUBLIC_AVATAR_BUCKET_NAME");
-    const attachmentsBucketName = env("NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME");
-
-    await client.send(new HeadBucketCommand({ Bucket: avatarBucketName }));
-    await client.send(new HeadBucketCommand({ Bucket: attachmentsBucketName }));
-
+    // A HEAD on a key that never exists proves the R2 bindings answer.
+    await getBucket("avatars").head("health-check");
+    await getBucket("attachments").head("health-check");
     return true;
   } catch (error) {
     console.error(error);
@@ -85,11 +69,8 @@ export const healthRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const dbHealthy = await checkDatabaseConnection(ctx.db);
       const s3Healthy = await checkS3Connection();
-      const s3Configured = !!(
-        process.env.S3_ENDPOINT &&
-        process.env.S3_ACCESS_KEY_ID &&
-        process.env.S3_SECRET_ACCESS_KEY
-      );
+      const s3Configured =
+        isStorageConfigured("avatars") && isStorageConfigured("attachments");
 
       const database = dbHealthy ? "ok" : "error";
       const storage = !s3Configured

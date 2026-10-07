@@ -8,10 +8,8 @@ import * as checklistRepo from "@kan/db/repository/checklist.repo";
 import * as labelRepo from "@kan/db/repository/label.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-import {
-  generateAttachmentUrl,
-  normalizeDescription,
-} from "@kan/shared/utils";
+import { generateAttachmentUrl } from "@kan/shared/storage";
+import { normalizeDescription } from "@kan/shared/utils";
 
 import {
   activityItemSchema,

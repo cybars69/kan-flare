@@ -56,8 +56,10 @@ vi.mock("../utils/permissions", () => ({
 vi.mock("@kan/shared/utils", () => ({
   generateSlug: vi.fn((name: string) => name.toLowerCase().replace(/\s+/g, "-")),
   generateUID: vi.fn(() => "abc123"),
-  generateAvatarUrl: vi.fn(),
   convertDueDateFiltersToRanges: vi.fn(),
+}));
+vi.mock("@kan/shared/storage", () => ({
+  generateAvatarUrl: vi.fn(),
 }));
 
 vi.mock("@kan/shared/constants", () => ({

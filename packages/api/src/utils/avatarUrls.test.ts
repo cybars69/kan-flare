@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { generateAvatarUrl } from "@kan/shared/utils";
+import { generateAvatarUrl } from "@kan/shared/storage";
 
 import { createAvatarUrlResolver } from "./avatarUrls";
 
-vi.mock("@kan/shared/utils", () => ({
+vi.mock("@kan/shared/storage", () => ({
   generateAvatarUrl: vi.fn(),
 }));
 

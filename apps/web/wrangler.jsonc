@@ -26,7 +26,12 @@
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
-  // R2 (Phase 6), email (Phase 7), images (Phase 10) and rate limiting
+  // Buckets are created on first deploy when they don't exist yet.
+  "r2_buckets": [
+    { "binding": "AVATARS", "bucket_name": "kan-flare-avatars" },
+    { "binding": "ATTACHMENTS", "bucket_name": "kan-flare-attachments" }
+  ],
+  // Email (Phase 7), images (Phase 10) and rate limiting
   // (Phase 11) bindings are added by their phases. Bindings are not
   // inherited by environments, so add each one to env.staging as well.
   "env": {
@@ -43,6 +48,13 @@
           "binding": "DB",
           "database_name": "kan-flare-staging",
           "migrations_dir": "../../packages/db/migrations"
+        }
+      ],
+      "r2_buckets": [
+        { "binding": "AVATARS", "bucket_name": "kan-flare-staging-avatars" },
+        {
+          "binding": "ATTACHMENTS",
+          "bucket_name": "kan-flare-staging-attachments"
         }
       ]
     }

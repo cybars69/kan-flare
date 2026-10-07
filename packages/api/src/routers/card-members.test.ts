@@ -42,9 +42,11 @@ vi.mock("@kan/auth/server", () => ({
   initAuth: vi.fn(() => ({ api: {} })),
 }));
 vi.mock("@kan/shared/utils", () => ({
+  normalizeDescription: vi.fn((description: string) => description),
+}));
+vi.mock("@kan/shared/storage", () => ({
   generateAttachmentUrl: vi.fn(),
   generateAvatarUrl: vi.fn(),
-  normalizeDescription: vi.fn((description: string) => description),
 }));
 vi.mock("../utils/notifications", () => ({
   sendMentionEmails: vi.fn(),

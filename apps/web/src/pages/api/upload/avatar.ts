@@ -1,16 +1,14 @@
+import { Readable } from "node:stream";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 import { createNextApiContext } from "@kan/api/trpc-context";
 import { withApiLogging } from "@kan/api/utils/apiLogging";
 import { withRateLimit } from "@kan/api/utils/rateLimit";
 import * as userRepo from "@kan/db/repository/user.repo";
-import { createS3Client } from "@kan/shared/utils";
-
-import { env } from "~/env";
+import { isStorageConfigured, putObject } from "@kan/shared/storage";
 
 const MAX_SIZE_BYTES = parseInt(
-  process.env.S3_AVATAR_UPLOAD_LIMIT || "2097152",
+  process.env.AVATAR_UPLOAD_LIMIT || "2097152",
   10,
 ); // Default 2MB
 const allowedContentTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -35,8 +33,7 @@ export default withRateLimit(
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const bucket = env.NEXT_PUBLIC_AVATAR_BUCKET_NAME;
-      if (!bucket) {
+      if (!isStorageConfigured("avatars")) {
         return res.status(500).json({ error: "Avatar bucket not configured" });
       }
 
@@ -80,18 +77,10 @@ export default withRateLimit(
 
       const s3Key = `${user.id}/${sanitizedFilename}`;
 
-      const client = createS3Client();
-
-      // Upload the file to S3
-      await client.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: s3Key,
-          Body: req,
-          ContentType: contentType,
-          ContentLength: contentLength,
-        }),
-      );
+      await putObject("avatars", s3Key, Readable.toWeb(req) as ReadableStream, {
+        contentType,
+        contentLength,
+      });
 
       // Update user image in database
       const updatedUser = await userRepo.update(db, user.id, {

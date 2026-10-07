@@ -24,12 +24,10 @@ vi.mock("@kan/email", () => ({
   triggerSubscriberWorkflow: vi.fn(),
 }));
 
-vi.mock("@kan/shared", () => ({
-  createS3Client: vi.fn(),
-}));
-
-vi.mock("@aws-sdk/client-s3", () => ({
-  PutObjectCommand: vi.fn(),
+vi.mock("@kan/shared/storage", () => ({
+  generateAvatarUrl: vi.fn(() => Promise.resolve(null)),
+  isStorageConfigured: vi.fn(() => false),
+  putObject: vi.fn(),
 }));
 
 const mockEnv = env as ReturnType<typeof vi.fn>;

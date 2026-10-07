@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-import { generateAvatarUrl } from "@kan/shared/utils";
+import { generateAvatarUrl } from "@kan/shared/storage";
 
 import { assertPermission } from "../utils/permissions";
 
@@ -30,9 +30,11 @@ vi.mock("@kan/auth/server", () => ({
   initAuth: vi.fn(() => ({ api: {} })),
 }));
 vi.mock("@kan/shared/utils", () => ({
+  generateUID: vi.fn(),
+}));
+vi.mock("@kan/shared/storage", () => ({
   generateAttachmentUrl: vi.fn(),
   generateAvatarUrl: vi.fn(),
-  generateUID: vi.fn(),
 }));
 vi.mock("../utils/notifications", () => ({
   sendMentionEmails: vi.fn(),

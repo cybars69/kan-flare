@@ -5,12 +5,16 @@ import * as cardRepo from "@kan/db/repository/card.repo";
 import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as cardAttachmentRepo from "@kan/db/repository/cardAttachment.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
+import {
+  deleteObject,
+  generateUploadUrl,
+  isStorageConfigured,
+} from "@kan/shared/storage";
 import { generateUID } from "@kan/shared/utils";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { attachmentConfirmResponseSchema } from "../schemas";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { assertPermission } from "../utils/permissions";
-import { deleteObject, generateUploadUrl } from "@kan/shared/utils";
 
 export const attachmentRouter = createTRPCRouter({
   generateUploadUrl: protectedProcedure
@@ -20,7 +24,7 @@ export const attachmentRouter = createTRPCRouter({
         method: "POST",
         path: "/cards/{cardPublicId}/attachments/upload-url",
         description:
-          "Generates a presigned URL for uploading an attachment to S3",
+          "Generates a signed URL for uploading an attachment with PUT",
         tags: ["Attachments"],
         protect: true,
       },
@@ -66,8 +70,7 @@ export const attachmentRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      const bucket = process.env.NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME;
-      if (!bucket)
+      if (!isStorageConfigured("attachments"))
         throw new TRPCError({
           message: `Attachments bucket not configured`,
           code: "INTERNAL_SERVER_ERROR",
@@ -80,12 +83,7 @@ export const attachmentRouter = createTRPCRouter({
 
       const s3Key = `${workspace.publicId}/${input.cardPublicId}/${generateUID()}-${sanitizedFilename}`;
 
-      const url = await generateUploadUrl(
-        bucket,
-        s3Key,
-        input.contentType,
-        3600, // 1 hour
-      );
+      const url = await generateUploadUrl(s3Key, 3600); // 1 hour
 
       return { url, key: s3Key };
     }),
@@ -196,16 +194,13 @@ export const attachmentRouter = createTRPCRouter({
       const workspaceId = attachment.card.list.board.workspaceId;
       await assertPermission(ctx.db, userId, workspaceId, "card:edit");
 
-      const bucket = process.env.NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME;
-      if (bucket) {
-        try {
-          await deleteObject(bucket, attachment.s3Key);
-        } catch (error) {
-          console.error(
-            `Failed to delete attachment from S3: ${attachment.s3Key}`,
-            error,
-          );
-        }
+      try {
+        await deleteObject("attachments", attachment.s3Key);
+      } catch (error) {
+        console.error(
+          `Failed to delete attachment from storage: ${attachment.s3Key}`,
+          error,
+        );
       }
 
       await cardAttachmentRepo.softDelete(ctx.db, {

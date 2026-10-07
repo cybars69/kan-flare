@@ -331,12 +331,43 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Avatars and attachments live in R2, and the AWS SDK is gone.
 **Estimate:** 2–3 days
 
-- [ ] `6.1` Create avatar and attachment buckets and add R2 bindings
-- [ ] `6.2` Replace `packages/shared/src/utils/s3.ts` with a storage module of the same shape
-- [ ] `6.3` Stream uploads into `bucket.put()` in `pages/api/upload/attachment.ts` and `avatar.ts`
-- [ ] `6.4` Replace presigned download URLs with an authorised route that streams from `bucket.get()` and keeps the membership check
-- [ ] `6.5` Update the routers that build URLs (attachment, card, board, user, workspace), the health check and `packages/auth/src/hooks.ts`
-- [ ] `6.6` Remove `@aws-sdk/*` and the `S3_*` variables
+- [x] `6.1` Create avatar and attachment buckets and add R2 bindings
+- [x] `6.2` Replace `packages/shared/src/utils/s3.ts` with a storage module of the same shape
+- [x] `6.3` Stream uploads into `bucket.put()` in `pages/api/upload/attachment.ts` and `avatar.ts`
+- [x] `6.4` Replace presigned download URLs with an authorised route that streams from `bucket.get()` and keeps the membership check
+- [x] `6.5` Update the routers that build URLs (attachment, card, board, user, workspace), the health check and `packages/auth/src/hooks.ts`
+- [x] `6.6` Remove `@aws-sdk/*` and the `S3_*` variables
+
+**Status notes (2026-10-08):**
+
+- `6.1`: there are two R2 bindings, `AVATARS` and `ATTACHMENTS`. Production uses the buckets `kan-flare-avatars` and `kan-flare-attachments`; staging uses `kan-flare-staging-*`. Wrangler creates them on first deploy, so nothing is created by hand.
+- `6.2`: `packages/shared/src/utils/s3.ts` is replaced by `storage.ts`, exported as the server-only subpath `@kan/shared/storage`. It isn't part of `@kan/shared/utils`, so the browser bundle can't pull it in.
+  - **Functions:** `getBucket`, `isStorageConfigured`, `putObject`, `getObject`, `deleteObject`, `signFileUrl`, `verifyFileSignature`, `generateUploadUrl`, `generateAvatarUrl` and `generateAttachmentUrl`.
+  - **Streamed uploads:** `putObject` streams through the Workers runtime's `FixedLengthStream`, because R2 needs a streamed body's length up front. Under `next dev` on Node, where that class doesn't exist, it buffers instead.
+- `6.3`: `/api/upload/attachment` and `/api/upload/avatar` stream the request body into R2 with `Readable.toWeb(req)`.
+- `6.4`: a new route, `/api/files/[...path]`, replaces S3 URLs:
+  - **Avatars** (`/api/files/avatars/<key>`) are public, like the old public-read bucket, and cached for a day.
+  - **Attachments** need a URL signed with HMAC-SHA256 (`exp`, `sig`), keyed off `BETTER_AUTH_SECRET`. That replaces S3 presigned URLs and keeps the same capability-URL model. Links last 24 hours, as before.
+  - **Signed `PUT`** (`method=PUT`) backs `attachment.generateUploadUrl` for API clients, followed by `attachment.confirm`.
+  - **Security:** files are now served from the app's own origin, so every response carries `Content-Security-Policy: sandbox` and `X-Content-Type-Options: nosniff`. Anything other than images, video, audio and PDF is forced to download.
+- `/api/download/attatchment` now just redirects to the file route with `download=<filename>`.
+  - **Workers quirk:** the encoded `&` inside its `url` parameter arrives decoded, so the signed URL's `exp`/`sig` show up as top-level parameters. The route copies them back.
+- **Browser avatars:** `getAvatarUrl` in `apps/web/src/utils/helpers.ts` maps a key to `/api/files/avatars/<key>`.
+- **Social login:** the `user.create.after` hook copies the provider's avatar into R2 whenever the image is an external URL and the avatars binding exists.
+- **Health check:** `/health` checks storage with a `head()` on each bucket.
+- `6.5`: done. The tests mock `@kan/shared/storage`.
+- `6.6`: `@aws-sdk/*` is removed from `apps/web` and `@kan/shared`. These environment variables are gone:
+  - `S3_*`
+  - `NEXT_PUBLIC_{AVATAR,ATTACHMENTS}_BUCKET_NAME`
+  - `NEXT_PUBLIC_STORAGE_{URL,DOMAIN}`
+  - `NEXT_PUBLIC_USE_VIRTUAL_HOSTED_URLS`
+
+  `S3_AVATAR_UPLOAD_LIMIT` is renamed `AVATAR_UPLOAD_LIMIT`. `packages/e2e` still uses the AWS SDK in its own helpers; Phase 12 will handle that.
+- **Bundle size:** the Worker is now **2.87 MiB gzipped**, which fits even the free plan's 3 MiB limit.
+- **Tests:**
+  - `storage.test.ts` has 6 tests covering signing: wrong key, wrong method, tampered expiry, expired link, rotated secret.
+  - `smoke.mjs` now checks storage end to end in `wrangler dev` against local R2: avatar upload and public fetch, attachment upload, a signed GET without a session, unsigned and tampered links rejected (403), PDF served inline under the sandbox policy, forced download, signed PUT upload plus confirm, delete removing the file (404), and the health check. All pass.
+- **No migration script:** task 6.6 mentioned a one-off copy script for existing S3 files. It isn't needed, because kan-flare starts with empty storage.
 
 **Files:** `packages/shared/src/utils/s3.ts`, `apps/web/src/pages/api/upload/`*, `apps/web/src/pages/api/download/attatchment.ts`, `packages/api/src/routers/`*, `packages/auth/src/hooks.ts`
 
