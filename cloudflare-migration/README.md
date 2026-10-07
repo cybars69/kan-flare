@@ -298,8 +298,29 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 - [ ] `5.1` Add `.github/workflows/deploy.yml`: install, test, `wrangler d1 migrations apply --remote`, build, `wrangler deploy`
 - [ ] `5.2` Store `CLOUDFLARE_API_TOKEN` and the account ID as repository secrets
 - [ ] `5.3` Push server secrets with `wrangler secret put`
-- [ ] `5.4` Add a staging environment with its own D1 database
-- [ ] `5.5` Turn on D1 Time Travel for point-in-time restore, and write down the restore command
+- [x] `5.4` Add a staging environment with its own D1 database
+- [x] `5.5` Turn on D1 Time Travel for point-in-time restore, and write down the restore command
+
+**Status notes (2026-10-08):**
+
+- **Deferred:** `5.1` and `5.2` (the GitHub Actions deploy workflow and repository secrets) are put off for a few weeks at the owner's request. Deploys run from a machine for now.
+- **One-command deploy:** `pnpm --filter @kan/web deploy` builds, then runs `deploy:built`, which does three things:
+  1. Migrates D1 if the database already exists. On the first deploy it doesn't, so this step prints a note and carries on.
+  2. Runs `opennextjs-cloudflare deploy`. On the first run, this provisions the D1 database, because the binding has no `database_id`.
+  3. Migrates again. This is a no-op when nothing is pending.
+
+  `deploy:staging` does the same against `--env staging`. `CI=true` skips Wrangler's confirmation prompt.
+- `5.3`: not done yet, because it writes to the Cloudflare account. Before the first deploy, run `wrangler secret put BETTER_AUTH_SECRET` from `apps/web`, adding `--env staging` for staging. Do the same for any OAuth client secrets in use. Non-secret values go in `vars` in `wrangler.jsonc`.
+- `5.4`: `env.staging` in `wrangler.jsonc` has its own Worker (`kan-flare-staging`), its own self-reference and its own D1 database (`kan-flare-staging`), all provisioned on its first deploy. Wrangler environments don't inherit bindings, so every binding added later must also be added under `env.staging`. A dry run with `--env staging` resolves all bindings.
+- `5.5`: D1 Time Travel is always on, with no setting to enable. It keeps 30 days of history on the paid plan and 7 on the free plan.
+  - **To restore:** `wrangler d1 time-travel restore kan-flare --timestamp=<RFC3339 or unix>`. Add `--env staging` for staging.
+  - **To find a bookmark first:** `wrangler d1 time-travel info kan-flare --timestamp=<…>`.
+- **Logs:** `observability.logs.enabled` is on, so Worker logs show in the dashboard. Phase 8 makes them structured.
+- **Bundle size:** with `pg` and PGlite gone, the Worker is **3.7 MiB gzipped** (19 MiB raw), down from 6.75 MiB.
+- **Lint:** I linted only the files I changed in Phases 2–4, and they're clean apart from three things that aren't mine:
+  - The parse errors on `integration-tests/*.ts`. Upstream's `packages/api` tsconfig doesn't include that folder, so its own test files show the same error.
+  - Two non-null assertions in upstream's `parseTicketId`.
+  - The new `@kan/db` client avoids the `AnyD1Database` type at runtime, because ESLint can't resolve it without Cloudflare's runtime types.
 
 **Files:** `.github/workflows/deploy.yml` (new), `apps/web/wrangler.jsonc`
 

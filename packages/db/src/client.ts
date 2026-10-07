@@ -13,7 +13,10 @@ export const createD1Client = (binding: AnyD1Database): dbClient =>
 const clients = new WeakMap<object, dbClient>();
 
 const clientForCurrentRequest = (): dbClient => {
-  const binding = (getCloudflareContext().env as { DB?: AnyD1Database }).DB;
+  const { env } = getCloudflareContext() as unknown as {
+    env: { DB?: object };
+  };
+  const binding = env.DB;
   if (!binding) {
     throw new Error(
       "No D1 binding named DB. Check d1_databases in apps/web/wrangler.jsonc.",
@@ -21,7 +24,7 @@ const clientForCurrentRequest = (): dbClient => {
   }
   let client = clients.get(binding);
   if (!client) {
-    client = createD1Client(binding);
+    client = createD1Client(binding as AnyD1Database);
     clients.set(binding, client);
   }
   return client;

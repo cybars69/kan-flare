@@ -5,7 +5,6 @@ import {
   count,
   desc,
   eq,
-  gt,
   inArray,
   isNull,
   sql,

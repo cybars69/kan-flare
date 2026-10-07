@@ -8,6 +8,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "observability": {
+    "logs": { "enabled": true }
+  },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
@@ -22,7 +25,26 @@
       // deploy and reuses it afterwards. Local dev uses .wrangler/state.
       "migrations_dir": "../../packages/db/migrations"
     }
-  ]
+  ],
   // R2 (Phase 6), email (Phase 7), images (Phase 10) and rate limiting
-  // (Phase 11) bindings are added by their phases.
+  // (Phase 11) bindings are added by their phases. Bindings are not
+  // inherited by environments, so add each one to env.staging as well.
+  "env": {
+    "staging": {
+      "name": "kan-flare-staging",
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "kan-flare-staging"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "kan-flare-staging",
+          "migrations_dir": "../../packages/db/migrations"
+        }
+      ]
+    }
+  }
 }
