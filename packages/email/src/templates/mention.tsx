@@ -46,7 +46,7 @@ export const MentionTemplate = ({
             color: "#232323",
           }}
         >
-          kan.bn
+          kan-flare
         </Heading>
         <Heading
           style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
@@ -61,7 +61,8 @@ export const MentionTemplate = ({
           }}
         >
           <strong>{commenterName}</strong> mentioned you in a comment on the
-          card <strong>{cardTitle}</strong> in the board <strong>{boardName}</strong>.
+          card <strong>{cardTitle}</strong> in the board{" "}
+          <strong>{boardName}</strong>.
         </Text>
         <Button
           target="_blank"
@@ -105,4 +106,3 @@ export const MentionTemplate = ({
 );
 
 export default MentionTemplate;
-

@@ -31,7 +31,10 @@
     { "binding": "AVATARS", "bucket_name": "kan-flare-avatars" },
     { "binding": "ATTACHMENTS", "bucket_name": "kan-flare-attachments" }
   ],
-  // Email (Phase 7), images (Phase 10) and rate limiting
+  // Transactional email through Cloudflare Email Service. The EMAIL_FROM
+  // domain must be onboarded (`wrangler email sending enable <domain>`).
+  "send_email": [{ "name": "EMAIL" }],
+  // Images (Phase 10) and rate limiting
   // (Phase 11) bindings are added by their phases. Bindings are not
   // inherited by environments, so add each one to env.staging as well.
   "env": {
@@ -50,6 +53,7 @@
           "migrations_dir": "../../packages/db/migrations"
         }
       ],
+      "send_email": [{ "name": "EMAIL" }],
       "r2_buckets": [
         { "binding": "AVATARS", "bucket_name": "kan-flare-staging-avatars" },
         {

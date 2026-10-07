@@ -378,10 +378,24 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** All four emails send through Cloudflare Email Service.
 **Estimate:** 1 day
 
-- [ ] `7.1` Check the current Email Service binding API and limits; onboard the sending domain
-- [ ] `7.2` Rewrite `packages/email/src/sendEmail.tsx`: render the React Email template, send through the binding
-- [ ] `7.3` Keep the four templates and their callers unchanged
-- [ ] `7.4` Remove `nodemailer` and the `SMTP_*` variables; update test mocks
+- [x] `7.1` Check the current Email Service binding API and limits; onboard the sending domain
+- [x] `7.2` Rewrite `packages/email/src/sendEmail.tsx`: render the React Email template, send through the binding
+- [x] `7.3` Keep the four templates and their callers unchanged
+- [x] `7.4` Remove `nodemailer` and the `SMTP_*` variables; update test mocks
+
+**Status notes (2026-10-08):**
+
+- `7.1`: the binding API was checked against the Email Service docs (`send_email` binding, `env.EMAIL.send({ from, to, subject, html, text })`, errors with `.code`).
+  - **Before first deploy** (needs the Cloudflare account): onboard the sending domain with `npx wrangler email sending enable <domain>`, and set `EMAIL_FROM` to an address on that domain.
+  - **Local runs:** `wrangler dev` doesn't send mail. It writes each message to `apps/web/.wrangler/tmp/email/`.
+- `7.2`: `packages/email/src/sendEmail.tsx` sends through the `EMAIL` binding.
+  - **Sender:** `EMAIL_FROM` is still a single variable, and the `Name <address>` form is parsed into the binding's `{ email, name }`.
+  - **Plain text:** a text version is sent alongside the HTML, which helps deliverability.
+  - **Rendering:** templates render with `react-dom/server`'s `renderToStaticMarkup`, with the same XHTML doctype react-email adds, and `toPlainText` from `@react-email/render`. Under the `workerd` condition, `@react-email/render`'s own `render()` loads its edge build. That build needs `renderToReadableStream`, which the bundled React 18 server build lacks, so it fails with `reactDOMServer.renderToReadableStream is not a function`.
+- `7.3`: the four templates and their callers are unchanged, apart from four `kan.bn` brand strings Phase 0 missed.
+- `7.4`: `nodemailer`, `@types/nodemailer` and the `SMTP_*` variables are gone. The test mocks of `sendEmail` needed no change. `packages/e2e` still has Mailpit SMTP settings for its own harness; Phase 12 will handle those.
+- **Checked:** in `wrangler dev`, signing up and then requesting a password reset sends `Reset Password` through the binding. The parsed sender is `"kan-flare" <noreply@example.com>`, and both HTML and text are rendered with the correct reset link.
+- **Build failure seen once:** an OpenNext build failed with `SQLITE_BUSY` while a just-stopped `wrangler dev` was still releasing local D1. `next build` starts the local runtime through `initOpenNextCloudflareForDev()`. Retrying fixed it.
 
 **Files:** `packages/email/src/sendEmail.tsx`, `packages/api/src/utils/notifications.test.ts`
 

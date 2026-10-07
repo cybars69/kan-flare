@@ -39,7 +39,7 @@ export const ResetPasswordTemplate = ({
             color: "#232323",
           }}
         >
-          kan.bn
+          kan-flare
         </Heading>
         <Heading
           style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
@@ -81,7 +81,8 @@ export const ResetPasswordTemplate = ({
             color: "#7e7e7e",
           }}
         >
-          If you didn&apos;t try to reset your password, you can safely ignore this email.
+          If you didn&apos;t try to reset your password, you can safely ignore
+          this email.
         </Text>
         <Hr
           style={{

@@ -22,7 +22,7 @@ export const JoinWorkspaceTemplate = ({
 }) => (
   <Html>
     <Head />
-    <Preview>Join {workspaceName ?? "workspace"} on kan.bn</Preview>
+    <Preview>Join {workspaceName ?? "workspace"} on kan-flare</Preview>
     <Body style={{ backgroundColor: "white" }}>
       <Container
         style={{
@@ -42,7 +42,8 @@ export const JoinWorkspaceTemplate = ({
             color: "#232323",
           }}
         >
-          {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" && "kan-flare"}
+          {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" &&
+            "kan-flare"}
         </Heading>
         <Heading
           style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
@@ -88,7 +89,8 @@ export const JoinWorkspaceTemplate = ({
             color: "#7e7e7e",
           }}
         >
-          If you don&apos;t want to join this workspace, you can safely ignore this email.
+          If you don&apos;t want to join this workspace, you can safely ignore
+          this email.
         </Text>
         {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" && (
           <>
