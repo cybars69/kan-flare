@@ -21,6 +21,7 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 
 | Date       | Who | What                                                                         |
 | ---------- | --- | ---------------------------------------------------------------------------- |
+| 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 254/254, e2e 48/48 (1 flaky), smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
 | 2026-10-08 | Claude (for Arsalan) | Phase 0 done except new icon artwork (`0.3`). Remotes repointed, `workers` branch created, renamed to kan-flare, `NOTICE` added, billing routes removed. Build, tests and a local run checked. |
 | 2026-10-07 | —   | Plan finalised. D1 chosen over Hyperdrive so no external Postgres is needed. |
 
@@ -530,13 +531,43 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Estimate:** 3–4 days
 
 - [x] `12.1` Write ordering tests first (before Phase 3): create at position, move within a list, move between lists, delete, bulk import
-- [ ] `12.2` Add a check that every list's indexes are exactly 0…n-1 after each test
-- [ ] `12.3` Run the Playwright suite in self-hosted mode against the preview
+- [x] `12.2` Add a check that every list's indexes are exactly 0…n-1 after each test
+- [x] `12.3` Run the Playwright suite in self-hosted mode against the preview
 - [ ] `12.4` Test uploads, image variants, every email and each login method you use
-- [ ] `12.5` Run `pnpm lint`, `pnpm typecheck` and `pnpm test`
+- [x] `12.5` Run `pnpm lint`, `pnpm typecheck` and `pnpm test`
 - [ ] `12.6` Record the final bundle size and cold-start time
 
+**Status notes (2026-10-08):**
+
+- `12.2`: every ordering test checks that indexes are exactly 0…n-1 (`cardTitles`/`listNames` in `ordering.integration.test.ts`, and the item checks).
+- `12.3`: the Playwright self-hosted suite now runs against the Workers build: OpenNext build plus `wrangler dev`, on a fresh local D1/R2 state each run.
+  - **Final result:** 48/48. 47 passed first time, and `auth.spec.ts` (log out, then log back in) passed on retry. Its first attempt hits a navigation race: after log-out, the app's own redirect to `/login` collides with the test's `page.goto("/login")` (`ERR_ABORTED`). Upstream configures retries for this kind of flakiness. Still open.
+  - **Harness changes:**
+    - `playwright.config.ts` builds with OpenNext, applies migrations to a temp state dir, runs `wrangler dev` with `--var` settings, and tees its output to a log.
+    - `tests/support/mailpit-client.ts` now reads sent mail from that log. Wrangler's email simulator logs the recipient and the path of each message's HTML. The exported names are unchanged.
+    - MinIO, Mailpit, `global-setup.ts` (bucket creation) and `@aws-sdk/client-s3` are gone from the e2e package.
+    - The repo's Playwright needs its own browser build: run `pnpm --filter @kan/e2e exec playwright install chromium` once.
+  - **App bugs the suite found:**
+    1. **tRPC error status codes were lost on Workers**, so UNAUTHORIZED and FORBIDDEN came back as 200. tRPC only sets the status when `res.statusCode === 200`, and OpenNext's response object starts without one. Fixed in `pages/api/trpc/[trpc].ts`. This caused the `member-role`, `permissions-settings` and `webhook-url-restriction` failures; the permission checks themselves were working.
+    2. **OpenNext dropped percent-encoding when it rebuilt `req.url`** (`convertToQueryString` in `@opennextjs/aws` 4.1.8). Any `%26`, `%3D` or `%23` inside a parameter split it, which broke invite acceptance (the magic-link `callbackURL` lost its `memberPublicId`). Fixed with `patches/@opennextjs__aws@4.1.8.patch`, registered in the root `package.json`, so the Phase 6 workaround in the download route is gone. Drop the patch when OpenNext fixes it.
+    3. **Workspace deletion failed on a foreign key.** `workspace_members.roleId` is `ON DELETE RESTRICT`, and SQLite checks that as soon as the cascade reaches a role, even though the members are deleted by the same cascade. Postgres happened to cascade in a different order. `workspaceRepo.hardDelete` now deletes members first in the same batch. A regression test is in `ordering.integration.test.ts`.
+    4. **Mention emails and webhooks were fire-and-forget**, using `void sendMentionEmails(…)` and un-awaited `sendWebhooksForWorkspace(…)`. Workers can cut that work off after the response. These are now wrapped in `runInBackground()` (`packages/api/src/utils/background.ts`, which uses `waitUntil`).
+  - **Test bugs fixed:**
+    - `archiveBoard()` and the public-board test navigated away while their save was still in flight. On Workers an aborted request can be cancelled before it writes, so they now wait for the save.
+    - `setDueDateToday()` used the UTC date and failed between midnight and 05:30 IST. It now uses the local date.
+
 **Files:** `packages/api/integration-tests`, `packages/e2e`
+
+- `12.4`: partly done.
+  - **Checked against the Workers build:** uploads, downloads and image variants (smoke test); the password-reset, magic-link invite and mention emails (smoke test and e2e); email-and-password and magic-link sign-in (e2e).
+  - **Not yet tested:** OAuth/OIDC providers need real client credentials, and a real Trello import needs a Trello API key; the e2e suite uses a mock Trello server.
+- `12.5`:
+  - **Typecheck:** 1 error, upstream's `views/board/index.tsx:902`.
+  - **Tests:** 254 unit and integration tests pass.
+  - **Lint:** all remaining errors are in upstream code, except the `integration-tests/` parse errors. Upstream's tsconfig excludes that folder, so its own test files show them too. Email dropped from 117 errors to 8, because build output is now ignored.
+  - **Lint crashes still open, both upstream:** `@kan/web` crashes (`@next/eslint-plugin-next` 14 vs ESLint 9) and `@kan/logger` has no ESLint config.
+  - **Turbo env:** `BETTER_AUTH_URL`, `DISABLE_RATE_LIMIT` and `SUBSCRIBER_*` were read without being declared in `turbo.json`, and are now declared.
+- `12.6`: half done. The bundle is **2.77 MiB gzipped**. Cold-start time needs a real deployment and is still to be measured.
 
 **Done when:** The e2e suite passes against staging, and staging runs for a few days with no new errors.
 
@@ -545,10 +576,19 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Someone else can deploy kan-flare from the README.
 **Estimate:** 0.5 days
 
-- [ ] `13.1` Write a deploy guide: D1, R2, Email Service, image transformations, rate limits, secrets
-- [ ] `13.2` Update `.env.example`, `turbo.json` and the README variable table, as `AGENTS.md` requires
-- [ ] `13.3` Remove the Docker files and `docker-publish` workflow
+- [x] `13.1` Write a deploy guide: D1, R2, Email Service, image transformations, rate limits, secrets
+- [x] `13.2` Update `.env.example`, `turbo.json` and the README variable table, as `AGENTS.md` requires
+- [x] `13.3` Remove the Docker files and `docker-publish` workflow
 - [ ] `13.4` Tag the first release
+
+**Status notes (2026-10-08):**
+
+- `13.1`: `DEPLOY.md` covers prerequisites (plan, email domain, Images), build-time and runtime settings, the one-command deploy, staging, custom domains, logs, backups, migrations, local development and tests. `pnpm dev` (`next dev` with local bindings) was checked: sign-up and tRPC work against local D1.
+- `13.2`: `.env.example`, `turbo.json`, the README's environment table, `AGENTS.md` and `apps/web/.dev.vars.example` are updated. The README's Docker/Railway section is replaced with a Cloudflare section, and its fork note points to `DEPLOY.md`. `AGENTS.md` has a new "Cloudflare Runtime Rules" section for future contributors and agents.
+- `13.3`: removed `apps/web/Dockerfile`, `apps/web/entrypoint.sh`, `docker-compose.yml`, `cloud/docker-compose.yml`, `.dockerignore` and `.github/workflows/docker-publish.yml`.
+  - **Still to update** (deferred with the CI work): `.github/workflows/e2e.yml` still provisions Postgres and MinIO.
+  - **Not updated:** `apps/docs` (upstream's Mintlify site) still describes Docker self-hosting.
+- `13.4`: not done. Tag the first release after the first real deploy.
 
 **Files:** `README.md`, `.env.example`, `turbo.json`, `docker-compose.yml`, `apps/web/Dockerfile`
 

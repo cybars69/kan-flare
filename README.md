@@ -1,4 +1,4 @@
-> **kan-flare** is a fork of [Kan](https://github.com/kanbn/kan) that runs entirely on Cloudflare (Workers, D1, R2). The port is in progress; see [`cloudflare-migration/README.md`](cloudflare-migration/README.md). Licensed under AGPL-3.0, like upstream; see [`NOTICE`](NOTICE). The rest of this README is upstream's and describes Kan.
+> **kan-flare** is a fork of [Kan](https://github.com/kanbn/kan) that runs entirely on Cloudflare (Workers, D1, R2, Images, Email Service). To deploy it, see [`DEPLOY.md`](DEPLOY.md). The migration from upstream's Docker/Postgres setup is recorded in [`cloudflare-migration/README.md`](cloudflare-migration/README.md). Licensed under AGPL-3.0, like upstream; see [`NOTICE`](NOTICE). Feature descriptions below are upstream's.
 
 ![github-background](https://github.com/user-attachments/assets/f728f52e-bf67-4357-9ba2-c24c437488e3)
 
@@ -47,108 +47,22 @@ See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 - [Drizzle ORM](https://orm.drizzle.team/?ref=kan.bn)
 - [React Email](https://react.email/?ref=kan.bn)
 
-## Self Hosting 🐳
+## Deploying to Cloudflare ☁️
 
-### One-click Deployments
-
-The easiest way to deploy Kan is through Railway. We've partnered with Railway to maintain an official template that supports the development of the project.
-
-<a href="https://railway.com/deploy/kan?referralCode=bZPsr2&utm_medium=integration&utm_source=template&utm_campaign=generic">
-  <img src="https://railway.app/button.svg" alt="Deploy on Railway" height="40" />
-</a>
-
-### Docker Compose
-
-Alternatively, you can self-host Kan with Docker Compose. This will set up everything for you including your postgres database and automatically run migrations.
-
-1. Create a `.env` file with your environment variables (see [Environment Variables](#environment-variables-) section below)
-
-2. Use the provided `docker-compose.yml` file or create your own with the following configuration:
-
-```yaml
-services:
-  migrate:
-    image: ghcr.io/kanbn/kan-migrate:latest
-    container_name: kan-migrate
-    networks:
-      - kan-network
-    environment:
-      - POSTGRES_URL=${POSTGRES_URL}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: "no"
-
-  web:
-    image: ghcr.io/kanbn/kan:latest
-    container_name: kan-web
-    ports:
-      - "${WEB_PORT:-3000}:3000"
-    networks:
-      - kan-network
-    env_file:
-      - .env
-    environment:
-      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
-      - POSTGRES_URL=${POSTGRES_URL}
-      - NEXT_PUBLIC_ALLOW_CREDENTIALS=true
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:15
-    container_name: kan-db
-    environment:
-      - POSTGRES_DB=kan_db
-      - POSTGRES_USER=kan
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - 5432:5432
-    volumes:
-      - kan_postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kan -d kan_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
-    networks:
-      - kan-network
-
-networks:
-  kan-network:
-
-volumes:
-  kan_postgres_data:
-```
-
-3. Start the containers in detached mode:
+kan-flare runs entirely on Cloudflare: Workers for the app, D1 for the database, R2 for files, Cloudflare Images for image resizing, Email Service for mail, and Workers Rate Limiting. One command builds, provisions anything missing and deploys:
 
 ```bash
-docker compose up -d
+pnpm --filter @kan/web deploy
 ```
 
-The `migrate` service will automatically run database migrations before the web service starts. The application will be available at http://localhost:3000 (or the port specified in `WEB_PORT`).
-
-**Managing containers:**
-
-- To stop the containers: `docker compose down`
-- To view logs: `docker compose logs -f`
-- To view logs for a specific service: `docker compose logs -f web` or `docker compose logs -f migrate`
-- To restart the containers: `docker compose restart`
-- To rebuild after code changes: `docker compose up -d --build`
-
-For the complete Docker Compose configuration with all optional features, see [docker-compose.yml](./docker-compose.yml) in the repository.
+See [DEPLOY.md](./DEPLOY.md) for first-time setup (email domain, secrets, build settings), staging, backups and local development.
 
 ## Local Development 🧑‍💻
 
 1. Clone the repository (or fork)
 
 ```bash
-git clone https://github.com/kanbn/kan.git
+git clone https://github.com/cybars69/kan-flare.git
 ```
 
 2. Install dependencies
@@ -157,8 +71,8 @@ git clone https://github.com/kanbn/kan.git
 pnpm install
 ```
 
-3. Copy `.env.example` to `.env` and configure your environment variables
-4. Migrate database
+3. Copy `.env.example` to `.env` (build-time settings) and `apps/web/.dev.vars.example` to `apps/web/.dev.vars` (runtime settings), then fill them in
+4. Migrate the local D1 database
 
 ```bash
 pnpm db:migrate
@@ -174,15 +88,7 @@ pnpm dev
 
 | Variable                                  | Description                                               | Required                                    | Example                                                     |
 | ----------------------------------------- | --------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------- |
-| `POSTGRES_URL`                            | PostgreSQL connection URL                                 | To use external database                    | `postgres://user:pass@localhost:5432/db`                    |
-| `REDIS_URL`                               | Redis connection URL                                      | For rate limiting (optional)                | `redis://localhost:6379` or `redis://redis:6379` (Docker)   |
-| `EMAIL_FROM`                              | Sender email address                                      | For Email                                   | `"Kan <hello@mail.kan.bn>"`                                 |
-| `SMTP_HOST`                               | SMTP server hostname                                      | For Email                                   | `smtp.resend.com`                                           |
-| `SMTP_PORT`                               | SMTP server port                                          | For Email                                   | `465`                                                       |
-| `SMTP_USER`                               | SMTP username/email                                       | No                                          | `resend`                                                    |
-| `SMTP_PASSWORD`                           | SMTP password/token                                       | No                                          | `re_xxxx`                                                   |
-| `SMTP_SECURE`                             | Use secure SMTP connection (defaults to true if not set)  | For Email                                   | `true`                                                      |
-| `SMTP_REJECT_UNAUTHORIZED`                | Reject invalid certificates (defaults to true if not set) | For Email                                   | `false`                                                     |
+| `EMAIL_FROM`                              | Sender address on a domain onboarded to Email Service     | For Email                                   | `"Kan <hello@mail.kan.bn>"`                                 |
 | `NEXT_PUBLIC_DISABLE_EMAIL`               | To disable all email features                             | For Email                                   | `true`                                                      |
 | `NEXT_PUBLIC_BASE_URL`                    | Base URL of your installation                             | Yes                                         | `http://localhost:3000`                                     |
 | `NEXT_API_BODY_SIZE_LIMIT`                | Maximum API request body size (defaults to 1mb)           | No                                          | `50mb`                                                      |
@@ -200,24 +106,14 @@ pnpm dev
 | `OIDC_DISCOVERY_URL`                      | OIDC discovery URL                                        | For OIDC login                              | `https://auth.example.com/.well-known/openid-configuration` |
 | `TRELLO_APP_API_KEY`                      | Trello app API key                                        | For Trello import                           | `xxx`                                                       |
 | `TRELLO_APP_API_SECRET`                   | Trello app API secret                                     | For Trello import                           | `xxx`                                                       |
-| `S3_REGION`                               | S3 storage region                                         | For file uploads                            | `WEUR`                                                      |
-| `S3_ENDPOINT`                             | S3 endpoint URL                                           | For file uploads                            | `https://xxx.r2.cloudflarestorage.com`                      |
-| `S3_ACCESS_KEY_ID`                        | S3 access key                                             | For file uploads (optional with IRSA)       | `xxx`                                                       |
-| `S3_SECRET_ACCESS_KEY`                    | S3 secret key                                             | For file uploads (optional with IRSA)       | `xxx`                                                       |
-| `S3_FORCE_PATH_STYLE`                     | Use path-style URLs for S3                                | For file uploads                            | `true`                                                      |
-| `S3_AVATAR_UPLOAD_LIMIT`                  | Maximum avatar file size in bytes                         | For file uploads                            | `2097152` (2MB)                                             |
-| `NEXT_PUBLIC_STORAGE_URL`                 | Storage service URL                                       | For file uploads                            | `https://storage.kanbn.com`                                 |
-| `NEXT_PUBLIC_STORAGE_DOMAIN`              | Storage domain name                                       | For file uploads                            | `kanbn.com`                                                 |
-| `NEXT_PUBLIC_USE_VIRTUAL_HOSTED_URLS`     | Use virtual-hosted style URLs (bucket.domain.com)         | For file uploads (optional)                 | `true`                                                      |
-| `NEXT_PUBLIC_AVATAR_BUCKET_NAME`          | S3 bucket name for avatars                                | For file uploads                            | `avatars`                                                   |
-| `NEXT_PUBLIC_ATTACHMENTS_BUCKET_NAME`     | S3 bucket name for attachments                            | For file uploads                            | `attachments`                                               |
+| `AVATAR_UPLOAD_LIMIT`                      | Maximum avatar file size in bytes                         | For file uploads                            | `2097152` (2MB)                                             |
 | `NEXT_PUBLIC_ALLOW_CREDENTIALS`           | Allow email & password login                              | For authentication                          | `true`                                                      |
 | `NEXT_PUBLIC_DISABLE_SIGN_UP`             | Disable sign up                                           | For authentication                          | `false`                                                     |
 | `NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY` | Hide “Powered by kan.bn” on public boards (self-host)     | For white labelling                         | `true`                                                      |
 | `KAN_ADMIN_API_KEY`                       | Admin API key for stats and admin endpoints               | For admin/monitoring                        | `your-secret-admin-key`                                     |
 | `LOG_LEVEL`                               | Log verbosity level (debug, info, warn, error)            | No (defaults to debug in dev, info in prod) | `info`                                                      |
 
-See `.env.example` for a complete list of supported environment variables.
+`NEXT_PUBLIC_*` values are compiled in at build time. Set them in `.env` on the machine that builds and deploys. Everything else is read at runtime: set secrets with `wrangler secret put` and other values as `vars` in `apps/web/wrangler.jsonc`. Storage, database, email and rate limiting use Cloudflare bindings and need no variables. See `.env.example` for the full list.
 
 ## MCP Server (AI Control) 🤖
 

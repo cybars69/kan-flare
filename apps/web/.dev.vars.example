@@ -2,4 +2,4 @@
 # Copy to `.dev.vars` and fill in. `.dev.vars` is gitignored.
 NEXTJS_ENV=development
 NEXT_PUBLIC_BASE_URL=http://localhost:8787
-BETTER_AUTH_SECRET=
+BETTER_AUTH_SECRET= # at least 32 characters, e.g. `openssl rand -base64 32`

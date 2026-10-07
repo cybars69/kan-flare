@@ -6,7 +6,8 @@ Kan is an open-source project management tool (Trello alternative) built with:
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **Backend**: tRPC, Node.js
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
+- **Hosting**: Cloudflare Workers via OpenNext (see `DEPLOY.md`)
 - **Monorepo**: pnpm workspaces with Turbo
 - **Auth**: Better Auth
 - **Internationalization**: Lingui
@@ -32,6 +33,19 @@ Kan is an open-source project management tool (Trello alternative) built with:
 - `packages/email/` - Email templates and sending
 - `packages/stripe/` - Stripe integration
 - `tooling/` - Shared tooling configs (ESLint, Prettier, TypeScript)
+
+## Cloudflare Runtime Rules
+
+kan-flare runs on Cloudflare Workers with D1. These differ from upstream Kan (Node + Postgres):
+
+- **No `db.transaction()`**: D1 has no interactive transactions. Use `runBatch(db, [...])` from `packages/db/src/utils/d1.ts` for writes that must succeed or fail together. Instead of reading a value and then writing it, compute it in SQL (see `nextIndex`, and the card-number subqueries in `card.repo.ts`).
+- **Ordered rows**: end every batch that moves or deletes cards, lists or checklist items with `renumberIndexes(...)`, so indexes stay 0..n-1.
+- **100 bound parameters per statement**: split multi-row inserts with `splitByParameters`. Use subqueries rather than large `inArray` id lists.
+- **SQLite SQL**: no `ILIKE`, `similarity()` or Postgres casts. Quote `"index"`. Timestamps are integer milliseconds (`mode: "timestamp_ms"`); booleans are integers.
+- **Bindings**: get D1 through `createDrizzleClient()`, files through `@kan/shared/storage` (R2), mail through `sendEmail` (the Email Service binding). Rate limiting goes through `withRateLimit` (Workers Rate Limiting).
+- **Background work**: don't leave promises un-awaited. Wrap them in `runInBackground()` (`packages/api/src/utils/background.ts`), or Workers may cut them off after the response.
+- **Env**: `NEXT_PUBLIC_*` values are compiled in at build time. Server code reads `process.env` at request time (Worker vars and secrets).
+- **Tests**: integration tests run on local D1 (`packages/api/integration-tests/test-db.ts`). Check end to end with `cloudflare-migration/smoke.mjs` against `wrangler dev`.
 
 ## Code Style
 
@@ -233,9 +247,8 @@ Update all of the following:
 
 1. `.env.example` — add the variable with an empty value and a comment explaining it
 2. `turbo.json` — add to `globalEnv` (or `globalPassThroughEnv` for CI/platform vars)
-3. `docker-compose.yml` — add to the `web` service `environment` section
-4. `cloud/docker-compose.yml` — add to the `web` service `environment` section
-5. `README.md` — add a row to the Environment Variables table
+3. `NEXT_PUBLIC_*` (build-time): also add it to `apps/web/src/env.ts`. Server-only values: document how to set them (`wrangler secret put` for secrets, `vars` in `apps/web/wrangler.jsonc` otherwise) and add a local value to `apps/web/.dev.vars.example`
+4. `README.md` — add a row to the Environment Variables table
 
 ## Database Changes
 
