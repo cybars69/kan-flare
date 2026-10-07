@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect } from "react";
 
 import { authClient } from "@kan/auth/client";
@@ -13,7 +13,7 @@ export default function WorkspaceDetailsPage() {
 
   useEffect(() => {
     if (!isPending && !session?.user) router.push("/login");
-    if (!isPending && env("NEXT_PUBLIC_KAN_ENV") !== "cloud")
+    if (!isPending && env.NEXT_PUBLIC_KAN_ENV !== "cloud")
       router.push("/boards");
   }, [session, isPending, router]);
 

@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
 
 import Button from "~/components/Button";
@@ -15,7 +15,7 @@ import { api } from "~/utils/api";
 export default function BillingSettings() {
   const { modalContentType, isOpen } = useModal();
   const router = useRouter();
-  const isCloud = env("NEXT_PUBLIC_KAN_ENV") === "cloud";
+  const isCloud = env.NEXT_PUBLIC_KAN_ENV === "cloud";
   const { workspace } = useWorkspace();
 
   const { data: workspaceData } = api.workspace.byId.useQuery(

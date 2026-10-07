@@ -18,9 +18,7 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("next-runtime-env", () => ({
-  env: vi.fn(() => "https://kan.example.com"),
-}));
+vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://kan.example.com");
 
 vi.mock("@kan/db/repository/card.repo", () => ({
   getWithListAndMembersByPublicId: mocks.getCard,

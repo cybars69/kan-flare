@@ -87,6 +87,8 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
     NEXT_PUBLIC_USE_STANDALONE_OUTPUT: z.string().optional(),
     NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_DISABLE_EMAIL: z.string().optional(),
+    NEXT_PUBLIC_PARTNER_NAME: z.string().optional(),
     NEXT_PUBLIC_APP_VERSION: z.string().optional(),
     NEXT_PUBLIC_ALLOW_CREDENTIALS: z
       .string()
@@ -120,6 +122,8 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_DISABLE_EMAIL: process.env.NEXT_PUBLIC_DISABLE_EMAIL,
+    NEXT_PUBLIC_PARTNER_NAME: process.env.NEXT_PUBLIC_PARTNER_NAME,
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
     NEXT_PUBLIC_ALLOW_CREDENTIALS: process.env.NEXT_PUBLIC_ALLOW_CREDENTIALS,
     NEXT_PUBLIC_DISABLE_SIGN_UP: process.env.NEXT_PUBLIC_DISABLE_SIGN_UP,

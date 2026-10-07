@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { env } from "next-runtime-env";
 import { z } from "zod";
 
 import type { WorkspacePlan } from "@kan/db/schema";
@@ -106,7 +105,7 @@ export const workspaceRouter = createTRPCRouter({
         isWorkspaceSlugAvailable && workspaceSlug?.type !== "reserved";
       const isReserved = workspaceSlug?.type === "reserved";
 
-      if (env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+      if (process.env.NEXT_PUBLIC_KAN_ENV === "cloud") {
         await workspaceSlugRepo.createWorkspaceSlugCheck(ctx.db, {
           slug,
           userId,
@@ -307,7 +306,7 @@ export const workspaceRouter = createTRPCRouter({
         });
 
       // Check if slug is provided in cloud environment
-      if (input.slug && env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+      if (input.slug && process.env.NEXT_PUBLIC_KAN_ENV === "cloud") {
         throw new TRPCError({
           message: "Custom URLs are only available for Pro workspaces",
           code: "BAD_REQUEST",
@@ -360,7 +359,7 @@ export const workspaceRouter = createTRPCRouter({
         ReturnType<typeof subscriptionRepo.getFirstUnlinkedSlotByLicenseKey>
       >;
 
-      if (env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+      if (process.env.NEXT_PUBLIC_KAN_ENV === "cloud") {
         const memberships = await workspaceRepo.getAllByUserId(ctx.db, userId);
         const otherWorkspaceIds = memberships
           .map((m) => m.workspace?.publicId)
@@ -462,7 +461,7 @@ export const workspaceRouter = createTRPCRouter({
           );
 
         if (
-          env("NEXT_PUBLIC_KAN_ENV") === "cloud" &&
+          process.env.NEXT_PUBLIC_KAN_ENV === "cloud" &&
           workspace.plan === "free" &&
           input.slug !== workspace.publicId
         ) {
@@ -537,7 +536,7 @@ export const workspaceRouter = createTRPCRouter({
         });
       await assertPermission(ctx.db, userId, workspace.id, "workspace:delete");
 
-      if (env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+      if (process.env.NEXT_PUBLIC_KAN_ENV === "cloud") {
         const subs = await subscriptionRepo.getByReferenceId(
           ctx.db,
           input.workspacePublicId,

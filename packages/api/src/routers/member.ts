@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { env } from "next-runtime-env";
 import { z } from "zod";
 
 import * as inviteLinkRepo from "@kan/db/repository/inviteLink.repo";
@@ -392,7 +391,7 @@ export const memberRouter = createTRPCRouter({
         return {
           id: activeInviteLink.id,
           inviteCode: activeInviteLink.code,
-          inviteLink: `${env("NEXT_PUBLIC_BASE_URL")}/invite/${activeInviteLink.code}`,
+          inviteLink: `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${activeInviteLink.code}`,
           isActive: true,
           expiresAt: activeInviteLink.expiresAt ?? undefined,
         };
@@ -500,7 +499,7 @@ export const memberRouter = createTRPCRouter({
       return {
         publicId: inviteLink.publicId,
         inviteCode: inviteLink.code,
-        inviteLink: `${env("NEXT_PUBLIC_BASE_URL")}/invite/${inviteLink.code}`,
+        inviteLink: `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${inviteLink.code}`,
         expiresAt: inviteLink.expiresAt,
       };
     }),

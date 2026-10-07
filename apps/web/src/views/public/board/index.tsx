@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { t } from "@lingui/core/macro";
 import { keepPreviousData } from "@tanstack/react-query";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect, useState } from "react";
 import { HiLink, HiOutlineLockClosed } from "react-icons/hi2";
 
@@ -21,9 +21,9 @@ import Card from "~/views/board/components/Card";
 import Filters from "~/views/board/components/Filters";
 import { CardModal } from "./CardModal";
 
-const IS_CLOUD = env("NEXT_PUBLIC_KAN_ENV") === "cloud";
+const IS_CLOUD = env.NEXT_PUBLIC_KAN_ENV === "cloud";
 const HIDE_POWERED_BY =
-  env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") === "true";
+  env.NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY === "true";
 
 export default function PublicBoardView() {
   const router = useRouter();

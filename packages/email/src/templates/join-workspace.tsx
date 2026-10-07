@@ -8,7 +8,6 @@ import { Html } from "@react-email/html";
 import { Link } from "@react-email/link";
 import { Preview } from "@react-email/preview";
 import { Text } from "@react-email/text";
-import { env } from "next-runtime-env";
 import * as React from "react";
 
 export const JoinWorkspaceTemplate = ({
@@ -42,7 +41,7 @@ export const JoinWorkspaceTemplate = ({
             color: "#232323",
           }}
         >
-          {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" &&
+          {process.env.NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY !== "true" &&
             "kan-flare"}
         </Heading>
         <Heading
@@ -92,7 +91,7 @@ export const JoinWorkspaceTemplate = ({
           If you don&apos;t want to join this workspace, you can safely ignore
           this email.
         </Text>
-        {env("NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY") !== "true" && (
+        {process.env.NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY !== "true" && (
           <>
             <Hr
               style={{
@@ -103,7 +102,7 @@ export const JoinWorkspaceTemplate = ({
             />
             <Text style={{ color: "#7e7e7e" }}>
               <Link
-                href={env("NEXT_PUBLIC_BASE_URL")}
+                href={process.env.NEXT_PUBLIC_BASE_URL}
                 target="_blank"
                 style={{ color: "#7e7e7e", textDecoration: "underline" }}
               >

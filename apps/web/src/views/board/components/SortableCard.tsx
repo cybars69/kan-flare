@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 
 import type { CardDragData } from "../dnd/types";
 import type { BoardCard } from "../types";
@@ -52,7 +52,7 @@ export default function SortableCard({
         if (isPlaceholder) e.preventDefault();
       }}
       onContextMenu={(e) => {
-        if (isPlaceholder || env("NEXT_PUBLIC_KAN_ENV") === "cloud") return;
+        if (isPlaceholder || env.NEXT_PUBLIC_KAN_ENV === "cloud") return;
         e.preventDefault();
         onContextMenu(e, card.publicId);
       }}

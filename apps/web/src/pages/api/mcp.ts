@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 
 import type { KanClient } from "@kan/mcp/client";
 import { withApiLogging } from "@kan/api/utils/apiLogging";
@@ -54,7 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
 
-  const rawBaseUrl = env("NEXT_PUBLIC_BASE_URL");
+  const rawBaseUrl = env.NEXT_PUBLIC_BASE_URL;
   if (!rawBaseUrl) {
     res.status(500).json({ error: "NEXT_PUBLIC_BASE_URL is not configured" });
     return;
@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const client = createKanClient({ baseUrl, apiToken });
 
-  if (env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+  if (env.NEXT_PUBLIC_KAN_ENV === "cloud") {
     let eligible: boolean;
     try {
       eligible = await hasPaidWorkspace(client, apiToken);

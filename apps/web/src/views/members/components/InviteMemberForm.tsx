@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -44,7 +44,7 @@ export function InviteMemberForm({
   const { workspace } = useWorkspace();
   const { showPopup } = usePopup();
 
-  const isEmailEnabled = env("NEXT_PUBLIC_DISABLE_EMAIL") !== "true";
+  const isEmailEnabled = env.NEXT_PUBLIC_DISABLE_EMAIL !== "true";
 
   const InviteMemberSchema = z.object({
     email: z.string().email({ message: t`Invalid email address` }),
@@ -187,7 +187,7 @@ export function InviteMemberForm({
   };
 
   const isFreePlan =
-    env("NEXT_PUBLIC_KAN_ENV") === "cloud" &&
+    env.NEXT_PUBLIC_KAN_ENV === "cloud" &&
     !hasTeamSubscription &&
     !hasProSubscription;
 
@@ -297,7 +297,7 @@ export function InviteMemberForm({
             </div>
           )}
 
-        {env("NEXT_PUBLIC_KAN_ENV") === "cloud" &&
+        {env.NEXT_PUBLIC_KAN_ENV === "cloud" &&
           (isPartnerTier && seatLimit !== null ? (
             <div className="mt-3 rounded-md bg-light-100 p-3 text-xs text-light-900 dark:bg-dark-200 dark:text-dark-900">
               <div className="flex items-center justify-between">

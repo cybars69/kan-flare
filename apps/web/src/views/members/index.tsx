@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import {
   HiBolt,
   HiChevronDown,
@@ -285,7 +285,7 @@ export default function MembersPage() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            {env("NEXT_PUBLIC_KAN_ENV") === "cloud" && !!data && (
+            {env.NEXT_PUBLIC_KAN_ENV === "cloud" && !!data && (
               <>
                 {!isPaidPlan && (
                   <Link

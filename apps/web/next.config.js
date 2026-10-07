@@ -1,18 +1,15 @@
 import { fileURLToPath } from "url";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import createJiti from "jiti";
-import { env } from "next-runtime-env";
-import { configureRuntimeEnv } from "next-runtime-env/build/configure.js";
 
 // Import env files to validate at build time. Use jiti so we can load .ts files in here.
 createJiti(fileURLToPath(import.meta.url))("./src/env");
 
-configureRuntimeEnv();
 
 /** @type {import("next").NextConfig} */
 const config = {
   output:
-    env("NEXT_PUBLIC_USE_STANDALONE_OUTPUT") === "true"
+    process.env.NEXT_PUBLIC_USE_STANDALONE_OUTPUT === "true"
       ? "standalone"
       : undefined,
   reactStrictMode: true,
@@ -97,9 +94,9 @@ const config = {
 
 // Only allow external images when OIDC is configured (for OIDC provider avatars)
 if (
-  env("OIDC_CLIENT_ID") &&
-  env("OIDC_CLIENT_SECRET") &&
-  env("OIDC_DISCOVERY_URL")
+  process.env.OIDC_CLIENT_ID &&
+  process.env.OIDC_CLIENT_SECRET &&
+  process.env.OIDC_DISCOVERY_URL
 ) {
   config.images?.remotePatterns?.push({
     protocol: "https",

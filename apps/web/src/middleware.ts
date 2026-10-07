@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 
 const MCP_HOSTNAMES = new Set(["mcp.kan.bn", "mcp-staging.kan.bn"]);
 
@@ -10,7 +10,7 @@ const OAUTH_DISCOVERY_PATHS = new Set([
 ]);
 
 function resolveLoginUrl(request: NextRequest) {
-  const publicBaseUrl = env("NEXT_PUBLIC_BASE_URL");
+  const publicBaseUrl = env.NEXT_PUBLIC_BASE_URL;
 
   if (publicBaseUrl?.length) {
     try {
@@ -41,7 +41,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (request.nextUrl.pathname === "/") {
-    if (env("NEXT_PUBLIC_KAN_ENV") !== "cloud") {
+    if (env.NEXT_PUBLIC_KAN_ENV !== "cloud") {
       return NextResponse.redirect(resolveLoginUrl(request));
     }
   }

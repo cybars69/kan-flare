@@ -1,8 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next-runtime-env", () => ({
-  env: vi.fn(),
+// `env` from ~/env, read through a mock so each test can set values.
+const mockedEnv = vi.hoisted(() =>
+  vi.fn<(key: string) => string | undefined>(),
+);
+vi.mock("~/env", () => ({
+  env: new Proxy({}, { get: (_target, key) => mockedEnv(String(key)) }),
 }));
 
 vi.mock("@kan/api/trpc-context", () => ({
@@ -42,8 +46,6 @@ vi.mock("@modelcontextprotocol/sdk/server/streamableHttp.js", () => ({
   })),
 }));
 
-const { env } = await import("next-runtime-env");
-const mockedEnv = vi.mocked(env);
 const { createKanClient } = await import("@kan/mcp/client");
 const mockedCreateKanClient = vi.mocked(createKanClient);
 const { clearPaidWorkspaceCache } = await import(

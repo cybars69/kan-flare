@@ -7,7 +7,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect, useState } from "react";
 import {
   HiChevronDown,
@@ -57,7 +57,7 @@ export function SettingsLayout({ children, currentTab }: SettingsLayoutProps) {
       key: "billing",
       label: t`Billing`,
       icon: <HiOutlineBanknotes />,
-      condition: env("NEXT_PUBLIC_KAN_ENV") === "cloud" && isAdmin,
+      condition: env.NEXT_PUBLIC_KAN_ENV === "cloud" && isAdmin,
     },
     {
       key: "api",

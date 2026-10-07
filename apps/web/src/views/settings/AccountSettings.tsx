@@ -1,5 +1,5 @@
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 
 import Button from "~/components/Button";
 import FeedbackModal from "~/components/FeedbackModal";
@@ -18,7 +18,7 @@ import UpdateDisplayNameForm from "./components/UpdateDisplayNameForm";
 export default function AccountSettings() {
   const { modalContentType, openModal, isOpen } = useModal();
   const isCredentialsEnabled =
-    env("NEXT_PUBLIC_ALLOW_CREDENTIALS")?.toLowerCase() === "true";
+    env.NEXT_PUBLIC_ALLOW_CREDENTIALS?.toLowerCase() === "true";
   const { data } = api.user.getUser.useQuery();
 
   return (

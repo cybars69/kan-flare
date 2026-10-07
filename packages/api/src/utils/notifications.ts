@@ -1,4 +1,3 @@
-import { env } from "next-runtime-env";
 
 import type { dbClient } from "@kan/db/client";
 import * as cardRepo from "@kan/db/repository/card.repo";
@@ -79,7 +78,7 @@ export async function sendMentionEmails({
 
     if (membersToNotify.length === 0) return;
 
-    const baseUrl = env("NEXT_PUBLIC_BASE_URL");
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const cardUrl = `${baseUrl}/cards/${cardPublicId}`;
 
     log.info(

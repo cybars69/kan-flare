@@ -23,7 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 import { t } from "@lingui/core/macro";
 import { keepPreviousData } from "@tanstack/react-query";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -172,7 +172,7 @@ export default function BoardPage({ isTemplate }: { isTemplate?: boolean }) {
   const boardType: "regular" | "template" = isTemplate ? "template" : "regular";
 
   const isFreeCloudPlan =
-    env("NEXT_PUBLIC_KAN_ENV") === "cloud" && workspace.plan === "free";
+    env.NEXT_PUBLIC_KAN_ENV === "cloud" && workspace.plan === "free";
 
   const upgradeUrl = `/upgrade/select-plan?plan=team&workspacePublicId=${workspace.publicId}&returnUrl=${encodeURIComponent(router.asPath)}`;
 

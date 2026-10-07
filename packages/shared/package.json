@@ -46,7 +46,6 @@
     "@opennextjs/cloudflare": "1.20.9",
     "date-fns": "^4.1.0",
     "jose": "^6.1.2",
-    "nanoid": "^5.0.9",
-    "next-runtime-env": "^1.7.2"
+    "nanoid": "^5.0.9"
   }
 }

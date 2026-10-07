@@ -1,6 +1,5 @@
 import type { OpenApiMeta } from "trpc-to-openapi";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { env } from "next-runtime-env";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -108,7 +107,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
 });
 
 const enforceUserIsAdmin = t.middleware(async ({ ctx, next }) => {
-  if (ctx.headers.get("x-admin-api-key") !== env("KAN_ADMIN_API_KEY")) {
+  if (ctx.headers.get("x-admin-api-key") !== process.env.KAN_ADMIN_API_KEY) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 

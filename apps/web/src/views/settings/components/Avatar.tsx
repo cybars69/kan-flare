@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useCallback, useRef, useState } from "react";
 import ReactCrop from "react-image-crop";
 
@@ -165,7 +165,7 @@ export default function Avatar({
       const originalExt = selectedFile.name.split(".").pop() ?? "jpg";
       const fileName = `${userId}/avatar-${generateUID()}.${originalExt}`;
 
-      const baseUrl = env("NEXT_PUBLIC_BASE_URL") ?? "";
+      const baseUrl = env.NEXT_PUBLIC_BASE_URL ?? "";
       const response = await fetch(
         `${baseUrl}/api/upload/avatar`,
         {

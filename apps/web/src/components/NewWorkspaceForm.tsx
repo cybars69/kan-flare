@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { HiCheck, HiXMark } from "react-icons/hi2";
@@ -192,7 +192,7 @@ export function NewWorkspaceForm() {
                   ? t`This workspace URL is reserved`
                   : undefined)
             }
-            prefix={`${env("NEXT_PUBLIC_BASE_URL")}/`}
+            prefix={`${env.NEXT_PUBLIC_BASE_URL}/`}
             iconRight={
               slug && slug.length >= 3 && !errors.slug ? (
                 isWorkspaceSlugAvailable?.isAvailable ? (

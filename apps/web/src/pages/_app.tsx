@@ -6,7 +6,7 @@ import type { AppProps, AppType } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { ThemeProvider } from "next-themes";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
@@ -46,12 +46,12 @@ type AppPropsWithLayout = AppProps & {
 };
 
 const MyApp: AppType = ({ Component, pageProps }: AppPropsWithLayout) => {
-  const posthogKey = env("NEXT_PUBLIC_POSTHOG_KEY");
+  const posthogKey = env.NEXT_PUBLIC_POSTHOG_KEY;
 
   useEffect(() => {
     if (posthogKey) {
       posthog.init(posthogKey, {
-        api_host: env("NEXT_PUBLIC_POSTHOG_HOST"),
+        api_host: env.NEXT_PUBLIC_POSTHOG_HOST,
         person_profiles: "identified_only",
         defaults: "2025-05-24",
         loaded: (posthog) => {
@@ -73,14 +73,13 @@ const MyApp: AppType = ({ Component, pageProps }: AppPropsWithLayout) => {
           position: relative;
         }
       `}</style>
-      {env("NEXT_PUBLIC_UMAMI_ID") && (
+      {env.NEXT_PUBLIC_UMAMI_ID && (
         <Script
           defer
           src="https://cloud.umami.is/script.js"
-          data-website-id={env("NEXT_PUBLIC_UMAMI_ID")}
+          data-website-id={env.NEXT_PUBLIC_UMAMI_ID}
         />
       )}
-      <script src="/__ENV.js" />
       <main className="font-sans">
         <KeyboardShortcutProvider>
           <LinguiProviderWrapper>

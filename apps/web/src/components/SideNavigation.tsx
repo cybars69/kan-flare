@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Button } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { HiBolt } from "react-icons/hi2";
@@ -83,7 +83,7 @@ export default function SideNavigation({
 
   const { resolvedTheme } = useTheme();
 
-  const isCloudEnv = env("NEXT_PUBLIC_KAN_ENV") === "cloud";
+  const isCloudEnv = env.NEXT_PUBLIC_KAN_ENV === "cloud";
 
   const isDarkMode = resolvedTheme === "dark";
 

@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { env } from "next-runtime-env";
 import { z } from "zod";
 
 import * as integrationsRepo from "@kan/db/repository/integration.repo";
@@ -201,7 +200,7 @@ export const integrationRouter = createTRPCRouter({
         });
 
       if (input.provider === "trello") {
-        const url = `${urls[input.provider]}/authorize?key=${apiKey}&expiration=never&response_type=token&scope=read&return_url=${env("NEXT_PUBLIC_BASE_URL")}/settings/trello/authorize&callback_method=fragment`;
+        const url = `${urls[input.provider]}/authorize?key=${apiKey}&expiration=never&response_type=token&scope=read&return_url=${process.env.NEXT_PUBLIC_BASE_URL}/settings/trello/authorize&callback_method=fragment`;
         return { url };
       }
 

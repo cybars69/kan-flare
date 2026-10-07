@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect, useState } from "react";
 
 import { authClient } from "@kan/auth/client";
@@ -19,7 +19,7 @@ export default function InvitePage() {
   const { data: session, isPending: isSessionLoading } =
     authClient.useSession();
 
-  const isCloudEnv = env("NEXT_PUBLIC_KAN_ENV") === "cloud";
+  const isCloudEnv = env.NEXT_PUBLIC_KAN_ENV === "cloud";
 
   const inviteCode = Array.isArray(code) ? code[0] : code;
 

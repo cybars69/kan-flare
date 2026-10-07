@@ -1,14 +1,15 @@
 import { NextRequest } from "next/server";
-import { env } from "next-runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { middleware } from "./middleware";
 
-vi.mock("next-runtime-env", () => ({
-  env: vi.fn(),
+// `env` from ~/env, read through a mock so each test can set values.
+const mockedEnv = vi.hoisted(() =>
+  vi.fn<(key: string) => string | undefined>(),
+);
+vi.mock("~/env", () => ({
+  env: new Proxy({}, { get: (_target, key) => mockedEnv(String(key)) }),
 }));
-
-const mockedEnv = vi.mocked(env);
 
 describe("middleware", () => {
   beforeEach(() => {

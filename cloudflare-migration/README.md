@@ -432,10 +432,27 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** Nothing is written at startup; public values come from the build.
 **Estimate:** 1–2 days
 
-- [ ] `9.1` Replace `next-runtime-env` calls with `process.env.NEXT_PUBLIC_…` in about 50 files
-- [ ] `9.2` Read server values from Worker vars and secrets through one helper
-- [ ] `9.3` Remove `configureRuntimeEnv()`, the `__ENV.js` script tag and `bootstrap.cjs`
-- [ ] `9.4` Keep `env.ts` validation so a missing value fails the build
+- [x] `9.1` Replace `next-runtime-env` calls with `process.env.NEXT_PUBLIC_…` in about 50 files
+- [x] `9.2` Read server values from Worker vars and secrets through one helper
+- [x] `9.3` Remove `configureRuntimeEnv()`, the `__ENV.js` script tag and `bootstrap.cjs`
+- [x] `9.4` Keep `env.ts` validation so a missing value fails the build
+
+**Status notes (2026-10-08):**
+
+- `9.1`: a codemod converted 44 files.
+  - **Web app (31 files):** `env("X")` became `env.X` from `~/env`, the typed environment module, which the app's lint rule requires.
+  - **API, auth and email packages (13 files):** it became `process.env.X`.
+  - **`env.ts`:** `NEXT_PUBLIC_DISABLE_EMAIL` and `NEXT_PUBLIC_PARTNER_NAME` were missing and are now declared.
+  - **Tests:** the four that mocked `next-runtime-env` now mock `~/env` through a proxy, or set `process.env`.
+- `9.2`: no helper was needed. With `nodejs_compat`, Workers put Worker vars and secrets on `process.env`, so server code reads `process.env.X` at request time.
+- `9.3`: `configureRuntimeEnv()`, the `/__ENV.js` script tag and `bootstrap.cjs` are removed, along with `next-runtime-env` from `apps/web` and `@kan/shared`. `next.config.js` reads `process.env` directly. `apps/web/Dockerfile` still references `bootstrap.cjs`; Docker goes in Phase 13.
+- `9.4`: `env.ts` validation still runs at build.
+- **Where values come from now:**
+  - **`NEXT_PUBLIC_*`** values are compiled into both the browser and server bundles at build time. Set them in the build's environment; `pnpm build` loads the repo-root `.env` through `with-env`. Staging and production need separate builds with their own values, because the deploy scripts build once per environment.
+  - **Server-only values** (`BETTER_AUTH_SECRET`, OAuth secrets, `EMAIL_FROM`, `LOG_LEVEL` and so on) are read at runtime. Set them with `wrangler secret put`, or as `vars` in `wrangler.jsonc`.
+- **Checked:** `/` redirects to the built-in base URL, the browser bundle contains it, `/__ENV.js` no longer exists, and the full smoke test passes.
+- **Also fixed:** the API request logger now redacts `sig` from logged query strings. A valid signed-file signature in the logs would grant access until it expired.
+- **Typecheck:** `@kan/web` is down to 1 error, upstream's `views/board/index.tsx:902`, now that `bootstrap.cjs` is gone.
 
 **Files:** `apps/web/next.config.js`, `apps/web/src/env.ts`, `apps/web/bootstrap.cjs`, about 50 files
 

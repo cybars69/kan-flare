@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useState } from "react";
 
 import { authClient } from "@kan/auth/client";
@@ -13,7 +13,7 @@ import PatternedBackground from "~/components/PatternedBackground";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const isSignUpDisabled = env("NEXT_PUBLIC_DISABLE_SIGN_UP") === "true";
+  const isSignUpDisabled = env.NEXT_PUBLIC_DISABLE_SIGN_UP === "true";
   const [isMagicLinkSent, setIsMagicLinkSent] = useState<boolean>(false);
   const [magicLinkRecipient, setMagicLinkRecipient] = useState<string>("");
 

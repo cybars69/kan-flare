@@ -1,13 +1,9 @@
-import { env } from "next-runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as memberRepo from "@kan/db/repository/member.repo";
 
 import { createDatabaseHooks } from "./hooks";
 
-vi.mock("next-runtime-env", () => ({
-  env: vi.fn(),
-}));
 
 vi.mock("@kan/db/repository/member.repo", () => ({
   getByEmailAndStatus: vi.fn(),
@@ -30,7 +26,23 @@ vi.mock("@kan/shared/storage", () => ({
   putObject: vi.fn(),
 }));
 
-const mockEnv = env as ReturnType<typeof vi.fn>;
+/**
+ * Sets the environment variables hooks.ts reads from a lookup function, in
+ * the style of the old next-runtime-env mock.
+ */
+const ENV_KEYS = ["NEXT_PUBLIC_DISABLE_SIGN_UP"];
+const mockEnv = {
+  mockImplementation(lookup: (key: string) => string | undefined) {
+    for (const key of ENV_KEYS) {
+      const value = lookup(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  },
+  mockReturnValue(value: string | undefined) {
+    mockEnv.mockImplementation(() => value);
+  },
+};
 const mockGetByEmailAndStatus = memberRepo.getByEmailAndStatus as ReturnType<
   typeof vi.fn
 >;

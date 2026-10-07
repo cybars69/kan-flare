@@ -8,7 +8,6 @@ import { Html } from "@react-email/html";
 import { Link } from "@react-email/link";
 import { Preview } from "@react-email/preview";
 import { Text } from "@react-email/text";
-import { env } from "next-runtime-env";
 
 export const ResetPasswordTemplate = ({
   resetPasswordUrl,
@@ -93,7 +92,7 @@ export const ResetPasswordTemplate = ({
         />
         <Text style={{ color: "#7e7e7e" }}>
           <Link
-            href={env("NEXT_PUBLIC_BASE_URL")}
+            href={process.env.NEXT_PUBLIC_BASE_URL}
             target="_blank"
             style={{ color: "#7e7e7e", textDecoration: "underline" }}
           >

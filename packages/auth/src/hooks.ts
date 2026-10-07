@@ -1,5 +1,4 @@
 import { createAuthMiddleware } from "better-auth/api";
-import { env } from "next-runtime-env";
 
 import type { dbClient } from "@kan/db/client";
 import * as memberRepo from "@kan/db/repository/member.repo";
@@ -32,7 +31,7 @@ export function createDatabaseHooks(db: dbClient) {
     user: {
       create: {
         async before(user: BetterAuthUser, _context: unknown) {
-          if (env("NEXT_PUBLIC_DISABLE_SIGN_UP")?.toLowerCase() === "true") {
+          if (process.env.NEXT_PUBLIC_DISABLE_SIGN_UP?.toLowerCase() === "true") {
             const pendingInvitation = await memberRepo.getByEmailAndStatus(
               db,
               user.email,

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -175,10 +175,10 @@ export function Auth({
   // Safely get environment variables on client side to avoid hydration mismatch
   useEffect(() => {
     const credentialsAllowed =
-      env("NEXT_PUBLIC_ALLOW_CREDENTIALS")?.toLowerCase() === "true";
+      env.NEXT_PUBLIC_ALLOW_CREDENTIALS?.toLowerCase() === "true";
     const emailSendingEnabled =
-      env("NEXT_PUBLIC_DISABLE_EMAIL")?.toLowerCase() !== "true";
-    const isCloudEnv = env("NEXT_PUBLIC_KAN_ENV") === "cloud";
+      env.NEXT_PUBLIC_DISABLE_EMAIL?.toLowerCase() !== "true";
+    const isCloudEnv = env.NEXT_PUBLIC_KAN_ENV === "cloud";
     setIsCloudEnv(isCloudEnv);
     setIsEmailSendingEnabled(emailSendingEnabled);
     setIsCredentialsEnabled(credentialsAllowed);

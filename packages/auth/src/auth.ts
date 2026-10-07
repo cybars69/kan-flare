@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { env } from "next-runtime-env";
 
 import type { dbClient } from "@kan/db/client";
 import * as schema from "@kan/db/schema";
@@ -11,12 +10,12 @@ import { createPlugins } from "./plugins";
 import { configuredProviders } from "./providers";
 
 export const initAuth = (db: dbClient) => {
-  const baseURL = env("NEXT_PUBLIC_BASE_URL") || env("BETTER_AUTH_URL");
+  const baseURL = process.env.NEXT_PUBLIC_BASE_URL || process.env.BETTER_AUTH_URL;
   const trustedOrigins =
-    env("BETTER_AUTH_TRUSTED_ORIGINS")?.split(",").filter(Boolean) ?? [];
+    process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").filter(Boolean) ?? [];
 
   return betterAuth({
-    secret: env("BETTER_AUTH_SECRET"),
+    secret: process.env.BETTER_AUTH_SECRET,
     baseURL,
     trustedOrigins: [...(baseURL ? [baseURL] : []), ...trustedOrigins],
     database: drizzleAdapter(db, {
@@ -31,11 +30,11 @@ export const initAuth = (db: dbClient) => {
       updateAge: 60 * 60 * 24 * 2, // Update session expiry every 48 hours if user is active
       freshAge: 0,
     },
-    ...(env("DISABLE_RATE_LIMIT") === "true"
+    ...(process.env.DISABLE_RATE_LIMIT === "true"
       ? { rateLimit: { enabled: false } }
       : {}),
     emailAndPassword: {
-      enabled: env("NEXT_PUBLIC_ALLOW_CREDENTIALS")?.toLowerCase() === "true",
+      enabled: process.env.NEXT_PUBLIC_ALLOW_CREDENTIALS?.toLowerCase() === "true",
       // Sign-up restriction is handled by the user.create.before database
       // hook which checks for pending invitations, allowing invited users
       // to register even when public sign-up is disabled.

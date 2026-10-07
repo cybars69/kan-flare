@@ -1,6 +1,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -140,7 +140,7 @@ export default function Dashboard({
 
   useEffect(() => {
     if (hasLoaded && availableWorkspaces.length === 0) {
-      if (env("NEXT_PUBLIC_KAN_ENV") === "cloud") {
+      if (env.NEXT_PUBLIC_KAN_ENV === "cloud") {
         router.push(
           `/onboarding/select-plan?returnUrl=${encodeURIComponent(window.location.pathname)}`,
         );
@@ -152,7 +152,7 @@ export default function Dashboard({
 
   useEffect(() => {
     const isCredentialsEnabled =
-      env("NEXT_PUBLIC_ALLOW_CREDENTIALS")?.toLowerCase() === "true";
+      env.NEXT_PUBLIC_ALLOW_CREDENTIALS?.toLowerCase() === "true";
 
     if (
       !userLoading &&

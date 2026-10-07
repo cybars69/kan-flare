@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 
 import { authClient } from "@kan/auth/client";
 
@@ -15,7 +15,7 @@ export default function SelectPlanPage() {
     if (!isPending && !session?.user) {
       router.push("/login");
     }
-    if (!isPending && env("NEXT_PUBLIC_KAN_ENV") !== "cloud") {
+    if (!isPending && env.NEXT_PUBLIC_KAN_ENV !== "cloud") {
       router.push("/boards");
     }
   }, [session, isPending, router]);

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "next-runtime-env";
+import { env } from "~/env";
 import { useForm } from "react-hook-form";
 import { HiCheck, HiMiniStar } from "react-icons/hi2";
 import { z } from "zod";
@@ -100,7 +100,7 @@ const UpdateWorkspaceUrlForm = ({
   const onSubmit = (data: FormValues) => {
     if (!isWorkspaceSlugAvailable?.isAvailable) return;
 
-    if (workspacePlan === "free" && env("NEXT_PUBLIC_KAN_ENV") === "cloud")
+    if (workspacePlan === "free" && env.NEXT_PUBLIC_KAN_ENV === "cloud")
       return router.push(
         `/upgrade/select-plan?plan=team&workspacePublicId=${workspacePublicId}&returnUrl=${encodeURIComponent("/settings/workspace")}`,
       );
@@ -130,9 +130,9 @@ const UpdateWorkspaceUrlForm = ({
               : undefined)
           }
           prefix={
-            env("NEXT_PUBLIC_KAN_ENV") === "cloud"
+            env.NEXT_PUBLIC_KAN_ENV === "cloud"
               ? "kan.bn/"
-              : `${env("NEXT_PUBLIC_BASE_URL")}/`
+              : `${env.NEXT_PUBLIC_BASE_URL}/`
           }
           iconRight={
             isWorkspaceSlugAvailable?.isAvailable ||
