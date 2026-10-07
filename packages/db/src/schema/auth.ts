@@ -1,81 +1,77 @@
 import { relations } from "drizzle-orm";
 import {
-  bigserial,
-  boolean,
   integer,
-  pgTable,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { users } from "./users";
 
-export const session = pgTable("session", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  expiresAt: timestamp("expiresAt").notNull(),
+export const session = sqliteTable("session", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  expiresAt: integer("expiresAt", { mode: "timestamp_ms" }).notNull(),
   token: text("token").notNull().unique(),
-  createdAt: timestamp("createdAt").notNull(),
-  updatedAt: timestamp("updatedAt").notNull(),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull(),
   ipAddress: text("ipAddress"),
   userAgent: text("userAgent"),
-  userId: uuid("userId")
+  userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-}).enableRLS();
+});
 
-export const account = pgTable("account", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+export const account = sqliteTable("account", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   accountId: text("accountId").notNull(),
   providerId: text("providerId").notNull(),
-  userId: uuid("userId")
+  userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   accessToken: text("accessToken"),
   refreshToken: text("refreshToken"),
   idToken: text("idToken"),
-  accessTokenExpiresAt: timestamp("accessTokenExpiresAt"),
-  refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt"),
+  accessTokenExpiresAt: integer("accessTokenExpiresAt", { mode: "timestamp_ms" }),
+  refreshTokenExpiresAt: integer("refreshTokenExpiresAt", { mode: "timestamp_ms" }),
   scope: text("scope"),
   password: text("password"),
-  createdAt: timestamp("createdAt").notNull(),
-  updatedAt: timestamp("updatedAt").notNull(),
-}).enableRLS();
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull(),
+});
 
-export const verification = pgTable("verification", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+export const verification = sqliteTable("verification", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: timestamp("expiresAt").notNull(),
-  createdAt: timestamp("createdAt"),
-  updatedAt: timestamp("updatedAt"),
-}).enableRLS();
+  expiresAt: integer("expiresAt", { mode: "timestamp_ms" }).notNull(),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+});
 
-export const apikey = pgTable("apiKey", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+export const apikey = sqliteTable("apiKey", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name"),
   start: text("start"),
   prefix: text("prefix"),
   key: text("key").notNull(),
-  userId: uuid("userId")
+  userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   refillInterval: integer("refillInterval"),
   refillAmount: integer("refillAmount"),
-  lastRefillAt: timestamp("lastRefillAt"),
-  enabled: boolean("enabled"),
-  rateLimitEnabled: boolean("rateLimitEnabled"),
+  lastRefillAt: integer("lastRefillAt", { mode: "timestamp_ms" }),
+  enabled: integer("enabled", { mode: "boolean" }),
+  rateLimitEnabled: integer("rateLimitEnabled", { mode: "boolean" }),
   rateLimitTimeWindow: integer("rateLimitTimeWindow"),
   rateLimitMax: integer("rateLimitMax"),
   requestCount: integer("requestCount"),
   remaining: integer("remaining"),
-  lastRequest: timestamp("lastRequest"),
-  expiresAt: timestamp("expiresAt"),
-  createdAt: timestamp("createdAt").notNull(),
-  updatedAt: timestamp("updatedAt").notNull(),
+  lastRequest: integer("lastRequest", { mode: "timestamp_ms" }),
+  expiresAt: integer("expiresAt", { mode: "timestamp_ms" }),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull(),
   permissions: text("permissions"),
   metadata: text("metadata"),
-}).enableRLS();
+});
 
 export const apiKeyRelations = relations(apikey, ({ one }) => ({
   user: one(users, {

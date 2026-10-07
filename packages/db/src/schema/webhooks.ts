@@ -1,15 +1,10 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
-  boolean,
   index,
-  pgTable,
+  integer,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { users } from "./users";
 import { workspaces } from "./workspaces";
@@ -22,25 +17,25 @@ export const webhookEvents = [
 ] as const;
 export type WebhookEvent = (typeof webhookEvents)[number];
 
-export const workspaceWebhooks = pgTable("workspace_webhooks", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  workspaceId: bigint("workspaceId", { mode: "number" })
+export const workspaceWebhooks = sqliteTable("workspace_webhooks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
+  workspaceId: integer("workspaceId")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 255 }).notNull(),
-  url: varchar("url", { length: 2048 }).notNull(),
+  name: text("name", { length: 255 }).notNull(),
+  url: text("url", { length: 2048 }).notNull(),
   secret: text("secret"),
   events: text("events").notNull(), // JSON array of webhook events
-  active: boolean("active").notNull().default(true),
-  createdBy: uuid("createdBy")
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdBy: text("createdBy")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt"),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
 }, (table) => [
   index("workspace_webhooks_workspace_idx").on(table.workspaceId),
-]).enableRLS();
+]);
 
 export const workspaceWebhooksRelations = relations(
   workspaceWebhooks,

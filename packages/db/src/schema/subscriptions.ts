@@ -1,37 +1,34 @@
 import { relations } from "drizzle-orm";
 import {
-  bigserial,
-  boolean,
   integer,
-  pgTable,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 import { workspaces } from "./workspaces";
 
-export const subscription = pgTable("subscription", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  plan: varchar("plan", { length: 255 }).notNull(),
-  referenceId: varchar("referenceId", { length: 12 }).references(
+export const subscription = sqliteTable("subscription", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  plan: text("plan", { length: 255 }).notNull(),
+  referenceId: text("referenceId", { length: 12 }).references(
     () => workspaces.publicId,
     { onDelete: "set null" },
   ),
-  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
-  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
-  status: varchar("status", { length: 255 }).notNull(),
-  periodStart: timestamp("periodStart"),
-  periodEnd: timestamp("periodEnd"),
-  cancelAtPeriodEnd: boolean("cancelAtPeriodEnd"),
+  stripeCustomerId: text("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: text("stripeSubscriptionId", { length: 255 }),
+  status: text("status", { length: 255 }).notNull(),
+  periodStart: integer("periodStart", { mode: "timestamp_ms" }),
+  periodEnd: integer("periodEnd", { mode: "timestamp_ms" }),
+  cancelAtPeriodEnd: integer("cancelAtPeriodEnd", { mode: "boolean" }),
   seats: integer("seats"),
-  unlimitedSeats: boolean("unlimitedSeats").default(false).notNull(),
-  trialStart: timestamp("trialStart"),
-  trialEnd: timestamp("trialEnd"),
-  partnerLicenseKey: varchar("partnerLicenseKey", { length: 255 }),
+  unlimitedSeats: integer("unlimitedSeats", { mode: "boolean" }).default(false).notNull(),
+  trialStart: integer("trialStart", { mode: "timestamp_ms" }),
+  trialEnd: integer("trialEnd", { mode: "timestamp_ms" }),
+  partnerLicenseKey: text("partnerLicenseKey", { length: 255 }),
   partnerTier: integer("partnerTier"),
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-}).enableRLS();
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
 
 export const subscriptionsRelations = relations(subscription, ({ one }) => ({
   workspace: one(workspaces, {

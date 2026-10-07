@@ -1,31 +1,48 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { Pool } from "pg";
-import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import type { AnyD1Database } from "drizzle-orm/d1";
+import { onTestFinished } from "vitest";
+import { getPlatformProxy } from "wrangler";
 
-import { pgliteExtensions } from "@kan/db/client";
+import type { dbClient } from "@kan/db/client";
+import { createD1Client } from "@kan/db/client";
 import * as schema from "@kan/db/schema";
 
-export type TestDbClient = NodePgDatabase<typeof schema> & {
-  $client: Pool;
+export type TestDbClient = dbClient;
+
+type TestD1 = AnyD1Database & {
+  batch: (statements: unknown[]) => Promise<unknown>;
+  prepare: (sql: string) => unknown;
 };
 
+const MIGRATIONS_DIR = resolve(__dirname, "../../db/migrations");
+
+/** The schema migrations, split into single statements. */
+const migrationStatements = readdirSync(MIGRATIONS_DIR)
+  .filter((file) => file.endsWith(".sql"))
+  .sort()
+  .flatMap((file) =>
+    readFileSync(join(MIGRATIONS_DIR, file), "utf8")
+      .split("--> statement-breakpoint")
+      .map((statement) => statement.trim())
+      .filter(Boolean),
+  );
+
 /**
- * Creates a fresh in-memory PGlite database for testing.
- * Each call returns an isolated database instance with migrations applied.
+ * Creates a fresh in-memory D1 database (Miniflare, the same engine as
+ * `wrangler dev`) with migrations applied. Disposed when the test finishes.
  */
 export async function createTestDb(): Promise<TestDbClient> {
-  const client = new PGlite({
-    extensions: pgliteExtensions,
+  const proxy = await getPlatformProxy<{ DB: TestD1 }>({
+    configPath: resolve(__dirname, "wrangler.test.jsonc"),
+    persist: false,
   });
+  onTestFinished(() => proxy.dispose());
 
-  const db = drizzle(client, { schema });
+  const d1 = proxy.env.DB;
+  await d1.batch(migrationStatements.map((statement) => d1.prepare(statement)));
 
-  // Run migrations
-  await migrate(db, { migrationsFolder: "../../packages/db/migrations" });
-
-  return db as unknown as TestDbClient;
+  return createD1Client(d1);
 }
 
 /**
@@ -53,7 +70,7 @@ export async function seedTestData(db: TestDbClient) {
       publicId: "wstest123456",
       name: "Test Workspace",
       slug: "test-workspace",
-      ownerId: user!.id,
+      createdBy: user!.id,
       createdAt: new Date(),
     })
     .returning();

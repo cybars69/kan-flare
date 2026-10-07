@@ -1,38 +1,34 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   integer,
-  pgTable,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 import { boards } from "./boards";
 import { cards } from "./cards";
 import { imports } from "./imports";
 import { users } from "./users";
 
-export const lists = pgTable("list", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const lists = sqliteTable("list", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
+  name: text("name", { length: 255 }).notNull(),
   index: integer("index").notNull(),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt"),
-  deletedAt: timestamp("deletedAt"),
-  deletedBy: uuid("deletedBy").references(() => users.id, {
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+  deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
+  deletedBy: text("deletedBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  boardId: bigint("boardId", { mode: "number" })
+  boardId: integer("boardId")
     .notNull()
     .references(() => boards.id, { onDelete: "cascade" }),
-  importId: bigint("importId", { mode: "number" }).references(() => imports.id),
-}).enableRLS();
+  importId: integer("importId").references(() => imports.id),
+});
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
   createdBy: one(users, {

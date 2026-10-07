@@ -1,0 +1,13 @@
+// Minimal Worker config for integration tests: only the D1 binding.
+// Each test gets its own in-memory database (see test-db.ts).
+{
+  "name": "kan-flare-tests",
+  "compatibility_date": "2026-10-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kan-flare-tests",
+      "database_id": "00000000-0000-0000-0000-000000000001"
+    }
+  ]
+}

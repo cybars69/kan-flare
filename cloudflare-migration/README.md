@@ -170,16 +170,36 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** The data model is declared for SQLite, and one migration creates it in D1.
 **Estimate:** 2–3 days
 
-- [ ] `2.1` Create the D1 database (`wrangler d1 create`) and add the binding
-- [ ] `2.2` Rewrite 17 schema files from `pgTable` to `sqliteTable`
-- [ ] `2.3` 17 enums become `text({ enum: [...] })`, which keeps the TypeScript types
-- [ ] `2.4` 34 UUID columns become `text` with `$defaultFn(() => crypto.randomUUID())`
-- [ ] `2.5` 39 serial columns become `integer().primaryKey({ autoIncrement: true })`
-- [ ] `2.6` 77 timestamps become `integer({ mode: "timestamp_ms" })`, and SQL defaults become `$defaultFn(() => new Date())`
-- [ ] `2.7` Check that relations and `drizzle-zod` schemas still compile
-- [ ] `2.8` Switch `drizzle.config.ts` to `dialect: "sqlite"` with the `d1-http` driver
-- [ ] `2.9` Move the 36 Postgres migrations to `migrations-pg-legacy/`; generate one SQLite baseline
-- [ ] `2.10` Apply the baseline to local D1 and open it in Drizzle Studio
+- [x] `2.1` Create the D1 database (`wrangler d1 create`) and add the binding
+- [x] `2.2` Rewrite 17 schema files from `pgTable` to `sqliteTable`
+- [x] `2.3` 17 enums become `text({ enum: [...] })`, which keeps the TypeScript types
+- [x] `2.4` 34 UUID columns become `text` with `$defaultFn(() => crypto.randomUUID())`
+- [x] `2.5` 39 serial columns become `integer().primaryKey({ autoIncrement: true })`
+- [x] `2.6` 77 timestamps become `integer({ mode: "timestamp_ms" })`, and SQL defaults become `$defaultFn(() => new Date())`
+- [x] `2.7` Check that relations and `drizzle-zod` schemas still compile
+- [x] `2.8` Switch `drizzle.config.ts` to `dialect: "sqlite"` with the `d1-http` driver
+- [x] `2.9` Move the 36 Postgres migrations to `migrations-pg-legacy/`; generate one SQLite baseline
+- [x] `2.10` Apply the baseline to local D1 and open it in Drizzle Studio
+
+**Status notes (2026-10-08):**
+
+- `2.1`: no remote database is created by hand, so the deploy stays one-click. The `DB` binding in `wrangler.jsonc` has no `database_id`. `wrangler deploy` provisions the database on first deploy and reuses it after that. Local development and the deploy dry run both work without an ID.
+- `2.2`–`2.6`: done with a codemod (Postgres builders to SQLite builders), then reviewed.
+  - Enums keep their exported value arrays. For example, `importSourceEnum` became `importSourceValues`, used through `text(col, { enum })`.
+  - The `pgEnum` objects were not used outside `schema/`.
+  - `.enableRLS()` was dropped; SQLite has no row-level security.
+  - `user.id` now defaults to `crypto.randomUUID()` in JS. There's no SQL default.
+  - Timestamps have no SQL default either. Raw-SQL inserts must set `createdAt` themselves.
+- `2.7`: relations and the rest of the schema compile. The only `@kan/db` type errors left are the 17 `tx.execute` calls that Phase 3 replaces.
+- `2.8`: `drizzle.config.ts` uses `dialect: "sqlite"` and the `d1-http` driver. Credentials come from `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID` and `CLOUDFLARE_D1_TOKEN`, and are only needed for `studio`.
+- `2.9`: `migrations-pg-legacy/` keeps the 36 old files for reference. `migrations/0000_InitialSqliteSchema.sql` creates all 31 tables. New migrations use `pnpm db:generate`.
+- `2.10`: `pnpm db:migrate` applies migrations to local D1, and `pnpm --filter @kan/web db:migrate:remote` applies them remotely. The local tables were checked with `wrangler d1 execute` instead of Drizzle Studio, because Studio needs remote credentials.
+- **Database client:** `createDrizzleClient()` now returns a lazy client. It finds the `DB` binding through `getCloudflareContext()` the first time it's used in each request. That lets `trpc-context.ts` and the auth route keep creating it at module scope. `createD1Client(binding)` wraps a binding directly, for tests.
+- **Integration tests:** they run on real local D1 through Wrangler's `getPlatformProxy()`, with each test getting its own in-memory database. All 16 existing tests pass, at about 200 ms each. This covers task `4.4`.
+- **Behaviour confirmed on local D1:**
+  - `db.transaction()` throws, because D1 doesn't allow `BEGIN`.
+  - `db.batch()` works.
+  - A query with 101 bound parameters fails with "too many SQL variables"; 100 works.
 
 **Files:** `packages/db/src/schema/`* (17 files), `packages/db/drizzle.config.ts`, `packages/db/migrations`
 

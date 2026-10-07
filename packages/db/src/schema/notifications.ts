@@ -1,15 +1,10 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   index,
-  pgEnum,
-  pgTable,
+  integer,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { cards } from "./cards";
 import { comments } from "./cards";
@@ -25,32 +20,31 @@ export const notificationTypes = [
 
 export type NotificationType = (typeof notificationTypes)[number];
 
-export const notificationTypeEnum = pgEnum("notification_type", notificationTypes);
 
-export const notifications = pgTable(
+export const notifications = sqliteTable(
   "notification",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    type: notificationTypeEnum("type").notNull(),
-    userId: uuid("userId")
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId", { length: 12 }).notNull().unique(),
+    type: text("type", { enum: notificationTypes }).notNull(),
+    userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    cardId: bigint("cardId", { mode: "number" }).references(() => cards.id, {
+    cardId: integer("cardId").references(() => cards.id, {
       onDelete: "cascade",
     }),
-    commentId: bigint("commentId", { mode: "number" }).references(
+    commentId: integer("commentId").references(
       () => comments.id,
       { onDelete: "cascade" },
     ),
-    workspaceId: bigint("workspaceId", { mode: "number" }).references(
+    workspaceId: integer("workspaceId").references(
       () => workspaces.id,
       { onDelete: "cascade" },
     ),
     metadata: text("metadata"),
-    readAt: timestamp("readAt"),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    deletedAt: timestamp("deletedAt"),
+    readAt: integer("readAt", { mode: "timestamp_ms" }),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+    deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
   },
   (table) => [
     index("notification_user_deleted_idx").on(table.userId, table.deletedAt),
@@ -71,7 +65,7 @@ export const notifications = pgTable(
     ),
     index("notification_user_created_idx").on(table.userId, table.createdAt),
   ],
-).enableRLS();
+);
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {

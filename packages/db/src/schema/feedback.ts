@@ -1,26 +1,23 @@
 import { relations } from "drizzle-orm";
 import {
-  bigserial,
-  boolean,
-  pgTable,
+  integer,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { users } from "./users";
 
-export const feedback = pgTable("feedback", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+export const feedback = sqliteTable("feedback", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   feedback: text("feedback").notNull(),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt"),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
   url: text("url").notNull(),
-  reviewed: boolean("reviewed").default(false).notNull(),
-}).enableRLS();
+  reviewed: integer("reviewed", { mode: "boolean" }).default(false).notNull(),
+});
 
 export const feedbackRelations = relations(feedback, ({ one }) => ({
   createdBy: one(users, {

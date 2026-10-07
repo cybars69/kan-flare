@@ -1,44 +1,45 @@
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { PGlite } from "@electric-sql/pglite";
-import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm";
-import { uuid_ossp } from "@electric-sql/pglite/contrib/uuid_ossp";
-import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
-import { drizzle as drizzlePgLite } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
-import { Pool } from "pg";
-
-import { createLogger } from "@kan/logger";
+import type { AnyD1Database, DrizzleD1Database } from "drizzle-orm/d1";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { drizzle } from "drizzle-orm/d1";
 
 import * as schema from "./schema";
 
-const log = createLogger("db");
+export type dbClient = DrizzleD1Database<typeof schema>;
 
-export const pgliteExtensions = { pg_trgm, uuid_ossp };
+/** Wraps a D1 binding (or Miniflare's D1, in tests) in a Drizzle client. */
+export const createD1Client = (binding: AnyD1Database): dbClient =>
+  drizzle(binding, { schema });
 
-export type dbClient = NodePgDatabase<typeof schema> & {
-  $client: Pool;
-};
+const clients = new WeakMap<object, dbClient>();
 
-export const createDrizzleClient = (): dbClient => {
-  const connectionString = process.env.POSTGRES_URL;
-
-  if (!connectionString) {
-    log.warn("POSTGRES_URL not set, falling back to PGLite");
-
-    const client = new PGlite({
-      dataDir: "./pgdata",
-      extensions: pgliteExtensions,
-    });
-    const db = drizzlePgLite(client, { schema });
-
-    migrate(db, { migrationsFolder: "../../packages/db/migrations" });
-
-    return db as unknown as dbClient;
+const clientForCurrentRequest = (): dbClient => {
+  const binding = (getCloudflareContext().env as { DB?: AnyD1Database }).DB;
+  if (!binding) {
+    throw new Error(
+      "No D1 binding named DB. Check d1_databases in apps/web/wrangler.jsonc.",
+    );
   }
-
-  const pool = new Pool({
-    connectionString,
-  });
-
-  return drizzlePg(pool, { schema }) as dbClient;
+  let client = clients.get(binding);
+  if (!client) {
+    client = createD1Client(binding);
+    clients.set(binding, client);
+  }
+  return client;
 };
+
+/**
+ * Returns a client that resolves the D1 binding from the Cloudflare request
+ * context each time it is used. Workers only expose bindings inside a request,
+ * so this lets callers create the client at module scope as they did with
+ * Postgres.
+ */
+export const createDrizzleClient = (): dbClient =>
+  new Proxy({} as dbClient, {
+    get(_target, prop) {
+      const client = clientForCurrentRequest();
+      const value: unknown = Reflect.get(client, prop, client);
+      return typeof value === "function"
+        ? (value as (...args: unknown[]) => unknown).bind(client)
+        : value;
+    },
+  });

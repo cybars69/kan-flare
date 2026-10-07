@@ -1,18 +1,12 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   index,
-  pgEnum,
-  pgTable,
+  integer,
   primaryKey,
+  sqliteTable,
   text,
-  timestamp,
   uniqueIndex,
-  uuid,
-  varchar,
-  boolean,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 import { imports } from "./imports";
 import { labels } from "./labels";
 import { lists } from "./lists";
@@ -21,42 +15,37 @@ import { workspaces } from "./workspaces";
 
 export const boardVisibilityStatuses = ["private", "public"] as const;
 export type BoardVisibilityStatus = (typeof boardVisibilityStatuses)[number];
-export const boardVisibilityEnum = pgEnum(
-  "board_visibility",
-  boardVisibilityStatuses,
-);
 
 export const boardTypes = ["regular", "template"] as const;
 export type BoardType = (typeof boardTypes)[number];
-export const boardTypeEnum = pgEnum("board_type", boardTypes);
 
-export const boards = pgTable(
+export const boards = sqliteTable(
   "board",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    name: varchar("name", { length: 255 }).notNull(),
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId", { length: 12 }).notNull().unique(),
+    name: text("name", { length: 255 }).notNull(),
     description: text("description"),
-    slug: varchar("slug", { length: 255 }).notNull(),
-    createdBy: uuid("createdBy").references(() => users.id, {
+    slug: text("slug", { length: 255 }).notNull(),
+    createdBy: text("createdBy").references(() => users.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt"),
-    deletedAt: timestamp("deletedAt"),
-    deletedBy: uuid("deletedBy").references(() => users.id, {
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+    deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
+    deletedBy: text("deletedBy").references(() => users.id, {
       onDelete: "set null",
     }),
-    importId: bigint("importId", { mode: "number" }).references(
+    importId: integer("importId").references(
       () => imports.id,
     ),
-    workspaceId: bigint("workspaceId", { mode: "number" })
+    workspaceId: integer("workspaceId")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
-    visibility: boardVisibilityEnum("visibility").notNull().default("private"),
-    type: boardTypeEnum("type").notNull().default("regular"),
-    isArchived: boolean("isArchived").notNull().default(false),
-    sourceBoardId: bigint("sourceBoardId", { mode: "number" }),
+    visibility: text("visibility", { enum: boardVisibilityStatuses }).notNull().default("private"),
+    type: text("type", { enum: boardTypes }).notNull().default("regular"),
+    isArchived: integer("isArchived", { mode: "boolean" }).notNull().default(false),
+    sourceBoardId: integer("sourceBoardId"),
   },
   (table) => [
     index("board_is_archived_idx").on(table.isArchived),
@@ -67,7 +56,7 @@ export const boards = pgTable(
       .on(table.workspaceId, table.slug)
       .where(sql`${table.deletedAt} IS NULL`),
   ],
-).enableRLS();
+);
 
 export const boardsRelations = relations(boards, ({ one, many }) => ({
   userFavorites: many(userBoardFavorites),
@@ -96,16 +85,16 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
   }),
 }));
 
-export const userBoardFavorites = pgTable(
+export const userBoardFavorites = sqliteTable(
   "user_board_favorites",
   {
-    userId: uuid("userId")
+    userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    boardId: bigint("boardId", { mode: "number" })
+    boardId: integer("boardId")
       .notNull()
       .references(() => boards.id, { onDelete: "cascade" }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.boardId] }),

@@ -1,17 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   index,
   integer,
-  pgEnum,
-  pgTable,
   primaryKey,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { boards } from "./boards";
 import { checklists } from "./checklists";
@@ -53,38 +47,37 @@ export const activityTypes = [
 
 export type ActivityType = (typeof activityTypes)[number];
 
-export const activityTypeEnum = pgEnum("card_activity_type", activityTypes);
 
-export const cards = pgTable(
+export const cards = sqliteTable(
   "card",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId", { length: 12 }).notNull().unique(),
     title: text("title").notNull(),
     description: text("description"),
     index: integer("index").notNull(),
     cardNumber: integer("cardNumber"),
-    createdBy: uuid("createdBy").references(() => users.id, {
+    createdBy: text("createdBy").references(() => users.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt"),
-    deletedAt: timestamp("deletedAt"),
-    deletedBy: uuid("deletedBy").references(() => users.id, {
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+    deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
+    deletedBy: text("deletedBy").references(() => users.id, {
       onDelete: "set null",
     }),
-    listId: bigint("listId", { mode: "number" })
+    listId: integer("listId")
       .notNull()
       .references(() => lists.id, { onDelete: "cascade" }),
-    importId: bigint("importId", { mode: "number" }).references(
+    importId: integer("importId").references(
       () => imports.id,
     ),
-    dueDate: timestamp("dueDate"),
+    dueDate: integer("dueDate", { mode: "timestamp_ms" }),
   },
   (table) => [
     index("card_list_number_idx").on(table.listId, table.cardNumber),
   ],
-).enableRLS();
+);
 
 export const cardsRelations = relations(cards, ({ one, many }) => ({
   createdBy: one(users, {
@@ -115,49 +108,47 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
   attachments: many(cardAttachments),
 }));
 
-export const cardActivities = pgTable("card_activity", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  type: activityTypeEnum("type").notNull(),
-  cardId: bigint("cardId", { mode: "number" })
+export const cardActivities = sqliteTable("card_activity", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
+  type: text("type", { enum: activityTypes }).notNull(),
+  cardId: integer("cardId")
     .notNull()
     .references(() => cards.id, { onDelete: "cascade" }),
   fromIndex: integer("fromIndex"),
   toIndex: integer("toIndex"),
-  fromListId: bigint("fromListId", { mode: "number" }).references(
+  fromListId: integer("fromListId").references(
     () => lists.id,
     { onDelete: "cascade" },
   ),
-  toListId: bigint("toListId", { mode: "number" }).references(() => lists.id, {
+  toListId: integer("toListId").references(() => lists.id, {
     onDelete: "cascade",
   }),
-  labelId: bigint("labelId", { mode: "number" }).references(() => labels.id, {
+  labelId: integer("labelId").references(() => labels.id, {
     onDelete: "cascade",
   }),
-  workspaceMemberId: bigint("workspaceMemberId", {
-    mode: "number",
-  }).references(() => workspaceMembers.id, { onDelete: "set null" }),
+  workspaceMemberId: integer("workspaceMemberId").references(() => workspaceMembers.id, { onDelete: "set null" }),
   fromTitle: text("fromTitle"),
   toTitle: text("toTitle"),
   fromDescription: text("fromDescription"),
   toDescription: text("toDescription"),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  commentId: bigint("commentId", { mode: "number" }).references(
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  commentId: integer("commentId").references(
     () => comments.id,
     { onDelete: "cascade" },
   ),
   fromComment: text("fromComment"),
   toComment: text("toComment"),
-  fromDueDate: timestamp("fromDueDate"),
-  toDueDate: timestamp("toDueDate"),
-  sourceBoardId: bigint("sourceBoardId", { mode: "number" }).references(
+  fromDueDate: integer("fromDueDate", { mode: "timestamp_ms" }),
+  toDueDate: integer("toDueDate", { mode: "timestamp_ms" }),
+  sourceBoardId: integer("sourceBoardId").references(
     () => boards.id,
     { onDelete: "set null" },
   ),
-  attachmentId: bigint("attachmentId", { mode: "number" }).references(
+  attachmentId: integer("attachmentId").references(
     () => cardAttachments.id,
     { onDelete: "cascade" },
   ),
@@ -166,7 +157,7 @@ export const cardActivities = pgTable("card_activity", {
     table.cardId,
     table.createdAt,
   ),
-]).enableRLS();
+]);
 
 export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
   card: one(cards, {
@@ -216,18 +207,18 @@ export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
   }),
 }));
 
-export const cardsToLabels = pgTable(
+export const cardsToLabels = sqliteTable(
   "_card_labels",
   {
-    cardId: bigint("cardId", { mode: "number" })
+    cardId: integer("cardId")
       .notNull()
       .references(() => cards.id, { onDelete: "cascade" }),
-    labelId: bigint("labelId", { mode: "number" })
+    labelId: integer("labelId")
       .notNull()
       .references(() => labels.id, { onDelete: "cascade" }),
   },
   (t) => [primaryKey({ columns: [t.cardId, t.labelId] })],
-).enableRLS();
+);
 
 export const cardToLabelsRelations = relations(cardsToLabels, ({ one }) => ({
   card: one(cards, {
@@ -242,18 +233,18 @@ export const cardToLabelsRelations = relations(cardsToLabels, ({ one }) => ({
   }),
 }));
 
-export const cardToWorkspaceMembers = pgTable(
+export const cardToWorkspaceMembers = sqliteTable(
   "_card_workspace_members",
   {
-    cardId: bigint("cardId", { mode: "number" })
+    cardId: integer("cardId")
       .notNull()
       .references(() => cards.id, { onDelete: "cascade" }),
-    workspaceMemberId: bigint("workspaceMemberId", { mode: "number" })
+    workspaceMemberId: integer("workspaceMemberId")
       .notNull()
       .references(() => workspaceMembers.id, { onDelete: "cascade" }),
   },
   (t) => [primaryKey({ columns: [t.cardId, t.workspaceMemberId] })],
-).enableRLS();
+);
 
 export const cardToWorkspaceMembersRelations = relations(
   cardToWorkspaceMembers,
@@ -271,25 +262,25 @@ export const cardToWorkspaceMembersRelations = relations(
   }),
 );
 
-export const comments = pgTable("card_comments", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+export const comments = sqliteTable("card_comments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
   comment: text("comment").notNull(),
-  cardId: bigint("cardId", { mode: "number" })
+  cardId: integer("cardId")
     .notNull()
     .references(() => cards.id, { onDelete: "cascade" }),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt"),
-  deletedAt: timestamp("deletedAt"),
-  deletedBy: uuid("deletedBy").references(() => users.id, {
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+  deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
+  deletedBy: text("deletedBy").references(() => users.id, {
     onDelete: "set null",
   }),
 }, (table) => [
   index("card_comments_card_id_idx").on(table.cardId),
-]).enableRLS();
+]);
 
 export const commentsRelations = relations(comments, ({ one }) => ({
   card: one(cards, {
@@ -309,28 +300,28 @@ export const commentsRelations = relations(comments, ({ one }) => ({
   }),
 }));
 
-export const cardAttachments = pgTable("card_attachment", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  cardId: bigint("cardId", { mode: "number" })
+export const cardAttachments = sqliteTable("card_attachment", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
+  cardId: integer("cardId")
     .notNull()
     .references(() => cards.id, { onDelete: "cascade" }),
-  filename: varchar("filename", { length: 255 }).notNull(),
-  originalFilename: varchar("originalFilename", { length: 255 }).notNull(),
-  contentType: varchar("contentType", { length: 100 }).notNull(),
-  size: bigint("size", { mode: "number" }).notNull(),
-  s3Key: varchar("s3Key", { length: 500 }).notNull(),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  filename: text("filename", { length: 255 }).notNull(),
+  originalFilename: text("originalFilename", { length: 255 }).notNull(),
+  contentType: text("contentType", { length: 100 }).notNull(),
+  size: integer("size").notNull(),
+  s3Key: text("s3Key", { length: 500 }).notNull(),
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  deletedAt: timestamp("deletedAt"),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  deletedAt: integer("deletedAt", { mode: "timestamp_ms" }),
 }, (table) => [
   index("card_attachment_card_created_at_idx").on(
     table.cardId,
     table.createdAt,
   ),
-]).enableRLS();
+]);
 
 export const cardAttachmentsRelations = relations(
   cardAttachments,

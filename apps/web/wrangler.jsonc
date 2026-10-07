@@ -13,7 +13,16 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "kan-flare"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kan-flare",
+      // No database_id: `wrangler deploy` provisions the database on first
+      // deploy and reuses it afterwards. Local dev uses .wrangler/state.
+      "migrations_dir": "../../packages/db/migrations"
+    }
   ]
-  // D1 (Phase 2), R2 (Phase 6), email (Phase 7), images (Phase 10) and
-  // rate limiting (Phase 11) bindings are added by their phases.
+  // R2 (Phase 6), email (Phase 7), images (Phase 10) and rate limiting
+  // (Phase 11) bindings are added by their phases.
 }

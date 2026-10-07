@@ -1,38 +1,30 @@
 import {
-  bigint,
-  bigserial,
-  pgEnum,
-  pgTable,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 import { users } from "./users";
 import { workspaces } from "./workspaces";
 
 export const inviteLinkStatuses = ["active", "inactive"] as const;
 export type InviteLinkStatus = (typeof inviteLinkStatuses)[number];
-export const inviteLinkStatusEnum = pgEnum(
-  "invite_link_status",
-  inviteLinkStatuses,
-);
 
-export const workspaceInviteLinks = pgTable("workspace_invite_links", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  workspaceId: bigint("workspaceId", { mode: "number" })
+export const workspaceInviteLinks = sqliteTable("workspace_invite_links", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  publicId: text("publicId", { length: 12 }).notNull().unique(),
+  workspaceId: integer("workspaceId")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  code: varchar("code", { length: 12 }).notNull().unique(),
-  status: inviteLinkStatusEnum("status").notNull().default("active"),
-  expiresAt: timestamp("expiresAt"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  createdBy: uuid("createdBy").references(() => users.id, {
+  code: text("code", { length: 12 }).notNull().unique(),
+  status: text("status", { enum: inviteLinkStatuses }).notNull().default("active"),
+  expiresAt: integer("expiresAt", { mode: "timestamp_ms" }),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+  createdBy: text("createdBy").references(() => users.id, {
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updatedAt"),
-  updatedBy: uuid("updatedBy").references(() => users.id, {
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+  updatedBy: text("updatedBy").references(() => users.id, {
     onDelete: "set null",
   }),
-}).enableRLS();
+});

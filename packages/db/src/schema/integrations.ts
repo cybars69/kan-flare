@@ -1,29 +1,27 @@
 import { relations } from "drizzle-orm";
 import {
-  pgTable,
+  integer,
   primaryKey,
+  sqliteTable,
   text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { users } from "./users";
 
-export const integrations = pgTable(
+export const integrations = sqliteTable(
   "integration",
   {
-    provider: varchar("provider", { length: 255 }).notNull(),
-    userId: uuid("userId")
+    provider: text("provider", { length: 255 }).notNull(),
+    userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     accessToken: text("accessToken").notNull(),
-    refreshToken: varchar("refreshToken", { length: 255 }),
-    expiresAt: timestamp("expiresAt").notNull(),
-    createdAt: timestamp("createdAt")
+    refreshToken: text("refreshToken", { length: 255 }),
+    expiresAt: integer("expiresAt", { mode: "timestamp_ms" }).notNull(),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
       .$defaultFn(() => new Date())
       .notNull(),
-    updatedAt: timestamp("updatedAt").$onUpdateFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).$onUpdateFn(() => new Date()),
   },
   (table) => [
     primaryKey({
@@ -31,7 +29,7 @@ export const integrations = pgTable(
       columns: [table.userId, table.provider],
     }),
   ],
-).enableRLS();
+);
 
 export const integrationsRelations = relations(integrations, ({ one }) => ({
   user: one(users, {

@@ -1,38 +1,34 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
-  boolean,
   index,
   integer,
-  pgTable,
-  timestamp,
+  sqliteTable,
+  text,
   uniqueIndex,
-  varchar,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 
 import { workspaces } from "./workspaces";
 
-export const workspaceRoles = pgTable(
+export const workspaceRoles = sqliteTable(
   "workspace_roles",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    workspaceId: bigint("workspaceId", { mode: "number" })
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId", { length: 12 }).notNull().unique(),
+    workspaceId: integer("workspaceId")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 64 }).notNull(),
-    description: varchar("description", { length: 255 }),
+    name: text("name", { length: 64 }).notNull(),
+    description: text("description", { length: 255 }),
     hierarchyLevel: integer("hierarchyLevel").notNull(),
-    isSystem: boolean("isSystem").notNull().default(false),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt"),
+    isSystem: integer("isSystem", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
   },
   (table) => [
     uniqueIndex("unique_role_per_workspace").on(table.workspaceId, table.name),
     index("workspace_roles_workspace_idx").on(table.workspaceId),
   ],
-).enableRLS();
+);
 
 export const workspaceRolesRelations = relations(
   workspaceRoles,
@@ -47,16 +43,16 @@ export const workspaceRolesRelations = relations(
 );
 
 
-export const workspaceRolePermissions = pgTable(
+export const workspaceRolePermissions = sqliteTable(
   "workspace_role_permissions",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    workspaceRoleId: bigint("workspaceRoleId", { mode: "number" })
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    workspaceRoleId: integer("workspaceRoleId")
       .notNull()
       .references(() => workspaceRoles.id, { onDelete: "cascade" }),
-    permission: varchar("permission", { length: 64 }).notNull(),
-    granted: boolean("granted").notNull().default(true),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    permission: text("permission", { length: 64 }).notNull(),
+    granted: integer("granted", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
   },
   (table) => [
     uniqueIndex("unique_role_permission").on(
@@ -65,7 +61,7 @@ export const workspaceRolePermissions = pgTable(
     ),
     index("role_permissions_role_idx").on(table.workspaceRoleId),
   ],
-).enableRLS();
+);
 
 export const workspaceRolePermissionsRelations = relations(
   workspaceRolePermissions,
@@ -78,15 +74,15 @@ export const workspaceRolePermissionsRelations = relations(
   }),
 );
 
-export const workspaceMemberPermissions = pgTable(
+export const workspaceMemberPermissions = sqliteTable(
   "workspace_member_permissions",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    workspaceMemberId: bigint("workspaceMemberId", { mode: "number" }).notNull(),
-    permission: varchar("permission", { length: 64 }).notNull(),
-    granted: boolean("granted").notNull().default(true),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt"),
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    workspaceMemberId: integer("workspaceMemberId").notNull(),
+    permission: text("permission", { length: 64 }).notNull(),
+    granted: integer("granted", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
   },
   (table) => [
     uniqueIndex("unique_member_permission").on(
@@ -95,4 +91,4 @@ export const workspaceMemberPermissions = pgTable(
     ),
     index("permission_member_idx").on(table.workspaceMemberId),
   ],
-).enableRLS();
+);
