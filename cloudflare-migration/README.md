@@ -130,13 +130,36 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Goal:** The app builds with OpenNext and boots in the local Workers runtime.
 **Estimate:** 1–2 days
 
-- [ ] `1.1` Confirm in the OpenNext Cloudflare docs that Next 15.5.9 and the Pages Router are supported
-- [ ] `1.2` Add `@opennextjs/cloudflare` and `wrangler` to `apps/web`
-- [ ] `1.3` Create `wrangler.jsonc` with `nodejs_compat`, a current compatibility date and the assets binding
-- [ ] `1.4` Create `open-next.config.ts`; add `preview`, `deploy` and `cf-typegen` scripts
-- [ ] `1.5` Call `initOpenNextCloudflareForDev()` in `next.config.js` so `next dev` sees D1, R2 and other bindings
-- [ ] `1.6` Stop forcing `output: "standalone"`
-- [ ] `1.7` Build once and record the compressed bundle size
+- [x] `1.1` Confirm in the OpenNext Cloudflare docs that Next 15.5.9 and the Pages Router are supported
+- [x] `1.2` Add `@opennextjs/cloudflare` and `wrangler` to `apps/web`
+- [x] `1.3` Create `wrangler.jsonc` with `nodejs_compat`, a current compatibility date and the assets binding
+- [x] `1.4` Create `open-next.config.ts`; add `preview`, `deploy` and `cf-typegen` scripts
+- [x] `1.5` Call `initOpenNextCloudflareForDev()` in `next.config.js` so `next dev` sees D1, R2 and other bindings
+- [x] `1.6` Stop forcing `output: "standalone"`
+- [x] `1.7` Build once and record the compressed bundle size
+
+**Status notes (2026-10-08):**
+
+- `1.1`: `@opennextjs/cloudflare` 1.20.9 requires `next >=15.5.27 <16`, so `next` was upgraded from 15.5.9 to 15.5.27, a patch release within 15.5.
+  - **vinext:** Cloudflare's own Next.js skill now recommends vinext (Next.js rebuilt on Vite) for new projects. It wasn't chosen here. Its README says it is "not yet a drop-in replacement for every application or production workload". It doesn't support webpack or Turbopack config, which this repo uses for SVG imports. It doesn't document support for SWC plugins, which Lingui needs here. Revisit after it matures.
+- `1.3`: the Worker is named `kan-flare`, with `nodejs_compat` and `global_fetch_strictly_public` and compatibility date `2026-10-01`. Later phases add their own bindings.
+- `1.2`: `@opennextjs/cloudflare` 1.20.9 and `wrangler` 4.148.0.
+- `1.4`: `open-next.config.ts` has no incremental cache, because the app has no ISR pages. The new scripts are `preview`, `deploy`, `upload` and `cf-typegen`. `cf-typegen` writes `cloudflare-env.d.ts`; commit it, and rerun it whenever `wrangler.jsonc` changes.
+- `1.7`: the Worker is **6.75 MiB gzipped** (28 MiB raw), measured with `wrangler deploy --dry-run`. That fits the paid plan's 10 MiB limit but not the free plan's 3 MiB. Static assets (9.8 MB) are served separately and don't count. Phases 3, 6 and 8 remove `pg`, the AWS SDK and pino from the bundle.
+  - **Smoke test** with `wrangler dev`: `/` redirects to `/login`, and `/login`, `/signup`, static assets and `/api/v1/openapi.json` all return 200. `/api/auth/get-session` and tRPC respond, with tRPC correctly returning UNAUTHORIZED. The remaining errors come from the PGlite fallback needing a filesystem, which Phases 2–3 replace with D1.
+  - **Tracing fix:** Next's file tracing only copies each package's Node.js files. Four packages also ship Workers-only builds: `pg-cloudflare`, `uncrypto`, `@react-email/render` and `stripe`. They are force-included through `outputFileTracingIncludes` in `next.config.js`, with the route key `"/**"`. The key `"*"` doesn't match nested routes. If a new dependency fails at runtime with `No such module "x"`, add it to that list. Drop `pg-cloudflare` once `pg` is removed.
+  - **Port 8787:** a `wrangler dev` from another project held this port. Stop it before `pnpm preview`.
+- `1.6`: nothing forces standalone output for the Workers build. Only the Dockerfile sets `NEXT_PUBLIC_USE_STANDALONE_OUTPUT=true`, and OpenNext picks its own output mode.
+- **Other changes:**
+  - `public/_headers` caches `/_next/static` for a year.
+  - `.dev.vars.example` lists the local Workers values.
+  - `.gitignore` covers `.open-next/`, `.wrangler/` and `.dev.vars`.
+  - `tsconfig.json` and ESLint skip the `.open-next` and `.wrangler` folders, because this tsconfig also typechecks JavaScript files.
+- The root `package.json` no longer installs Linux binaries on Macs, which makes installs much faster. Upstream's multi-architecture Docker builds stop working; Phase 13 removes Docker.
+- **Checks:**
+  - All 229 unit tests pass.
+  - `@kan/web` typecheck has 3 errors, all present on upstream (`bootstrap.cjs` ×2 and `views/board/index.tsx:902`). Upstream's 8 SVG-import errors go away once a build has generated `next-env.d.ts`. `public/` is now excluded from typechecking, because Cloudflare's types flag the generated `__ENV.js`.
+  - **`@kan/web` lint crashes.** Upstream's `@next/eslint-plugin-next` 14.2.32 calls `context.getAncestors()`, which ESLint 9.34 removed. Nothing in Phase 1 changed those versions. Fixing it means upgrading the plugin to match Next 15, which is left for later.
 
 **Files:** `apps/web/package.json`, `apps/web/next.config.js`, `apps/web/wrangler.jsonc` (new), `apps/web/open-next.config.ts` (new)
 

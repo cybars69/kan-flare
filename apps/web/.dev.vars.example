@@ -1,0 +1,5 @@
+# Local values for the Workers runtime (`pnpm preview`, `next dev` bindings).
+# Copy to `.dev.vars` and fill in. `.dev.vars` is gitignored.
+NEXTJS_ENV=development
+NEXT_PUBLIC_BASE_URL=http://localhost:8787
+BETTER_AUTH_SECRET=
