@@ -40,6 +40,25 @@ export const restrictEnvAccess = tseslint.config(
 export default tseslint.config(
   // Ignore files not tracked by VCS and any config files
   includeIgnoreFile(path.join(import.meta.dirname, "../../.gitignore")),
+  // Build and tool output, ignored explicitly so linting never depends on
+  // what .gitignore happens to list.
+  {
+    ignores: [
+      "**/.next/**",
+      "**/.open-next/**",
+      "**/.wrangler/**",
+      "**/.turbo/**",
+      "**/.react-email/**",
+      "**/dist/**",
+      "**/out/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "**/node_modules/**",
+      "**/cloudflare-env.d.ts",
+    ],
+  },
   { ignores: ["**/*.config.*"] },
   {
     files: ["**/*.js", "**/*.ts", "**/*.tsx"],
