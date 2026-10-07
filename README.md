@@ -1,3 +1,5 @@
+> **kan-flare** is a fork of [Kan](https://github.com/kanbn/kan) that runs entirely on Cloudflare (Workers, D1, R2). The port is in progress; see [`cloudflare-migration/README.md`](cloudflare-migration/README.md). Licensed under AGPL-3.0, like upstream; see [`NOTICE`](NOTICE). The rest of this README is upstream's and describes Kan.
+
 ![github-background](https://github.com/user-attachments/assets/f728f52e-bf67-4357-9ba2-c24c437488e3)
 
 <div align="center">
