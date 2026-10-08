@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   getWorkspace: vi.fn(),
   sendEmail: vi.fn(),
+  sendPush: vi.fn(),
   log: {
     debug: vi.fn(),
     error: vi.fn(),
@@ -46,6 +47,10 @@ vi.mock("@kan/email", () => ({
 
 vi.mock("@kan/logger", () => ({
   createLogger: vi.fn(() => mocks.log),
+}));
+
+vi.mock("./push", () => ({
+  sendPushToUser: mocks.sendPush,
 }));
 
 const db = {} as dbClient;
@@ -104,7 +109,7 @@ describe("sendMentionEmails", () => {
     expect(mocks.sendEmail).toHaveBeenCalledOnce();
   });
 
-  it("records the notification only after SMTP accepts the email", async () => {
+  it("records the notification, pushes, then emails", async () => {
     await sendMentionEmails({
       db,
       cardPublicId: "card-public-id",
@@ -131,8 +136,18 @@ describe("sendMentionEmails", () => {
       cardId: 42,
       commentId: 21,
     });
-    expect(mocks.sendEmail.mock.invocationCallOrder[0]).toBeLessThan(
-      mocks.createNotification.mock.invocationCallOrder[0] ?? 0,
+    expect(mocks.sendPush).toHaveBeenCalledWith(db, "mentioned-user-id", {
+      title: "Author mentioned you",
+      body: "A card · A board",
+      url: "/cards/card-public-id",
+      tag: "mention-card-public-id",
+    });
+    // The in-app notification exists before the push announces it.
+    expect(mocks.createNotification.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.sendPush.mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(mocks.sendPush.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.sendEmail.mock.invocationCallOrder[0] ?? 0,
     );
   });
 
@@ -160,7 +175,7 @@ describe("sendMentionEmails", () => {
     });
   });
 
-  it("does not record a notification when email delivery fails", async () => {
+  it("keeps the notification and push when email delivery fails", async () => {
     const error = new Error("SMTP rejected the message");
     mocks.sendEmail.mockRejectedValue(error);
 
@@ -174,7 +189,8 @@ describe("sendMentionEmails", () => {
       }),
     ).resolves.toBeUndefined();
 
-    expect(mocks.createNotification).not.toHaveBeenCalled();
+    expect(mocks.createNotification).toHaveBeenCalledOnce();
+    expect(mocks.sendPush).toHaveBeenCalledOnce();
     expect(mocks.log.error).toHaveBeenCalledWith(
       {
         err: error,
@@ -185,7 +201,7 @@ describe("sendMentionEmails", () => {
     );
   });
 
-  it("reports a recording failure separately after sending the email", async () => {
+  it("still emails when recording the notification fails", async () => {
     const error = new Error("Database unavailable");
     mocks.createNotification.mockRejectedValue(error);
 

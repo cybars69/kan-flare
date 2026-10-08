@@ -156,7 +156,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        263
+        278
       ]
     ],
     "translation": "{actor} nævnte dig"
@@ -175,7 +175,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        262
+        277
       ]
     ],
     "translation": "{actor} nævnte dig på {0}"
@@ -3249,10 +3249,22 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        210
+        225
       ]
     ],
     "translation": "Notifikationer kunne ikke indlæses."
+  },
+  "zFushw": {
+    "message": "Couldn't turn on push notifications. Try again.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        405
+      ]
+    ],
+    "translation": "Push-notifikationer kunne ikke slås til. Prøv igen."
   },
   "b9XOHo": {
     "message": "Create {0}",
@@ -3696,7 +3708,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        159
+        167
       ]
     ],
     "translation": "Mørk"
@@ -4120,7 +4132,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        210
+        218
       ],
       [
         "src/views/boards/components/TemplateBoards.tsx",
@@ -5189,7 +5201,7 @@
       ],
       [
         "src/components/UserMenu.tsx",
-        218
+        226
       ]
     ],
     "translation": "Feedback"
@@ -6054,6 +6066,22 @@
     ],
     "translation": "Enkeltpersoner"
   },
+  "HQY/3x": {
+    "message": "Install kan-flare as an app to get push notifications on this device.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        355
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        357
+      ]
+    ],
+    "translation": "Installér kan-flare som app for at få push-notifikationer på denne enhed."
+  },
   "nbfdhU": {
     "message": "Integrations",
     "placeholders": {},
@@ -6495,7 +6523,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        173
+        181
       ]
     ],
     "translation": "Lys"
@@ -6639,7 +6667,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        245
+        260
       ]
     ],
     "translation": "Indlæser…"
@@ -6663,7 +6691,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        228
+        236
       ]
     ],
     "translation": "Log ud"
@@ -6751,7 +6779,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        188
+        203
       ]
     ],
     "translation": "Markér alle som læst"
@@ -7574,11 +7602,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        45
-      ],
-      [
-        "src/components/NotificationBell.tsx",
-        47
+        59
       ],
       [
         "src/components/NotificationBell.tsx",
@@ -7586,7 +7610,11 @@
       ],
       [
         "src/components/NotificationBell.tsx",
-        180
+        75
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        195
       ]
     ],
     "translation": "Notifikationer"
@@ -7602,10 +7630,22 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        47
+        61
       ]
     ],
     "translation": "Notifikationer ({badge} ulæste)"
+  },
+  "+zjt60": {
+    "message": "Notifications are blocked. Allow them for kan-flare in your device settings.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        359
+      ]
+    ],
+    "translation": "Notifikationer er blokeret. Tillad dem for kan-flare i enhedens indstillinger."
   },
   "9h7RDh": {
     "message": "Offer",
@@ -8672,6 +8712,22 @@
     ],
     "translation": "Publicering"
   },
+  "nn1SW2": {
+    "message": "Push notifications on this device",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        380
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        386
+      ]
+    ],
+    "translation": "Push-notifikationer på denne enhed"
+  },
   "bfgr/e": {
     "message": "Question",
     "placeholders": {},
@@ -9615,7 +9671,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        188
+        196
       ]
     ],
     "translation": "Genveje"
@@ -9859,7 +9915,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        257
+        272
       ]
     ],
     "translation": "Nogen"
@@ -10065,7 +10121,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        199
+        207
       ],
       [
         "src/views/pricing/components/FeatureComparisonTable.tsx",
@@ -10093,7 +10149,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        145
+        153
       ]
     ],
     "translation": "System"
@@ -10516,7 +10572,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        132
+        140
       ]
     ],
     "translation": "Tema"
@@ -10900,7 +10956,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        216
+        231
       ]
     ],
     "translation": "Prøv igen"
@@ -11674,7 +11730,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        311
+        326
       ]
     ],
     "translation": "Ulæst"
@@ -12829,7 +12885,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        265
+        280
       ]
     ],
     "translation": "Du blev tilføjet til {workspace}"
@@ -12845,7 +12901,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        267
+        282
       ]
     ],
     "translation": "Du blev fjernet fra {workspace}"
@@ -12857,7 +12913,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        222
+        237
       ]
     ],
     "translation": "Du er helt opdateret."
@@ -13093,7 +13149,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        269
+        284
       ]
     ],
     "translation": "Din rolle i {workspace} blev ændret"

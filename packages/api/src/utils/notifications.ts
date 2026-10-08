@@ -8,6 +8,7 @@ import { sendEmail } from "@kan/email";
 import { createLogger } from "@kan/logger";
 
 import { getNewMentionPublicIds } from "./mention-notifications";
+import { sendPushToUser } from "./push";
 
 const log = createLogger("notifications");
 
@@ -97,9 +98,32 @@ export async function sendMentionEmails({
         // Skip pending members (no userId) - they can be mentioned but won't receive emails
         if (!userId || !email) return;
 
+        // Record the in-app notification first, so it exists even if the
+        // email or push fails.
+        try {
+          await notificationRepo.create(db, {
+            type: "mention",
+            userId,
+            cardId,
+            commentId,
+          });
+        } catch (error) {
+          log.error(
+            { err: error, email, cardPublicId },
+            "Failed to record mention notification",
+          );
+        }
+
+        // Push to the user's subscribed devices (no-op without VAPID keys).
+        await sendPushToUser(db, userId, {
+          title: `${commenterName} mentioned you`,
+          body: boardName ? `${cardTitle} · ${boardName}` : cardTitle,
+          url: `/cards/${cardPublicId}`,
+          tag: `mention-${cardPublicId}`,
+        });
+
         // DISABLE_NOTIFICATION_EMAILS turns off mention emails only; sign-in,
-        // invite and password-reset emails still go out, and the
-        // notification is still recorded for the in-app bell.
+        // invite and password-reset emails still go out.
         if (process.env.DISABLE_NOTIFICATION_EMAILS?.toLowerCase() !== "true") {
           try {
             await sendEmail(
@@ -119,22 +143,7 @@ export async function sendMentionEmails({
               { err: error, email, cardPublicId },
               "Failed to send mention email",
             );
-            return;
           }
-        }
-
-        try {
-          await notificationRepo.create(db, {
-            type: "mention",
-            userId,
-            cardId,
-            commentId,
-          });
-        } catch (error) {
-          log.error(
-            { err: error, email, cardPublicId },
-            "Failed to record mention notification",
-          );
         }
       }),
     );

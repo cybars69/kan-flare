@@ -87,7 +87,7 @@
       "actor": ["actor"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 263]],
+    "origin": [["src/components/NotificationBell.tsx", 278]],
     "translation": "{actor} heeft je genoemd"
   },
   "+s7v8w": {
@@ -97,7 +97,7 @@
       "actor": ["actor"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 262]],
+    "origin": [["src/components/NotificationBell.tsx", 277]],
     "translation": "{actor} heeft je genoemd op {0}"
   },
   "0xWkkH": {
@@ -1948,8 +1948,15 @@
     "message": "Couldn't load notifications.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 210]],
+    "origin": [["src/components/NotificationBell.tsx", 225]],
     "translation": "Meldingen konden niet worden geladen."
+  },
+  "zFushw": {
+    "message": "Couldn't turn on push notifications. Try again.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 405]],
+    "translation": "Pushmeldingen konden niet worden ingeschakeld. Probeer het opnieuw."
   },
   "b9XOHo": {
     "message": "Create {0}",
@@ -2224,7 +2231,7 @@
     "message": "Dark",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 159]],
+    "origin": [["src/components/UserMenu.tsx", 167]],
     "translation": "Donker"
   },
   "cp1rsD": {
@@ -2475,7 +2482,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/UserMenu.tsx", 210],
+      ["src/components/UserMenu.tsx", 218],
       ["src/views/boards/components/TemplateBoards.tsx", 24],
       ["src/views/boards/components/TemplateBoards.tsx", 30],
       ["src/views/boards/components/TemplateBoards.tsx", 36],
@@ -3126,7 +3133,7 @@
     "comments": [],
     "origin": [
       ["src/components/FeedbackModal.tsx", 59],
-      ["src/components/UserMenu.tsx", 218]
+      ["src/components/UserMenu.tsx", 226]
     ],
     "translation": "Feedback"
   },
@@ -3634,6 +3641,16 @@
     "origin": [["src/views/pricing/components/Pricing.tsx", 28]],
     "translation": "Individuen"
   },
+  "HQY/3x": {
+    "message": "Install kan-flare as an app to get push notifications on this device.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      ["src/components/NotificationBell.tsx", 355],
+      ["src/components/NotificationBell.tsx", 357]
+    ],
+    "translation": "Installeer kan-flare als app om pushmeldingen op dit apparaat te krijgen."
+  },
   "nbfdhU": {
     "message": "Integrations",
     "placeholders": {},
@@ -3912,7 +3929,7 @@
     "message": "Light",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 173]],
+    "origin": [["src/components/UserMenu.tsx", 181]],
     "translation": "Licht"
   },
   "TCt/8K": {
@@ -4000,7 +4017,7 @@
     "message": "Loading…",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 245]],
+    "origin": [["src/components/NotificationBell.tsx", 260]],
     "translation": "Laden…"
   },
   "dhq0/w": {
@@ -4014,7 +4031,7 @@
     "message": "Logout",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 228]],
+    "origin": [["src/components/UserMenu.tsx", 236]],
     "translation": "Uitloggen"
   },
   "vuxdLS": {
@@ -4066,7 +4083,7 @@
     "message": "Mark all as read",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 188]],
+    "origin": [["src/components/NotificationBell.tsx", 203]],
     "translation": "Alles als gelezen markeren"
   },
   "IDvohQ": {
@@ -4543,10 +4560,10 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/NotificationBell.tsx", 45],
-      ["src/components/NotificationBell.tsx", 47],
+      ["src/components/NotificationBell.tsx", 59],
       ["src/components/NotificationBell.tsx", 61],
-      ["src/components/NotificationBell.tsx", 180]
+      ["src/components/NotificationBell.tsx", 75],
+      ["src/components/NotificationBell.tsx", 195]
     ],
     "translation": "Meldingen"
   },
@@ -4556,8 +4573,15 @@
       "badge": ["badge"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 47]],
+    "origin": [["src/components/NotificationBell.tsx", 61]],
     "translation": "Meldingen ({badge} ongelezen)"
+  },
+  "+zjt60": {
+    "message": "Notifications are blocked. Allow them for kan-flare in your device settings.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 359]],
+    "translation": "Meldingen zijn geblokkeerd. Sta ze toe voor kan-flare in de apparaatinstellingen."
   },
   "9h7RDh": {
     "message": "Offer",
@@ -5128,6 +5152,16 @@
     "origin": [["src/views/boards/components/TemplateBoards.tsx", 47]],
     "translation": "Publiceren"
   },
+  "nn1SW2": {
+    "message": "Push notifications on this device",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      ["src/components/NotificationBell.tsx", 380],
+      ["src/components/NotificationBell.tsx", 386]
+    ],
+    "translation": "Pushmeldingen op dit apparaat"
+  },
   "bfgr/e": {
     "message": "Question",
     "placeholders": {},
@@ -5686,7 +5720,7 @@
     "message": "Shortcuts",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 188]],
+    "origin": [["src/components/UserMenu.tsx", 196]],
     "translation": "Sneltoetsen"
   },
   "5lWFkC": {
@@ -5832,7 +5866,7 @@
     "message": "Someone",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 257]],
+    "origin": [["src/components/NotificationBell.tsx", 272]],
     "translation": "Iemand"
   },
   "J9+zIR": {
@@ -5962,7 +5996,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/UserMenu.tsx", 199],
+      ["src/components/UserMenu.tsx", 207],
       ["src/views/pricing/components/FeatureComparisonTable.tsx", 295]
     ],
     "translation": "Ondersteuning"
@@ -5978,7 +6012,7 @@
     "message": "System",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 145]],
+    "origin": [["src/components/UserMenu.tsx", 153]],
     "translation": "Systeem"
   },
   "KM6m8p": {
@@ -6227,7 +6261,7 @@
     "message": "Theme",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 132]],
+    "origin": [["src/components/UserMenu.tsx", 140]],
     "translation": "Thema"
   },
   "Yf9FAx": {
@@ -6466,7 +6500,7 @@
     "message": "Try again",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 216]],
+    "origin": [["src/components/NotificationBell.tsx", 231]],
     "translation": "Opnieuw proberen"
   },
   "bZSICm": {
@@ -6926,7 +6960,7 @@
     "message": "Unread",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 311]],
+    "origin": [["src/components/NotificationBell.tsx", 326]],
     "translation": "Ongelezen"
   },
   "SMaFdc": {
@@ -7657,7 +7691,7 @@
       "workspace": ["workspace"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 265]],
+    "origin": [["src/components/NotificationBell.tsx", 280]],
     "translation": "Je bent toegevoegd aan {workspace}"
   },
   "XqiWz0": {
@@ -7666,14 +7700,14 @@
       "workspace": ["workspace"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 267]],
+    "origin": [["src/components/NotificationBell.tsx", 282]],
     "translation": "Je bent verwijderd uit {workspace}"
   },
   "KS7iJH": {
     "message": "You're all caught up.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 222]],
+    "origin": [["src/components/NotificationBell.tsx", 237]],
     "translation": "Je bent helemaal bij."
   },
   "2SePRT": {
@@ -7816,7 +7850,7 @@
       "workspace": ["workspace"]
     },
     "comments": [],
-    "origin": [["src/components/NotificationBell.tsx", 269]],
+    "origin": [["src/components/NotificationBell.tsx", 284]],
     "translation": "Je rol in {workspace} is gewijzigd"
   },
   "CJWDTP": {

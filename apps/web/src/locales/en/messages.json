@@ -156,7 +156,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        263
+        278
       ]
     ],
     "translation": "{actor} mentioned you"
@@ -175,7 +175,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        262
+        277
       ]
     ],
     "translation": "{actor} mentioned you on {0}"
@@ -3262,10 +3262,22 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        210
+        225
       ]
     ],
     "translation": "Couldn't load notifications."
+  },
+  "zFushw": {
+    "message": "Couldn't turn on push notifications. Try again.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        405
+      ]
+    ],
+    "translation": "Couldn't turn on push notifications. Try again."
   },
   "b9XOHo": {
     "message": "Create {0}",
@@ -3722,7 +3734,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        159
+        167
       ]
     ],
     "translation": "Dark"
@@ -4159,7 +4171,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        210
+        218
       ],
       [
         "src/views/boards/components/TemplateBoards.tsx",
@@ -5241,7 +5253,7 @@
       ],
       [
         "src/components/UserMenu.tsx",
-        218
+        226
       ]
     ],
     "translation": "Feedback"
@@ -6106,6 +6118,22 @@
     ],
     "translation": "Individuals"
   },
+  "HQY/3x": {
+    "message": "Install kan-flare as an app to get push notifications on this device.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        355
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        357
+      ]
+    ],
+    "translation": "Install kan-flare as an app to get push notifications on this device."
+  },
   "nbfdhU": {
     "message": "Integrations",
     "placeholders": {},
@@ -6573,7 +6601,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        173
+        181
       ]
     ],
     "translation": "Light"
@@ -6717,7 +6745,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        245
+        260
       ]
     ],
     "translation": "Loading…"
@@ -6741,7 +6769,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        228
+        236
       ]
     ],
     "translation": "Logout"
@@ -6829,7 +6857,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        188
+        203
       ]
     ],
     "translation": "Mark all as read"
@@ -7652,11 +7680,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        45
-      ],
-      [
-        "src/components/NotificationBell.tsx",
-        47
+        59
       ],
       [
         "src/components/NotificationBell.tsx",
@@ -7664,7 +7688,11 @@
       ],
       [
         "src/components/NotificationBell.tsx",
-        180
+        75
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        195
       ]
     ],
     "translation": "Notifications"
@@ -7680,10 +7708,22 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        47
+        61
       ]
     ],
     "translation": "Notifications ({badge} unread)"
+  },
+  "+zjt60": {
+    "message": "Notifications are blocked. Allow them for kan-flare in your device settings.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        359
+      ]
+    ],
+    "translation": "Notifications are blocked. Allow them for kan-flare in your device settings."
   },
   "9h7RDh": {
     "message": "Offer",
@@ -8750,6 +8790,22 @@
     ],
     "translation": "Publishing"
   },
+  "nn1SW2": {
+    "message": "Push notifications on this device",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        380
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        386
+      ]
+    ],
+    "translation": "Push notifications on this device"
+  },
   "bfgr/e": {
     "message": "Question",
     "placeholders": {},
@@ -9693,7 +9749,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        188
+        196
       ]
     ],
     "translation": "Shortcuts"
@@ -9937,7 +9993,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        257
+        272
       ]
     ],
     "translation": "Someone"
@@ -10143,7 +10199,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        199
+        207
       ],
       [
         "src/views/pricing/components/FeatureComparisonTable.tsx",
@@ -10171,7 +10227,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        145
+        153
       ]
     ],
     "translation": "System"
@@ -10594,7 +10650,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        132
+        140
       ]
     ],
     "translation": "Theme"
@@ -10978,7 +11034,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        216
+        231
       ]
     ],
     "translation": "Try again"
@@ -11752,7 +11808,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        311
+        326
       ]
     ],
     "translation": "Unread"
@@ -12976,7 +13032,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        265
+        280
       ]
     ],
     "translation": "You were added to {workspace}"
@@ -12992,7 +13048,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        267
+        282
       ]
     ],
     "translation": "You were removed from {workspace}"
@@ -13004,7 +13060,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        222
+        237
       ]
     ],
     "translation": "You're all caught up."
@@ -13240,7 +13296,7 @@
     "origin": [
       [
         "src/components/NotificationBell.tsx",
-        269
+        284
       ]
     ],
     "translation": "Your role in {workspace} changed"

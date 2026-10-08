@@ -63,7 +63,7 @@ DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 
 - **The first person to sign up** on a fresh install gets an account even with sign-up disabled. They create the first workspace and are its admin. After that, sign-up is closed.
 - **Adding people:** invite them by email from the workspace's Members page. An invitee can sign up because of the pending invitation. Invite links don't work while sign-up is closed, because the link's recipient has no invitation to match.
-- **`DISABLE_NOTIFICATION_EMAILS`** stops mention emails only. Magic-link sign-in, invite and password-reset emails still go out, and mentions still show in the in-app notification bell (bottom of the sidebar). There are no browser push notifications.
+- **`DISABLE_NOTIFICATION_EMAILS`** stops mention emails only. Magic-link sign-in, invite and password-reset emails still go out, and mentions still show in the in-app notification bell (bottom of the sidebar) and as push notifications on devices that turned them on.
 - **Leave `NEXT_PUBLIC_DISABLE_EMAIL` unset:** it hides magic-link sign-in and email invites.
 
 ## Deploy
@@ -82,6 +82,24 @@ This runs `tools/deploy.mjs`, which:
 Use this instead of passing `--secrets-file .env` yourself. The raw file would upload every `NEXT_PUBLIC_*` and empty value as a secret, and would clash with names set in `vars`.
 
 Production is served on the Custom Domain `tasks.example.com`, declared in `wrangler.jsonc` (`routes` with `"custom_domain": true`). `wrangler deploy` attaches it and creates the DNS record and certificate, as long as `example.com` is a zone in the same Cloudflare account. Keep it in step with `NEXT_PUBLIC_BASE_URL`.
+
+## Push notifications
+
+The installed app (the PWA: "Add to Home Screen" on iPhone and Android, or "Install" in desktop Chrome and Edge) can receive push notifications for mentions.
+
+1. Generate the server keys once. They're written to `.env`, and the next deploy uploads them as secrets. The values aren't printed:
+
+   ```sh
+   node tools/generate-vapid-keys.mjs
+   ```
+
+   Keep them. Replacing them (`--force`) invalidates every device's subscription, and people have to turn push on again.
+
+2. Each person opens the installed app, opens the bell and turns on **Push notifications on this device**. On iPhone and iPad this needs iOS 16.4 or later, and the app must be opened from the home screen.
+
+Tapping a notification opens the card. The app icon shows the unread count where the platform supports badges. Logging out removes that device's subscription. Without the keys, push is simply off and the bell works as before.
+
+`VAPID_SUBJECT` (optional, in `vars`) is the contact push services see; it defaults to the site's URL.
 
 ## MCP server (AI clients)
 

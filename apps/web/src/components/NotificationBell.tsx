@@ -8,8 +8,13 @@ import { twMerge } from "tailwind-merge";
 
 import type { RouterOutputs } from "@kan/api";
 
+import type { PushStatus } from "~/hooks/usePushNotifications";
 import { useLocalisation } from "~/hooks/useLocalisation";
 import { useIsMobile } from "~/hooks/useMediaQuery";
+import {
+  setAppBadge,
+  usePushNotifications,
+} from "~/hooks/usePushNotifications";
 import { api } from "~/utils/api";
 
 type Notification = RouterOutputs["notification"]["list"]["items"][number];
@@ -35,6 +40,15 @@ export default function NotificationBell({
   });
   const count = unread?.count ?? 0;
   const badge = count > 99 ? "99+" : String(count);
+
+  // Mounted on every page, so this also registers the service worker and
+  // re-syncs the device's push subscription.
+  const push = usePushNotifications();
+
+  // Keep the installed app's icon badge in step with the unread count.
+  useEffect(() => {
+    if (unread) setAppBadge(unread.count);
+  }, [unread]);
 
   return (
     <Popover className="relative w-full">
@@ -75,6 +89,7 @@ export default function NotificationBell({
                   onCloseSideNav?.();
                 }}
               />
+              {push.ready && <PushFooter push={push} />}
             </PopoverPanel>
           )}
         </>
@@ -332,5 +347,64 @@ function NotificationItem({
         </button>
       )}
     </li>
+  );
+}
+
+const PUSH_HINTS: Partial<Record<PushStatus, () => string>> = {
+  "not-installed": () =>
+    t`Install kan-flare as an app to get push notifications on this device.`,
+  unsupported: () =>
+    t`Install kan-flare as an app to get push notifications on this device.`,
+  denied: () =>
+    t`Notifications are blocked. Allow them for kan-flare in your device settings.`,
+};
+
+function PushFooter({
+  push,
+}: {
+  push: ReturnType<typeof usePushNotifications>;
+}) {
+  const { status, busy, error } = push;
+  if (status === "unconfigured") return null;
+
+  const hint = PUSH_HINTS[status]?.();
+  const on = status === "on";
+
+  return (
+    <div className="border-t border-light-300 px-3 py-2 text-xs text-light-900 dark:border-dark-400 dark:text-dark-900">
+      {hint ? (
+        <p>{hint}</p>
+      ) : (
+        <label className="flex cursor-pointer items-center justify-between gap-3">
+          <span className="text-neutral-900 dark:text-dark-1000">
+            {t`Push notifications on this device`}
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            aria-label={t`Push notifications on this device`}
+            disabled={busy}
+            onClick={() => void (on ? push.disable() : push.enable())}
+            className={twMerge(
+              "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
+              on ? "bg-blue-500" : "bg-light-400 dark:bg-dark-500",
+            )}
+          >
+            <span
+              className={twMerge(
+                "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                on ? "translate-x-[18px]" : "translate-x-0.5",
+              )}
+            />
+          </button>
+        </label>
+      )}
+      {error && (
+        <p role="alert" className="mt-1 text-red-500">
+          {t`Couldn't turn on push notifications. Try again.`}
+        </p>
+      )}
+    </div>
   );
 }

@@ -90,3 +90,27 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+/**
+ * Web Push subscriptions, one per device (browser or installed app). The
+ * endpoint is unique: if another user signs in on the same device and
+ * subscribes, the row moves to them.
+ */
+export const pushSubscriptions = sqliteTable(
+  "push_subscription",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId", { length: 12 }).notNull().unique(),
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("userAgent"),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
+  },
+  (table) => [index("push_subscription_user_idx").on(table.userId)],
+);

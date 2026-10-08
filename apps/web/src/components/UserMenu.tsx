@@ -10,8 +10,10 @@ import { authClient } from "@kan/auth/client";
 
 import { env } from "~/env";
 import { useIsMobile } from "~/hooks/useMediaQuery";
+import { unsubscribeThisDevice } from "~/hooks/usePushNotifications";
 import { useKeyboardShortcuts } from "~/providers/keyboard-shortcuts";
 import { useModal } from "~/providers/modal";
+import { api } from "~/utils/api";
 import { getAvatarUrl } from "~/utils/helpers";
 
 interface UserMenuProps {
@@ -33,6 +35,7 @@ export default function UserMenu({
 }: UserMenuProps) {
   const { theme, setTheme } = useTheme();
   const { openModal } = useModal();
+  const removePushSubscription = api.push.unsubscribe.useMutation();
   const { openLegend } = useKeyboardShortcuts();
   const isMobile = useIsMobile();
 
@@ -40,6 +43,11 @@ export default function UserMenu({
     if (onCloseSideNav && isMobile) {
       onCloseSideNav();
     }
+    // While still signed in, so the server can drop this device's
+    // subscription; otherwise the next person here gets this user's pushes.
+    await unsubscribeThisDevice((endpoint) =>
+      removePushSubscription.mutateAsync({ endpoint }),
+    );
     await authClient.signOut();
     // A full page load rather than router.push: it drops every client cache,
     // so the login page can't see the stale session and bounce to /boards,

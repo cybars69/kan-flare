@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { generateKeyPairSync } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
@@ -31,12 +32,24 @@ const wranglerLog = join(tmpdir(), "kan-e2e-wrangler.log");
 const betterAuthSecret =
   process.env.BETTER_AUTH_SECRET ?? "e2e-test-only-secret-not-for-prod-use";
 
+// Throwaway VAPID keys for this run, never the real ones from .env.
+const vapidJwk = generateKeyPairSync("ec", {
+  namedCurve: "P-256",
+}).privateKey.export({ format: "jwk" });
+const vapidPublicKey = Buffer.concat([
+  Buffer.from([4]),
+  Buffer.from(vapidJwk.x ?? "", "base64url"),
+  Buffer.from(vapidJwk.y ?? "", "base64url"),
+]).toString("base64url");
+
 /** Read by the Worker at runtime; passed with `wrangler dev --var`. */
 const sharedVars: Record<string, string> = {
   BETTER_AUTH_SECRET: betterAuthSecret,
   DISABLE_RATE_LIMIT: "true",
   // wrangler.jsonc turns these off for production; mention-email.spec needs them.
   DISABLE_NOTIFICATION_EMAILS: "false",
+  VAPID_PUBLIC_KEY: vapidPublicKey,
+  VAPID_PRIVATE_KEY: vapidJwk.d ?? "",
   EMAIL_FROM: "kan-flare e2e <e2e@kan-test.local>",
   TRELLO_API_URL: `http://127.0.0.1:${trelloMockPort}`,
   TRELLO_APP_API_KEY: "e2e-mock-trello-key",

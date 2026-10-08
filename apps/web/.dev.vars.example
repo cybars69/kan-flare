@@ -3,3 +3,6 @@
 NEXTJS_ENV=development
 NEXT_PUBLIC_BASE_URL=http://localhost:8787
 BETTER_AUTH_SECRET= # at least 32 characters, e.g. `openssl rand -base64 32`
+# Optional, for push notifications: copy from .env after `node tools/generate-vapid-keys.mjs`
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
