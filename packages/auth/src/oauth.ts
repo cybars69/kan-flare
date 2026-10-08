@@ -70,6 +70,21 @@ export interface OAuthTokenInfo {
 }
 
 /**
+ * The OAuth Provider plugin's live options. Companion plugins (cimd) add
+ * their client discovery to these at startup, so a token issued to a
+ * URL-identified client such as Claude only validates against them, not
+ * against the original `oauthOptions` object.
+ */
+const providerOptions = (context: {
+  getPlugin?: (id: string) => unknown;
+}): OAuthOptions<Scope[]> => {
+  const plugin = context.getPlugin?.("oauth-provider") as
+    | { options?: OAuthOptions<Scope[]> }
+    | undefined;
+  return plugin?.options ?? oauthOptions;
+};
+
+/**
  * Server-only endpoint that resolves an OAuth access token to its user, for
  * the REST API and MCP. Called as `auth.api.resolveOAuthAccessToken`.
  */
@@ -90,7 +105,7 @@ const oauthTokenResolver = () =>
           try {
             const payload = await getOAuthProviderApi(
               ctx,
-              oauthOptions,
+              providerOptions(ctx.context),
             ).requireActiveAccessToken(token);
             if (typeof payload.sub !== "string") return null;
             const scope = (payload as { scope?: unknown }).scope;
