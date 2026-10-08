@@ -84,8 +84,11 @@ const write = (
   if (isDev()) {
     const { level: _level, time, module, msg: message, ...rest } = entry;
     const extra = Object.keys(rest).length ? ` ${JSON.stringify(rest)}` : "";
+    const clock = typeof time === "string" ? time.slice(11, 19) : "";
+    const label = typeof module === "string" ? module : "app";
+    const text = typeof message === "string" ? message : "";
     CONSOLE[level](
-      `${String(time).slice(11, 19)} ${level.toUpperCase().padEnd(5)} [${String(module ?? "app")}] ${String(message ?? "")}${extra}`,
+      `${clock} ${level.toUpperCase().padEnd(5)} [${label}] ${text}${extra}`,
     );
     return;
   }

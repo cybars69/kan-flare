@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Menu, Transition } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
 import { useTheme } from "next-themes";
@@ -32,7 +31,6 @@ export default function UserMenu({
   isCollapsed = false,
   onCloseSideNav,
 }: UserMenuProps) {
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { openModal } = useModal();
   const { openLegend } = useKeyboardShortcuts();
@@ -43,7 +41,10 @@ export default function UserMenu({
       onCloseSideNav();
     }
     await authClient.signOut();
-    router.push("/login");
+    // A full page load rather than router.push: it drops every client cache,
+    // so the login page can't see the stale session and bounce to /boards,
+    // and the previous user's data doesn't linger in memory.
+    window.location.assign("/login");
   };
 
   const handleLinkClick = () => {
@@ -77,7 +78,7 @@ export default function UserMenu({
         ) : (
           <Menu.Button
             className="flex w-full items-center rounded-md p-1.5 text-neutral-900 hover:bg-light-200 dark:text-dark-900 dark:hover:bg-dark-200 dark:hover:text-dark-1000"
-            title={isCollapsed ? (displayName || email) : undefined}
+            title={isCollapsed ? displayName || email : undefined}
           >
             {avatarUrl ? (
               <Image

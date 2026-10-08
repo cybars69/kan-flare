@@ -21,7 +21,7 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 
 | Date       | Who | What                                                                         |
 | ---------- | --- | ---------------------------------------------------------------------------- |
-| 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 254/254, e2e 48/48 (1 flaky), smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
+| 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 255/255, e2e 48/48 with no retries, typecheck clean, smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
 | 2026-10-08 | Claude (for Arsalan) | Phase 0 done except new icon artwork (`0.3`). Remotes repointed, `workers` branch created, renamed to kan-flare, `NOTICE` added, billing routes removed. Build, tests and a local run checked. |
 | 2026-10-07 | —   | Plan finalised. D1 chosen over Hyperdrive so no external Postgres is needed. |
 
@@ -541,7 +541,8 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 - `12.2`: every ordering test checks that indexes are exactly 0…n-1 (`cardTitles`/`listNames` in `ordering.integration.test.ts`, and the item checks).
 - `12.3`: the Playwright self-hosted suite now runs against the Workers build: OpenNext build plus `wrangler dev`, on a fresh local D1/R2 state each run.
-  - **Final result:** 48/48. 47 passed first time, and `auth.spec.ts` (log out, then log back in) passed on retry. Its first attempt hits a navigation race: after log-out, the app's own redirect to `/login` collides with the test's `page.goto("/login")` (`ERR_ABORTED`). Upstream configures retries for this kind of flakiness. Still open.
+  - **Final result:** 48/48 with retries off, and the log-out test passed 5 times in a row.
+  - **Log-out flake, fixed:** after sign-out, `UserMenu` used `router.push("/login")`, and the login page redirected to `/boards` while the client still held the stale session. That bounced between pages and aborted the test's navigation. It also left the previous user's cached data in the page. It now does a full page load to `/login`, which clears every client cache.
   - **Harness changes:**
     - `playwright.config.ts` builds with OpenNext, applies migrations to a temp state dir, runs `wrangler dev` with `--var` settings, and tees its output to a log.
     - `tests/support/mailpit-client.ts` now reads sent mail from that log. Wrangler's email simulator logs the recipient and the path of each message's HTML. The exported names are unchanged.
@@ -562,10 +563,14 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   - **Checked against the Workers build:** uploads, downloads and image variants (smoke test); the password-reset, magic-link invite and mention emails (smoke test and e2e); email-and-password and magic-link sign-in (e2e).
   - **Not yet tested:** OAuth/OIDC providers need real client credentials, and a real Trello import needs a Trello API key; the e2e suite uses a mock Trello server.
 - `12.5`:
-  - **Typecheck:** 1 error, upstream's `views/board/index.tsx:902`.
-  - **Tests:** 254 unit and integration tests pass.
+  - **Typecheck:** clean; see below.
+  - **Tests:** 255 unit and integration tests pass.
   - **Lint:** all remaining errors are in upstream code, except the `integration-tests/` parse errors. Upstream's tsconfig excludes that folder, so its own test files show them too. Email dropped from 117 errors to 8, because build output is now ignored.
-  - **Lint crashes still open, both upstream:** `@kan/web` crashes (`@next/eslint-plugin-next` 14 vs ESLint 9) and `@kan/logger` has no ESLint config.
+  - **Lint crashes, fixed:**
+    - `@next/eslint-plugin-next` is upgraded 14 → 15.5.27 to match Next, so `@kan/web` lints again. Upstream had already turned off one of its rules for the same crash.
+    - `@kan/logger` has an ESLint config now.
+  - **Lint in the web app:** across files changed since upstream, the only errors on changed lines were 5 in my image and avatar routes, now fixed.
+  - **Typecheck:** fully clean, 21/21. Upstream's `views/board/index.tsx:902` error is fixed by typing the board output schema's `visibility` as `z.enum(["public", "private"])`.
   - **Turbo env:** `BETTER_AUTH_URL`, `DISABLE_RATE_LIMIT` and `SUBSCRIBER_*` were read without being declared in `turbo.json`, and are now declared.
 - `12.6`: half done. The bundle is **2.77 MiB gzipped**. Cold-start time needs a real deployment and is still to be measured.
 

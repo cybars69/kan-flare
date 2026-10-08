@@ -12,6 +12,7 @@ import {
   verifyFileSignature,
 } from "@kan/shared/storage";
 
+import { env } from "~/env";
 import { decodeImageSource } from "~/utils/image-loader";
 
 /**
@@ -51,10 +52,10 @@ interface Source {
   public: boolean;
 }
 
-type Env = {
+interface Env {
   IMAGES?: ImagesBinding;
   ASSETS?: { fetch(request: Request): Promise<Response> };
-};
+}
 
 const sha256Hex = async (value: string) =>
   [
@@ -71,12 +72,12 @@ const first = (value: string | string[] | undefined) =>
 async function resolveSource(
   src: string,
   origin: string,
-  env: Env,
+  bindings: Env,
 ): Promise<Source | "forbidden" | null> {
   const url = new URL(src, origin);
   const sameOrigin =
     url.origin === origin ||
-    url.origin === process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "");
+    url.origin === env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "");
 
   if (sameOrigin && url.pathname.startsWith("/api/files/")) {
     const [, , , kindSegment, ...keySegments] = url.pathname.split("/");
@@ -110,8 +111,8 @@ async function resolveSource(
 
   let response: Response;
   if (sameOrigin) {
-    if (!env.ASSETS) return null;
-    response = await env.ASSETS.fetch(new Request(url));
+    if (!bindings.ASSETS) return null;
+    response = await bindings.ASSETS.fetch(new Request(url));
   } else if (url.protocol === "https:") {
     response = await fetch(url, { redirect: "follow" });
   } else {
@@ -190,17 +191,19 @@ export default withRateLimit(
       return res.status(400).json({ error: "Invalid parameters" });
     }
 
-    const { env } = getCloudflareContext() as unknown as { env: Env };
+    const { env: bindings } = getCloudflareContext() as unknown as {
+      env: Env;
+    };
     const proto = first(req.headers["x-forwarded-proto"]) ?? "http";
     const origin = `${proto}://${req.headers.host ?? "localhost"}`;
 
-    const source = await resolveSource(src, origin, env);
+    const source = await resolveSource(src, origin, bindings);
     if (source === "forbidden") {
       return res.status(403).json({ error: "Image not allowed" });
     }
     if (!source) return res.status(404).json({ error: "Image not found" });
 
-    if (PASSTHROUGH.has(source.contentType) || !env.IMAGES) {
+    if (PASSTHROUGH.has(source.contentType) || !bindings.IMAGES) {
       return send(
         res,
         source.body,
@@ -225,7 +228,7 @@ export default withRateLimit(
     const [forTransform, forFallback] = source.body.tee();
     try {
       const transformed = (
-        await env.IMAGES.input(forTransform)
+        await bindings.IMAGES.input(forTransform)
           .transform({ width, fit: "scale-down" })
           .output({ format, quality })
       ).response();

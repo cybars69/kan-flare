@@ -11,10 +11,9 @@ import {
   putObject,
 } from "@kan/shared/storage";
 
-const MAX_SIZE_BYTES = parseInt(
-  process.env.AVATAR_UPLOAD_LIMIT || "2097152",
-  10,
-); // Default 2MB
+import { env } from "~/env";
+
+const MAX_SIZE_BYTES = parseInt(env.AVATAR_UPLOAD_LIMIT ?? "2097152", 10); // Default 2MB
 const allowedContentTypes = ["image/jpeg", "image/png", "image/webp"];
 
 export const config = {

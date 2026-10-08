@@ -73,6 +73,7 @@ export const env = createEnv({
     APPLE_CLIENT_SECRET: z.string().optional(),
     APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
     EMAIL_FROM: z.string().optional(),
+    AVATAR_UPLOAD_LIMIT: z.string().optional(),
   },
 
   /**
