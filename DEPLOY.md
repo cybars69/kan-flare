@@ -63,7 +63,7 @@ DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 
 - **The first person to sign up** on a fresh install gets an account even with sign-up disabled. They create the first workspace and are its admin. After that, sign-up is closed.
 - **Adding people:** invite them by email from the workspace's Members page. An invitee can sign up because of the pending invitation. Invite links don't work while sign-up is closed, because the link's recipient has no invitation to match.
-- **`DISABLE_NOTIFICATION_EMAILS`** stops mention emails only. Magic-link sign-in, invite and password-reset emails still go out, and mentions still appear as in-app notifications.
+- **`DISABLE_NOTIFICATION_EMAILS`** stops mention emails only. Magic-link sign-in, invite and password-reset emails still go out. kan-flare has no in-app or push notifications to fall back on: mentions are recorded in the database, but nothing displays them.
 - **Leave `NEXT_PUBLIC_DISABLE_EMAIL` unset:** it hides magic-link sign-in and email invites.
 
 ## Deploy

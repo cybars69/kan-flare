@@ -98,8 +98,8 @@ export async function sendMentionEmails({
         if (!userId || !email) return;
 
         // DISABLE_NOTIFICATION_EMAILS turns off mention emails only; sign-in,
-        // invite and password-reset emails still go out, and the in-app
-        // notification is still recorded.
+        // invite and password-reset emails still go out, and the
+        // notification row is still recorded (nothing displays it yet).
         if (process.env.DISABLE_NOTIFICATION_EMAILS?.toLowerCase() !== "true") {
           try {
             await sendEmail(
