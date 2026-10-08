@@ -1,24 +1,24 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kan-flare",
-  "main": ".open-next/worker.js",
+  "main": "apps/web/worker.mjs",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
-    "directory": ".open-next/assets",
+    "directory": "apps/web/.open-next/assets",
     "binding": "ASSETS"
   },
-  // Serve production on a Custom Domain (custom_domain: true), not a zone
-  // route: wrangler deploy creates the DNS record and certificate. Must match
-  // NEXT_PUBLIC_BASE_URL in .env; example.com must be in this account.
-  "routes": [{ "pattern": "tasks.example.com", "custom_domain": true }],
-  // Non-secret runtime settings. Secrets (BETTER_AUTH_SECRET, OAuth client
-  // secrets…) come from .env and are uploaded by `pnpm --filter @kan/web run deploy`.
+  // This file is generic so the "Deploy to Cloudflare" button works for
+  // anyone. Instance settings (EMAIL_FROM, APP URL, secrets…) live in .env
+  // and are uploaded by `pnpm run deploy`, or are entered in the button's
+  // form. Attach a custom domain in the dashboard: Workers & Pages → this
+  // Worker → Settings → Domains & Routes. It stays across deploys.
   "vars": {
-    "EMAIL_FROM": "Kan Flare <no-reply@tasks.example.com>",
-    "DISABLE_NOTIFICATION_EMAILS": "true",
     "LOG_LEVEL": "info"
   },
+  // Keep variables added in the dashboard (EMAIL_FROM, NEXT_PUBLIC_BASE_URL…)
+  // when a deploy runs; otherwise each deploy would remove them.
+  "keep_vars": true,
   "observability": {
     "logs": { "enabled": true }
   },
@@ -34,7 +34,7 @@
       "database_name": "kan-flare",
       // No database_id: `wrangler deploy` provisions the database on first
       // deploy and reuses it afterwards. Local dev uses .wrangler/state.
-      "migrations_dir": "../../packages/db/migrations"
+      "migrations_dir": "packages/db/migrations"
     }
   ],
   // Buckets are created on first deploy when they don't exist yet.

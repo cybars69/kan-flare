@@ -1,16 +1,17 @@
 import { useRouter } from "next/router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "~/env";
 import { useForm } from "react-hook-form";
 import { HiCheck, HiMiniStar } from "react-icons/hi2";
 import { z } from "zod";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
+import { env } from "~/env";
 import { useDebounce } from "~/hooks/useDebounce";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { getBaseUrl } from "~/utils/baseUrl";
 
 const UpdateWorkspaceUrlForm = ({
   workspacePublicId,
@@ -130,9 +131,7 @@ const UpdateWorkspaceUrlForm = ({
               : undefined)
           }
           prefix={
-            env.NEXT_PUBLIC_KAN_ENV === "cloud"
-              ? "kan.bn/"
-              : `${env.NEXT_PUBLIC_BASE_URL}/`
+            env.NEXT_PUBLIC_KAN_ENV === "cloud" ? "kan.bn/" : `${getBaseUrl()}/`
           }
           iconRight={
             isWorkspaceSlugAvailable?.isAvailable ||

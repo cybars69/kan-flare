@@ -7,12 +7,14 @@
   },
   "packageManager": "pnpm@9.14.2",
   "scripts": {
-    "build": "turbo run build",
+    "build": "node tools/deploy.mjs --build-only",
+    "build:packages": "turbo run build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
     "db:generate": "pnpm --filter @kan/db generate",
     "db:migrate": "pnpm --filter @kan/web db:migrate",
     "db:studio": "turbo -F @kan/db studio",
+    "deploy": "node tools/deploy.mjs",
     "dev": "turbo watch dev --continue",
     "dev:next": "turbo watch dev -F @kan/web...",
     "format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
@@ -28,7 +30,9 @@
     "test:e2e:ui": "pnpm --filter @kan/e2e test:ui",
     "test:e2e:ui:cloud": "pnpm --filter @kan/e2e test:ui:cloud",
     "typecheck": "turbo run typecheck",
-    "ui-add": "turbo run ui-add"
+    "ui-add": "turbo run ui-add",
+    "secrets:push": "node tools/push-secrets.mjs",
+    "vapid:generate": "node tools/generate-vapid-keys.mjs"
   },
   "devDependencies": {
     "@kan/prettier-config": "workspace:*",
@@ -45,6 +49,31 @@
     },
     "patchedDependencies": {
       "@opennextjs/aws@4.1.8": "patches/@opennextjs__aws@4.1.8.patch"
+    }
+  },
+  "cloudflare": {
+    "bindings": {
+      "BETTER_AUTH_SECRET": {
+        "description": "Signs sign-in sessions. Use a random string of 32 or more characters, for example from `openssl rand -base64 32`. Keep it: changing it signs everyone out."
+      },
+      "DB": {
+        "description": "kan-flare's database (D1). Created for you; tables are set up on the first deploy."
+      },
+      "AVATARS": {
+        "description": "R2 bucket for profile pictures. Created for you."
+      },
+      "ATTACHMENTS": {
+        "description": "R2 bucket for card attachments. Created for you."
+      },
+      "IMAGE_VARIANTS": {
+        "description": "R2 bucket for resized images. Created for you."
+      },
+      "IMAGES": {
+        "description": "Cloudflare Images, used to resize and convert pictures. Billed per unique transformation."
+      },
+      "EMAIL": {
+        "description": "Cloudflare Email Service, for sign-in links and invites. After deploying, onboard a sending domain and set `EMAIL_FROM`; see [DEPLOY.md](https://github.com/cybars69/kan-flare/blob/workers/DEPLOY.md)."
+      }
     }
   }
 }

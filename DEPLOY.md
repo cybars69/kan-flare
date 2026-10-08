@@ -2,7 +2,7 @@
 
 kan-flare runs entirely on Cloudflare:
 
-| Piece | Cloudflare product | Binding in `apps/web/wrangler.jsonc` |
+| Piece | Cloudflare product | Binding in `wrangler.jsonc` |
 | --- | --- | --- |
 | Web app and API (Next.js via OpenNext) | Workers | – |
 | Database | D1 | `DB` |
@@ -13,41 +13,42 @@ kan-flare runs entirely on Cloudflare:
 
 None of these need creating by hand. Bindings without IDs are provisioned by `wrangler deploy` the first time, and reused afterwards.
 
+There are two ways to deploy: the **Deploy to Cloudflare** button in the [README](README.md#with-the-button), which needs no local setup, or `pnpm run deploy` from a clone, described here. The root `wrangler.jsonc` is generic and shared by both; everything specific to your instance (sender, URL, secrets) lives in `.env`, or in the Worker's dashboard settings for a button deploy.
+
 ## Before the first deploy
 
-1. **Account and tools.** Use a Cloudflare account on the Workers Paid plan. The free plan's limits on CPU time, D1 queries per request and bundle size (3 MiB, where kan-flare is about 2.8 MiB) leave little headroom. You also need Node.js 20+ and pnpm 9.
+1. **Account and tools.** The Workers Paid plan is recommended: kan-flare fits the free plan's 3 MiB bundle limit (about 2.7 MiB), but the free plan's CPU time and D1 limits leave little headroom. You also need Node.js 20+ and pnpm 9.
 
    ```sh
    pnpm install
-   cd apps/web && npx wrangler login
+   npx wrangler login
    ```
 
-2. **Email domain.** Mail is sent from a domain onboarded to Cloudflare Email Service:
+2. **Images.** Cloudflare Images transformations must be available on the account. They're billed per unique transformation each month. kan-flare stores every variant in R2, so each one is made only once.
+
+3. **Email (optional, but needed for sign-in links and invites).** Mail is sent from a domain onboarded to Cloudflare Email Service:
 
    ```sh
    npx wrangler email sending enable mail.example.com
    ```
 
-3. **Images.** Cloudflare Images transformations must be available on the account. They're billed per unique transformation each month. kan-flare stores every variant in R2, so each one is made only once.
-
-4. **Build-time settings.** `NEXT_PUBLIC_*` values are compiled into the build, so they have to be in the environment of the machine that runs the deploy. Put them in `.env` at the repository root (see `.env.example`):
+4. **Settings.** Copy `.env.example` to `.env` at the repository root and fill it in. At minimum:
 
    ```sh
-   NEXT_PUBLIC_BASE_URL=https://kan.example.com
-   NEXT_PUBLIC_ALLOW_CREDENTIALS=true   # email + password sign-in
-   NEXT_PUBLIC_DISABLE_SIGN_UP=false
-   BETTER_AUTH_SECRET=...               # also needed at build for env validation
+   BETTER_AUTH_SECRET=...                       # openssl rand -base64 32
+   NEXT_PUBLIC_BASE_URL=https://kan.example.com # optional; see "Your own domain"
+   EMAIL_FROM="Kan <no-reply@mail.example.com>" # for email
    ```
 
-5. **Runtime settings.** These are read by the Worker at request time:
-   - **Non-secret values** (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`, OAuth client IDs…) go in `vars` in `apps/web/wrangler.jsonc`.
-   - **Secrets** (`BETTER_AUTH_SECRET`, OAuth client secrets…) stay in `.env`. Each deploy uploads them with the new version: every non-empty, non-`NEXT_PUBLIC_*` value that isn't already a var.
+   - **`NEXT_PUBLIC_*`** values are compiled into the build. Without `NEXT_PUBLIC_ALLOW_CREDENTIALS` and `NEXT_PUBLIC_DISABLE_SIGN_UP`, the build uses `true` for both: email and password sign-in, and closed sign-up.
+   - **Everything else** that's non-empty is uploaded as a Worker secret with each deploy. Nothing is printed.
+   - **`wrangler.jsonc`** holds only settings shared by every install (`LOG_LEVEL`). Keep instance settings out of it, so the deploy button keeps working for everyone.
 
-   To change a secret without deploying:
+   To change secrets without deploying:
 
    ```sh
-   pnpm --filter @kan/web secrets:push --dry-run   # lists the names it would push
-   pnpm --filter @kan/web secrets:push
+   pnpm secrets:push --dry-run   # lists the names it would push
+   pnpm secrets:push
    ```
 
 ## Closed sign-up and email
@@ -55,9 +56,8 @@ None of these need creating by hand. Bindings without IDs are provisioned by `wr
 For a private instance:
 
 ```sh
-# .env (build-time)
-NEXT_PUBLIC_DISABLE_SIGN_UP=true    # only the first account and email invitees can sign up
-# runtime: apps/web/wrangler.jsonc "vars"
+# .env
+NEXT_PUBLIC_DISABLE_SIGN_UP=true    # the default: only the first account and email invitees can sign up
 DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 ```
 
@@ -69,10 +69,10 @@ DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 ## Deploy
 
 ```sh
-pnpm --filter @kan/web run deploy
+pnpm run deploy
 ```
 
-This runs `tools/deploy.mjs`, which:
+Use `pnpm run deploy`, not `pnpm deploy`, which is a built-in pnpm command. This runs `tools/deploy.mjs`, which:
 
 1. Builds the Worker with OpenNext, reading `NEXT_PUBLIC_*` from `.env`.
 2. If the D1 database already exists, applies pending migrations before the new code goes live. A failed migration stops the deploy.
@@ -81,7 +81,13 @@ This runs `tools/deploy.mjs`, which:
 
 Use this instead of passing `--secrets-file .env` yourself. The raw file would upload every `NEXT_PUBLIC_*` and empty value as a secret, and would clash with names set in `vars`.
 
-Production is served on the Custom Domain `tasks.example.com`, declared in `wrangler.jsonc` (`routes` with `"custom_domain": true`). `wrangler deploy` attaches it and creates the DNS record and certificate, as long as `example.com` is a zone in the same Cloudflare account. Keep it in step with `NEXT_PUBLIC_BASE_URL`.
+`pnpm run build` builds only, and `pnpm run deploy --skip-build` deploys the last build. Button deploys (Workers Builds) run these two scripts: there's no `.env` there, so the secrets are the ones set on the Worker.
+
+### Your own domain
+
+Attach it once in the dashboard: **Workers & Pages** → **kan-flare** → **Settings** → **Domains & Routes** → **Add** → **Custom domain**. Cloudflare creates the DNS record and certificate; the domain's zone must be in the same account. Deploys don't remove it.
+
+Then set `NEXT_PUBLIC_BASE_URL` to that address (in `.env`, or as a variable on the Worker for a button deploy), so links in emails always use it. Without it, the app uses whichever address each request came in on (`apps/web/worker.mjs`), which is what makes a fresh button deploy work on its `workers.dev` address.
 
 ## Push notifications
 
@@ -90,7 +96,7 @@ The installed app (the PWA: "Add to Home Screen" on iPhone and Android, or "Inst
 1. Generate the server keys once. They're written to `.env`, and the next deploy uploads them as secrets. The values aren't printed:
 
    ```sh
-   node tools/generate-vapid-keys.mjs
+   pnpm vapid:generate
    ```
 
    Keep them. Replacing them (`--force`) invalidates every device's subscription, and people have to turn push on again.
@@ -99,7 +105,7 @@ The installed app (the PWA: "Add to Home Screen" on iPhone and Android, or "Inst
 
 Tapping a notification opens the card. The app icon shows the unread count where the platform supports badges. Logging out removes that device's subscription. Without the keys, push is simply off and the bell works as before.
 
-`VAPID_SUBJECT` (optional, in `vars`) is the contact push services see; it defaults to the site's URL.
+For a button deploy, generate the keys in a clone and add `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` as secrets on the Worker. `VAPID_SUBJECT` (optional) is the contact push services see; it defaults to the site's URL.
 
 ## MCP server (AI clients)
 
@@ -153,8 +159,8 @@ The HTTP endpoint calls the app's own REST API through the `WORKER_SELF_REFERENC
 ## Local development
 
 ```sh
-cp apps/web/.dev.vars.example apps/web/.dev.vars   # fill in BETTER_AUTH_SECRET
-pnpm db:migrate                                    # local D1 in apps/web/.wrangler
+cp .dev.vars.example .dev.vars   # fill in BETTER_AUTH_SECRET
+pnpm db:migrate                  # local D1 in .wrangler/
 pnpm dev                                           # next dev, with bindings
 ```
 
@@ -162,12 +168,13 @@ To run the real Workers build locally:
 
 ```sh
 cd apps/web
-npx opennextjs-cloudflare build && npx wrangler dev --local-upstream localhost:8787
+npx opennextjs-cloudflare build -c ../../wrangler.jsonc
+npx wrangler dev -c ../../wrangler.jsonc --local-upstream localhost:8787
 ```
 
-`--local-upstream` matters: because `wrangler.jsonc` declares the `tasks.example.com` custom domain, plain `wrangler dev` rewrites every request to that host, and sign-in then fails with "Invalid origin".
+`--local-upstream` keeps requests on `localhost`. If you add a `routes` entry to `wrangler.jsonc`, plain `wrangler dev` rewrites every request to that host, and sign-in fails with "Invalid origin".
 
-Mail isn't sent locally. `wrangler dev` writes each message under `apps/web/.wrangler/tmp/email/` and logs where it put it.
+Mail isn't sent locally. `wrangler dev` writes each message under `.wrangler/tmp/email/` and logs where it put it.
 
 ## Tests
 

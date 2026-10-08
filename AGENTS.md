@@ -44,7 +44,8 @@ kan-flare runs on Cloudflare Workers with D1. These differ from upstream Kan (No
 - **SQLite SQL**: no `ILIKE`, `similarity()` or Postgres casts. Quote `"index"`. Timestamps are integer milliseconds (`mode: "timestamp_ms"`); booleans are integers.
 - **Bindings**: get D1 through `createDrizzleClient()`, files through `@kan/shared/storage` (R2), mail through `sendEmail` (the Email Service binding). Rate limiting goes through `withRateLimit` (Workers Rate Limiting).
 - **Background work**: don't leave promises un-awaited. Wrap them in `runInBackground()` (`packages/api/src/utils/background.ts`), or Workers may cut them off after the response.
-- **Env**: `NEXT_PUBLIC_*` values are compiled in at build time. Server code reads `process.env` at request time (Worker vars and secrets).
+- **Env**: `NEXT_PUBLIC_*` values are compiled in at build time when set. Server code reads `process.env` at request time (Worker vars and secrets). Without `NEXT_PUBLIC_BASE_URL`, `apps/web/worker.mjs` uses each request's origin and the browser uses `getBaseUrl()` (`apps/web/src/utils/baseUrl.ts`).
+- **Config**: `wrangler.jsonc` lives at the repo root (the Deploy to Cloudflare button needs it there). Commands run from `apps/web` pass `-c ../../wrangler.jsonc`.
 - **Tests**: integration tests run on local D1 (`packages/api/integration-tests/test-db.ts`). Check end to end with `cloudflare-migration/smoke.mjs` against `wrangler dev`.
 
 ## Code Style
@@ -247,7 +248,7 @@ Update all of the following:
 
 1. `.env.example` — add the variable with an empty value and a comment explaining it
 2. `turbo.json` — add to `globalEnv` (or `globalPassThroughEnv` for CI/platform vars)
-3. `NEXT_PUBLIC_*` (build-time): also add it to `apps/web/src/env.ts`. Server-only values: document how to set them (`wrangler secret put` for secrets, `vars` in `apps/web/wrangler.jsonc` otherwise) and add a local value to `apps/web/.dev.vars.example`
+3. `NEXT_PUBLIC_*` (build-time): also add it to `apps/web/src/env.ts`, and make the app work when it's unset ("Deploy to Cloudflare" builds have no `.env`). Server-only values are uploaded from `.env` by `pnpm run deploy`; keep the root `wrangler.jsonc` generic (no instance-specific `vars` or routes). If the button should ask for a secret, add it to the root `.dev.vars.example`
 4. `README.md` — add a row to the Environment Variables table
 
 ## Database Changes

@@ -46,7 +46,7 @@ const vapidPublicKey = Buffer.concat([
 const sharedVars: Record<string, string> = {
   BETTER_AUTH_SECRET: betterAuthSecret,
   DISABLE_RATE_LIMIT: "true",
-  // wrangler.jsonc turns these off for production; mention-email.spec needs them.
+  // Production .env files may turn these off; mention-email.spec needs them.
   DISABLE_NOTIFICATION_EMAILS: "false",
   VAPID_PUBLIC_KEY: vapidPublicKey,
   VAPID_PRIVATE_KEY: vapidJwk.d ?? "",
@@ -155,11 +155,11 @@ export default defineConfig({
         {
           command: [
             `rm -rf ${wranglerState}`,
-            "pnpm --filter @kan/web exec opennextjs-cloudflare build",
-            `pnpm --filter @kan/web exec wrangler d1 migrations apply kan-flare --local --persist-to ${wranglerState}`,
+            "pnpm --filter @kan/web exec opennextjs-cloudflare build -c ../../wrangler.jsonc",
+            `pnpm --filter @kan/web exec wrangler d1 migrations apply kan-flare --local -c ../../wrangler.jsonc --persist-to ${wranglerState}`,
             // --local-upstream: without it, wrangler dev rewrites requests to the
             // production custom domain in wrangler.jsonc, and auth rejects the origin.
-            `pnpm --filter @kan/web exec wrangler dev --port ${port} --local-upstream localhost:${port} --inspector-port 9459 --persist-to ${wranglerState} ${Object.entries(
+            `pnpm --filter @kan/web exec wrangler dev -c ../../wrangler.jsonc --port ${port} --local-upstream localhost:${port} --inspector-port 9459 --persist-to ${wranglerState} ${Object.entries(
               { ...sharedVars, NEXT_PUBLIC_BASE_URL: baseURL },
             )
               .map(([key, value]) => `--var ${key}:${JSON.stringify(value)}`)

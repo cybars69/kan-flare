@@ -51,7 +51,7 @@ export const getBucket = (kind: StorageKind): StorageBucket => {
   const bucket = env[BINDINGS[kind]];
   if (!bucket) {
     throw new Error(
-      `No R2 binding named ${BINDINGS[kind]}. Check r2_buckets in apps/web/wrangler.jsonc.`,
+      `No R2 binding named ${BINDINGS[kind]}. Check r2_buckets in wrangler.jsonc.`,
     );
   }
   return bucket;

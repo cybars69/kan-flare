@@ -91,7 +91,13 @@ const config = {
 // several workers at once, and each would start a local runtime on the same
 // D1 state, failing with SQLITE_BUSY.
 if (process.env.NODE_ENV !== "production") {
-  initOpenNextCloudflareForDev();
+  // The Wrangler config lives at the repo root (the Deploy to Cloudflare
+  // button needs it there).
+  initOpenNextCloudflareForDev({
+    configPath: "../../wrangler.jsonc",
+    // Same local state as `pnpm db:migrate` (next to wrangler.jsonc).
+    persist: { path: "../../.wrangler/state/v3" },
+  });
 }
 
 export default config;

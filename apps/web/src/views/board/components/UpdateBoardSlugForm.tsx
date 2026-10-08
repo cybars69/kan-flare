@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "~/env";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { HiCheck, HiXMark } from "react-icons/hi2";
@@ -8,10 +7,12 @@ import { z } from "zod";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
+import { env } from "~/env";
 import { useDebounce } from "~/hooks/useDebounce";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { getBaseUrl } from "~/utils/baseUrl";
 
 interface QueryParams {
   boardPublicId: string;
@@ -136,7 +137,7 @@ export function UpdateBoardSlugForm({
               ? t`This board URL has already been taken`
               : undefined)
           }
-          prefix={`${env.NEXT_PUBLIC_KAN_ENV === "cloud" ? "kan.bn" : env.NEXT_PUBLIC_BASE_URL}/${workspaceSlug}/`}
+          prefix={`${env.NEXT_PUBLIC_KAN_ENV === "cloud" ? "kan.bn" : getBaseUrl()}/${workspaceSlug}/`}
           onKeyDown={async (e) => {
             if (e.key === "Enter") {
               e.preventDefault();

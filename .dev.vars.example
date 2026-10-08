@@ -1,0 +1,16 @@
+# Secrets for the Worker, in dotenv format.
+#
+# "Deploy to Cloudflare" asks for the values below and stores them as
+# Worker secrets. Generate BETTER_AUTH_SECRET with: openssl rand -base64 32
+#
+# Local development (`pnpm dev`, `wrangler dev`): copy this file to
+# `.dev.vars` in the repo root, fill it in and uncomment the local-only
+# lines. `.dev.vars` is gitignored.
+
+BETTER_AUTH_SECRET=
+
+# Local only:
+# NEXTJS_ENV=development
+# Push notifications (optional): `pnpm vapid:generate`, then copy from .env
+# VAPID_PUBLIC_KEY=
+# VAPID_PRIVATE_KEY=

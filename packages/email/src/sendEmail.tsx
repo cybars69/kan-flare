@@ -46,7 +46,7 @@ const getEmailBinding = (): SendEmailBinding => {
   };
   if (!env.EMAIL) {
     throw new Error(
-      "No send_email binding named EMAIL. Check apps/web/wrangler.jsonc.",
+      "No send_email binding named EMAIL. Check wrangler.jsonc.",
     );
   }
   return env.EMAIL;

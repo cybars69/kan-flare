@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
-import { env } from "~/env";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { HiCheck, HiXMark } from "react-icons/hi2";
@@ -14,6 +13,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
+import { getBaseUrl } from "~/utils/baseUrl";
 import LoadingSpinner from "./LoadingSpinner";
 
 const schema = z.object({
@@ -192,7 +192,7 @@ export function NewWorkspaceForm() {
                   ? t`This workspace URL is reserved`
                   : undefined)
             }
-            prefix={`${env.NEXT_PUBLIC_BASE_URL}/`}
+            prefix={`${getBaseUrl()}/`}
             iconRight={
               slug && slug.length >= 3 && !errors.slug ? (
                 isWorkspaceSlugAvailable?.isAvailable ? (

@@ -19,7 +19,7 @@ const clientForCurrentRequest = (): dbClient => {
   const binding = env.DB;
   if (!binding) {
     throw new Error(
-      "No D1 binding named DB. Check d1_databases in apps/web/wrangler.jsonc.",
+      "No D1 binding named DB. Check d1_databases in wrangler.jsonc.",
     );
   }
   let client = clients.get(binding);

@@ -1,7 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { format } from "date-fns";
-import { env } from "~/env";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiOutlinePaperClip } from "react-icons/hi";
@@ -28,6 +27,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
+import { getBaseUrl } from "~/utils/baseUrl";
 import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
 
 type NewCardFormInput = NewCardInput & {
@@ -276,7 +276,7 @@ export function NewCardForm({
   };
 
   const uploadAttachments = async (cardPublicId: string, files: File[]) => {
-    const baseUrl = env.NEXT_PUBLIC_BASE_URL ?? "";
+    const baseUrl = getBaseUrl();
     let failedCount = 0;
 
     for (const file of files) {
