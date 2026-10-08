@@ -89,7 +89,7 @@ pnpm --filter @kan/web deploy:staging   # or: deploy --env staging
 
 Staging and production each need their own build, because `NEXT_PUBLIC_*` values are compiled in. Set the staging values in the environment before running `deploy:staging`.
 
-To serve on your own domain, add a custom domain to the `kan-flare` Worker in the dashboard (Workers & Pages → kan-flare → Settings → Domains), or add `routes` to `wrangler.jsonc`.
+Production is served on the Custom Domain `tasks.example.com`, declared in `wrangler.jsonc` (`routes` with `"custom_domain": true`). `wrangler deploy` attaches it and creates the DNS record and certificate, as long as `example.com` is a zone in the same Cloudflare account. Keep it in step with `NEXT_PUBLIC_BASE_URL`. Staging sets `"routes": []` so it never takes the domain over.
 
 ## MCP server (AI clients)
 
