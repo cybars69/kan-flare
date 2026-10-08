@@ -39,15 +39,16 @@ None of these need creating by hand. Bindings without IDs are provisioned by `wr
    BETTER_AUTH_SECRET=...               # also needed at build for env validation
    ```
 
-5. **Runtime secrets and settings.** Everything in `.env` that isn't `NEXT_PUBLIC_*` (`BETTER_AUTH_SECRET`, `EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, OAuth secrets…) is read by the Worker at request time. Push them all as Worker secrets in one go:
+5. **Runtime settings.** These are read by the Worker at request time:
+   - **Non-secret values** (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`, OAuth client IDs…) go in `vars` in `apps/web/wrangler.jsonc`. There's a block for production and one under `env.staging`.
+   - **Secrets** (`BETTER_AUTH_SECRET`, OAuth client secrets…) stay in `.env`. Each deploy uploads them with the new version: every non-empty, non-`NEXT_PUBLIC_*` value that isn't already a var.
+
+   To change a secret without deploying:
 
    ```sh
    pnpm --filter @kan/web secrets:push --dry-run   # lists the names it would push
-   pnpm --filter @kan/web secrets:push             # production
-   pnpm --filter @kan/web secrets:push --env staging
+   pnpm --filter @kan/web secrets:push             # add --env staging for staging
    ```
-
-   This runs `tools/push-secrets.mjs`, which skips `NEXT_PUBLIC_*` and empty values and passes values to `wrangler secret bulk` on stdin, so they're never printed. Run it again whenever you change a runtime value. If the Worker doesn't exist yet, run it right after the first deploy.
 
 ## Closed sign-up and email
 
@@ -56,7 +57,7 @@ For a private instance:
 ```sh
 # .env (build-time)
 NEXT_PUBLIC_DISABLE_SIGN_UP=true    # only the first account and email invitees can sign up
-# runtime (wrangler.jsonc vars or a secret)
+# runtime: apps/web/wrangler.jsonc "vars"
 DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 ```
 
@@ -71,12 +72,19 @@ DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 pnpm --filter @kan/web deploy
 ```
 
-This builds the Worker and then deploys it, migrating D1 along the way. On the first deploy, the migration before deploy finds no database and is skipped; `wrangler deploy` creates the database, and the migration after deploy creates the tables. On later deploys, pending migrations run before the new code goes live.
+This runs `tools/deploy.mjs`, which:
+
+1. Builds the Worker with OpenNext, reading `NEXT_PUBLIC_*` from `.env`.
+2. If the D1 database already exists, applies pending migrations before the new code goes live. A failed migration stops the deploy.
+3. Deploys with `--secrets-file`, so the secrets from `.env` ship with this version. Missing D1, R2 and other resources are created here. The secrets file is written to a private temp file and deleted afterwards; values are never printed.
+4. Applies migrations again, which creates the tables on the first deploy.
+
+Use this instead of passing `--secrets-file .env` yourself. The raw file would upload every `NEXT_PUBLIC_*` and empty value as a secret, and would clash with names set in `vars`.
 
 Staging is a separate Worker with its own database and buckets:
 
 ```sh
-pnpm --filter @kan/web deploy:staging
+pnpm --filter @kan/web deploy:staging   # or: deploy --env staging
 ```
 
 Staging and production each need their own build, because `NEXT_PUBLIC_*` values are compiled in. Set the staging values in the environment before running `deploy:staging`.

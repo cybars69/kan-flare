@@ -8,6 +8,13 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Non-secret runtime settings. Secrets (BETTER_AUTH_SECRET, OAuth client
+  // secrets…) come from .env and are uploaded by `pnpm --filter @kan/web deploy`.
+  "vars": {
+    "EMAIL_FROM": "Kan Flare <no-reply@tasks.example.com>",
+    "DISABLE_NOTIFICATION_EMAILS": "true",
+    "LOG_LEVEL": "info"
+  },
   "observability": {
     "logs": { "enabled": true }
   },
@@ -66,6 +73,11 @@
   "env": {
     "staging": {
       "name": "kan-flare-staging",
+      "vars": {
+        "EMAIL_FROM": "Kan Flare <no-reply@tasks.example.com>",
+        "DISABLE_NOTIFICATION_EMAILS": "true",
+        "LOG_LEVEL": "info"
+      },
       "services": [
         {
           "binding": "WORKER_SELF_REFERENCE",
