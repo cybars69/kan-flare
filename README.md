@@ -6,6 +6,7 @@
   <p>
     <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/cybars69/kan-flare/tree/workers"><img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare" /></a>
   </p>
+  <p><sub>Needs a Cloudflare account on the <a href="https://developers.cloudflare.com/workers/platform/pricing/">Workers Paid plan</a> ($5 a month).</sub></p>
 
   <p>
     <a href="DEPLOY.md">Deploy guide</a>
