@@ -1,6 +1,12 @@
 export interface KanConfig {
   baseUrl: string;
   apiToken: string;
+  /**
+   * Fetch used for API calls. Defaults to the global fetch. Inside the
+   * Worker, /api/mcp passes one that goes through the service binding to
+   * itself, since a Worker can't reliably fetch its own public hostname.
+   */
+  fetch?: typeof fetch;
 }
 
 export interface KanClient {
@@ -40,7 +46,7 @@ export function createKanClient(config: KanConfig): KanClient {
     async request<T>(method: string, path: string, body?: unknown): Promise<T> {
       const url = `${config.baseUrl}/api/v1${path}`;
 
-      const res = await fetch(url, {
+      const res = await (config.fetch ?? fetch)(url, {
         method,
         headers: {
           "Content-Type": "application/json",

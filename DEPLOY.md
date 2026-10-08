@@ -84,6 +84,43 @@ Staging and production each need their own build, because `NEXT_PUBLIC_*` values
 
 To serve on your own domain, add a custom domain to the `kan-flare` Worker in the dashboard (Workers & Pages → kan-flare → Settings → Domains), or add `routes` to `wrangler.jsonc`.
 
+## MCP server (AI clients)
+
+kan-flare includes an MCP server, so AI clients (Claude, Cursor, Codex, Copilot…) can read and manage boards. Each user creates an API key under **Settings → API keys**. On a self-hosted instance there's no plan requirement.
+
+**Remote (HTTP).** Point the client at your instance:
+
+```
+URL:     https://kan.example.com/api/mcp
+Header:  Authorization: Bearer kan_your_api_key
+```
+
+For example, in Claude Code:
+
+```sh
+claude mcp add --transport http kan https://kan.example.com/api/mcp \
+  --header "Authorization: Bearer kan_your_api_key"
+```
+
+**Local (stdio).** Use upstream's npm package, pointed at your instance:
+
+```json
+{
+  "mcpServers": {
+    "kan": {
+      "command": "npx",
+      "args": ["-y", "@kan/mcp"],
+      "env": {
+        "KAN_BASE_URL": "https://kan.example.com",
+        "KAN_API_TOKEN": "kan_your_api_key"
+      }
+    }
+  }
+}
+```
+
+The HTTP endpoint calls the app's own REST API through the `WORKER_SELF_REFERENCE` service binding, because a Worker can't reliably fetch its own public hostname.
+
 ## Operating it
 
 - **Logs:** Workers Logs is on. Entries are structured (level, module, request ID, procedure, duration…) and searchable in the dashboard.

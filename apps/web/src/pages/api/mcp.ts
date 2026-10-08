@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { env } from "~/env";
+import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import type { KanClient } from "@kan/mcp/client";
 import { withApiLogging } from "@kan/api/utils/apiLogging";
@@ -12,6 +12,8 @@ import {
 import { createKanMcpServer } from "@kan/mcp";
 import { createKanClient, KanApiError } from "@kan/mcp/client";
 import { isPaidWorkspacePlan } from "@kan/shared/utils";
+
+import { env } from "~/env";
 
 interface WorkspaceMembership {
   workspace: { plan: string };
@@ -61,7 +63,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
   const baseUrl = rawBaseUrl.replace(/\/$/, "");
 
-  const client = createKanClient({ baseUrl, apiToken });
+  // Call our own REST API through the WORKER_SELF_REFERENCE service binding
+  // when it exists, so the request stays inside Cloudflare.
+  const self = (() => {
+    try {
+      const { env: bindings } = getCloudflareContext() as unknown as {
+        env: { WORKER_SELF_REFERENCE?: { fetch: typeof fetch } };
+      };
+      return bindings.WORKER_SELF_REFERENCE;
+    } catch {
+      return undefined;
+    }
+  })();
+  const client = createKanClient({
+    baseUrl,
+    apiToken,
+    fetch: self ? (input, init) => self.fetch(input, init) : undefined,
+  });
 
   if (env.NEXT_PUBLIC_KAN_ENV === "cloud") {
     let eligible: boolean;
@@ -88,18 +106,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const server = createKanMcpServer(client);
-  const transport = new StreamableHTTPServerTransport({
+  // The web-standard transport, fed a Request built from req.headers. The
+  // Node transport converts through Hono, which reads req.rawHeaders; under
+  // OpenNext those don't carry the Accept header, so every call got 406.
+  const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
 
-  res.on("close", () => {
-    void transport.close();
-    void server.close();
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value !== undefined) {
+      headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+    }
+  }
+  const webRequest = new Request(new URL(req.url ?? "/api/mcp", baseUrl), {
+    method: req.method,
+    headers,
+    body: JSON.stringify(req.body),
   });
 
-  await server.connect(transport);
-  await transport.handleRequest(req, res, req.body);
+  try {
+    await server.connect(transport);
+    const response = await transport.handleRequest(webRequest, {
+      parsedBody: req.body as unknown,
+    });
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+    res.send(Buffer.from(await response.arrayBuffer()));
+  } finally {
+    await transport.close();
+    await server.close();
+  }
 }
 
 export default withApiLogging(handler, { transport: "mcp" });
