@@ -92,38 +92,4 @@ describe("middleware", () => {
     expect(response.headers.get("x-middleware-rewrite")).toBeNull();
     expect(response.headers.get("location")).toBeNull();
   });
-
-  it.each([
-    "/.well-known/oauth-protected-resource",
-    "/.well-known/oauth-authorization-server",
-  ])(
-    "returns 404 for %s on the MCP hostname instead of the app shell",
-    (pathname) => {
-      mockedEnv.mockImplementation((key) => {
-        if (key === "NEXT_PUBLIC_KAN_ENV") return "cloud";
-      });
-
-      const response = middleware(
-        new NextRequest(`http://localhost:3000${pathname}`, {
-          headers: { host: "mcp.kan.bn" },
-        }),
-      );
-
-      expect(response.status).toBe(404);
-      expect(response.headers.get("x-middleware-rewrite")).toBeNull();
-    },
-  );
-
-  it("returns 404 for OAuth discovery paths on the main app domain too", () => {
-    // No OAuth server exists; without this the workspace page answers 200
-    // and MCP clients wrongly offer an OAuth sign-in.
-    const response = middleware(
-      new NextRequest(
-        "https://tasks.example.com/.well-known/oauth-protected-resource",
-        { headers: { host: "tasks.example.com" } },
-      ),
-    );
-
-    expect(response.status).toBe(404);
-  });
 });

@@ -29,6 +29,13 @@
       "when": 1791456603397,
       "tag": "0003_AddApiKeyConfigId",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1791457027923,
+      "tag": "0004_AddOAuthProvider",
+      "breakpoints": true
     }
   ]
 }

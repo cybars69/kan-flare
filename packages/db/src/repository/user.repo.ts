@@ -126,3 +126,21 @@ export const update = async (
 
   return result;
 };
+
+/** The fields the API's request context needs for a signed-in user. */
+export const getAuthUserById = async (db: dbClient, userId: string) => {
+  const user = await db.query.users.findFirst({
+    columns: {
+      id: true,
+      name: true,
+      email: true,
+      emailVerified: true,
+      image: true,
+      createdAt: true,
+      updatedAt: true,
+      stripeCustomerId: true,
+    },
+    where: (users, { eq }) => eq(users.id, userId),
+  });
+  return user ?? null;
+};

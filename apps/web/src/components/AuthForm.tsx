@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { env } from "~/env";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -33,7 +32,9 @@ import { authClient } from "@kan/auth/client";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
+import { env } from "~/env";
 import { usePopup } from "~/providers/popup";
+import { isOAuthSignIn } from "~/utils/oauthFlow";
 
 type AuthProvider = SocialProvider | "oidc";
 
@@ -170,7 +171,12 @@ export function Auth({
   const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const redirect = useSearchParams().get("next");
-  const callbackURL = callbackURLProp ?? redirect ?? "/boards";
+  // In an OAuth sign-in, magic links and social sign-ins come back to this
+  // login page, which then resumes the authorization (views/auth/login).
+  const callbackURL =
+    typeof window !== "undefined" && isOAuthSignIn(window.location.search)
+      ? `${window.location.pathname}${window.location.search}`
+      : (callbackURLProp ?? redirect ?? "/boards");
 
   // Safely get environment variables on client side to avoid hydration mismatch
   useEffect(() => {

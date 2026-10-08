@@ -28,3 +28,10 @@ describe("getApiKeyFromHeaders", () => {
     expect(getApiKeyFromHeaders(undefined)).toBeNull();
   });
 });
+
+describe("OAuth access tokens", () => {
+  it("are not treated as API keys", () => {
+    const headers = new Headers({ authorization: "Bearer kan_oat_abc123" });
+    expect(getApiKeyFromHeaders(headers)).toBeNull();
+  });
+});

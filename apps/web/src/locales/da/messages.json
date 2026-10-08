@@ -180,6 +180,22 @@
     ],
     "translation": "{actor} nævnte dig på {0}"
   },
+  "llI2Z5": {
+    "message": "{appName} wants to connect",
+    "placeholders": {
+      "appName": [
+        "appName"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        124
+      ]
+    ],
+    "translation": "{appName} vil gerne oprette forbindelse"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -858,7 +874,7 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        256
+        252
       ]
     ],
     "translation": "Juster den kvadratiske beskæring, så den passer til din avatar."
@@ -996,6 +1012,18 @@
     ],
     "translation": "Alle funktioner i Teams +"
   },
+  "h7peZQ": {
+    "message": "Allow",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        174
+      ]
+    ],
+    "translation": "Tillad"
+  },
   "Z3krJD": {
     "message": "Allow workspace members to see each other's email addresses",
     "placeholders": {},
@@ -1023,6 +1051,18 @@
       ]
     ],
     "translation": "Har du allerede en konto? <0><1>Log ind</1></0>"
+  },
+  "APO08p": {
+    "message": "An app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        77
+      ]
+    ],
+    "translation": "En app"
   },
   "j1+HPc": {
     "message": "An error occurred while connecting your GitHub account.",
@@ -1167,7 +1207,7 @@
     "origin": [
       [
         "src/views/settings/ApiSettings.tsx",
-        22
+        23
       ]
     ],
     "translation": "API-nøgler"
@@ -1183,6 +1223,18 @@
       ]
     ],
     "translation": "API-reference"
+  },
+  "qg7CpQ": {
+    "message": "App disconnected",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        42
+      ]
+    ],
+    "translation": "App afbrudt"
   },
   "bJZm1W": {
     "message": "Applicants",
@@ -1207,6 +1259,18 @@
       ]
     ],
     "translation": "Godkendelse"
+  },
+  "v3P/A1": {
+    "message": "Apps you allowed to use your account by signing in to kan-flare, such as Claude or other MCP clients. They act as you, like an API key.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/ApiSettings.tsx",
+        43
+      ]
+    ],
+    "translation": "Apps, du har givet adgang til din konto ved at logge ind på kan-flare, fx Claude eller andre MCP-klienter. De handler som dig, ligesom en API-nøgle."
   },
   "aKJHG+": {
     "message": "Archive board",
@@ -1779,7 +1843,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        46
+        47
       ]
     ],
     "translation": "Tavlens URL må kun indeholde bogstaver, tal og bindestreger"
@@ -1791,7 +1855,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        44
+        45
       ]
     ],
     "translation": "Tavlens URL må højst være 60 tegn"
@@ -1815,7 +1879,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        42
+        43
       ]
     ],
     "translation": "Tavlens URL skal være mindst 3 tegn lang"
@@ -2367,7 +2431,7 @@
       ],
       [
         "src/views/settings/components/Avatar.tsx",
-        287
+        283
       ],
       [
         "src/views/settings/components/ChangePasswordConfirmation.tsx",
@@ -2595,7 +2659,7 @@
       ],
       [
         "src/views/auth/login/index.tsx",
-        54
+        66
       ],
       [
         "src/views/auth/signup/index.tsx",
@@ -2723,7 +2787,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        59
+        71
       ],
       [
         "src/views/auth/signup/index.tsx",
@@ -2933,6 +2997,34 @@
     ],
     "translation": "Konfigurer, hvilke handlinger der er tilladt for hver rolle i arbejdsområdet. Disse rettigheder gælder for alle medlemmer med den pågældende rolle."
   },
+  "7VpPHA": {
+    "message": "Confirm",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        124
+      ]
+    ],
+    "translation": "Bekræft"
+  },
+  "jj3XWn": {
+    "message": "Confirm disconnecting {name}",
+    "placeholders": {
+      "name": [
+        "name"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        120
+      ]
+    ],
+    "translation": "Bekræft afbrydelse af {name}"
+  },
   "479pdJ": {
     "message": "Confirm your new password",
     "placeholders": {},
@@ -2956,6 +3048,18 @@
       ]
     ],
     "translation": "Forbind"
+  },
+  "STj9Sb": {
+    "message": "Connect an app | kan-flare",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        91
+      ]
+    ],
+    "translation": "Forbind en app | kan-flare"
   },
   "3jod3l": {
     "message": "Connect GitHub",
@@ -3016,6 +3120,34 @@
       ]
     ],
     "translation": "Forbind din Trello-konto for at importere tavler."
+  },
+  "sk/Z5E": {
+    "message": "Connected {0}",
+    "placeholders": {
+      "0": [
+        "format(app.connectedAt, \"d MMM yyyy\", { locale: dateLocale })"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        102
+      ]
+    ],
+    "translation": "Forbundet {0}"
+  },
+  "YGP/lN": {
+    "message": "Connected apps",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/ApiSettings.tsx",
+        40
+      ]
+    ],
+    "translation": "Forbundne apps"
   },
   "jfC/xh": {
     "message": "Contact",
@@ -3100,7 +3232,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        442
+        438
       ]
     ],
     "translation": "Fortsæt med "
@@ -3116,7 +3248,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        360
+        356
       ]
     ],
     "translation": "Fortsæt med {0}"
@@ -3241,6 +3373,18 @@
       ]
     ],
     "translation": "Kernefunktioner"
+  },
+  "AoUN3t": {
+    "message": "Couldn't disconnect the app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        49
+      ]
+    ],
+    "translation": "Appen kunne ikke afbrydes"
   },
   "MQNvCg": {
     "message": "Couldn't load notifications.",
@@ -3401,7 +3545,7 @@
     "origin": [
       [
         "src/views/settings/ApiSettings.tsx",
-        30
+        31
       ]
     ],
     "translation": "Opret ny nøgle"
@@ -3529,7 +3673,7 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        253
+        249
       ]
     ],
     "translation": "Beskær din avatar"
@@ -3977,6 +4121,18 @@
     ],
     "translation": "slettede tjeklistepunktet <0>{0}</0>"
   },
+  "cFCKYZ": {
+    "message": "Deny",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        166
+      ]
+    ],
+    "translation": "Afvis"
+  },
   "f8fH8W": {
     "message": "Design",
     "placeholders": {},
@@ -4000,6 +4156,34 @@
       ]
     ],
     "translation": "Målarbejdsområde"
+  },
+  "+K0AvT": {
+    "message": "Disconnect",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        124
+      ]
+    ],
+    "translation": "Afbryd"
+  },
+  "C2BaaK": {
+    "message": "Disconnect {name}",
+    "placeholders": {
+      "name": [
+        "name"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        121
+      ]
+    ],
+    "translation": "Afbryd {name}"
   },
   "Odv3J6": {
     "message": "Disconnect GitHub",
@@ -4164,7 +4348,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        74
+        86
       ]
     ],
     "translation": "Har du ikke en konto? <0><1>Opret konto</1></0>"
@@ -4364,7 +4548,7 @@
       ],
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        116
+        117
       ]
     ],
     "translation": "Rediger tavlens URL"
@@ -4428,7 +4612,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        162
+        163
       ]
     ],
     "translation": "Rediger URL til arbejdsområde"
@@ -4464,7 +4648,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        443
+        439
       ]
     ],
     "translation": "e-mail"
@@ -4620,7 +4804,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        407
+        403
       ]
     ],
     "translation": "Indtast din e-mailadresse"
@@ -4632,7 +4816,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        395
+        391
       ]
     ],
     "translation": "Indtast dit navn"
@@ -4656,7 +4840,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        421
+        417
       ]
     ],
     "translation": "Indtast din adgangskode"
@@ -4876,7 +5060,7 @@
     "origin": [
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        75
+        76
       ]
     ],
     "translation": "Fejl ved opdatering af URL til arbejdsområde"
@@ -4901,11 +5085,11 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        69
+        68
       ],
       [
         "src/views/settings/components/Avatar.tsx",
-        199
+        195
       ]
     ],
     "translation": "Fejl ved upload af profilbillede"
@@ -5061,7 +5245,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        296
+        292
       ]
     ],
     "translation": "Login med {0} mislykkedes. Prøv igen."
@@ -6251,6 +6435,46 @@
     ],
     "translation": ""
   },
+  "h13Vqq": {
+    "message": "It can no longer access your account.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        43
+      ]
+    ],
+    "translation": "Den har ikke længere adgang til din konto."
+  },
+  "04ExBZ": {
+    "message": "It will be able to, as {0}:",
+    "placeholders": {
+      "0": [
+        "session.user.email"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        136
+      ]
+    ],
+    "translation": "Den vil kunne, som {0}:"
+  },
+  "ie0t7Q": {
+    "message": "It will be able to:",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        140
+      ]
+    ],
+    "translation": "Den vil kunne:"
+  },
   "c9AJhn": {
     "message": "Join workspace",
     "placeholders": {},
@@ -6679,7 +6903,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        44
+        56
       ]
     ],
     "translation": "Login | kan-flare"
@@ -6739,7 +6963,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        443
+        439
       ]
     ],
     "translation": "magisk link"
@@ -7411,6 +7635,18 @@
     ],
     "translation": "Ingen {0}"
   },
+  "NG3bk2": {
+    "message": "No apps are connected. When an app such as Claude asks to connect, you'll approve it here in kan-flare.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        64
+      ]
+    ],
+    "translation": "Ingen apps er forbundet. Når en app som Claude beder om forbindelse, godkender du det her i kan-flare."
+  },
   "tlhgDC": {
     "message": "No archived boards",
     "placeholders": {},
@@ -7430,7 +7666,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        374
+        370
       ]
     ],
     "translation": "Ingen godkendelsesmetoder er tilgængelige i øjeblikket"
@@ -7719,6 +7955,18 @@
     ],
     "translation": "Når du sletter dit arbejdsområde, kan du ikke gå tilbage. Denne handling kan ikke fortrydes."
   },
+  "GurMv/": {
+    "message": "Only allow apps you trust. You can disconnect it at any time under Settings → API → Connected apps.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        179
+      ]
+    ],
+    "translation": "Tillad kun apps, du stoler på. Du kan afbryde den når som helst under Indstillinger → API → Forbundne apps."
+  },
   "69b7aE": {
     "message": "Open command menu",
     "placeholders": {},
@@ -7774,7 +8022,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        385
+        381
       ]
     ],
     "translation": "eller"
@@ -7898,7 +8146,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        263
+        269
       ]
     ],
     "translation": "Adgangskode er påkrævet for at logge ind."
@@ -7910,7 +8158,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        262
+        268
       ]
     ],
     "translation": "Adgangskode er påkrævet for at oprette en konto."
@@ -8186,7 +8434,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        411
+        407
       ]
     ],
     "translation": "Indtast en gyldig e-mailadresse"
@@ -8198,7 +8446,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        399
+        395
       ]
     ],
     "translation": "Indtast et gyldigt navn"
@@ -8210,7 +8458,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        426
+        422
       ]
     ],
     "translation": "Indtast en gyldig adgangskode"
@@ -8250,7 +8498,7 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        70
+        69
       ]
     ],
     "translation": "Vælg en fil, der skal uploades."
@@ -8294,7 +8542,7 @@
       ],
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        73
+        74
       ],
       [
         "src/views/board/components/VisibilityButton.tsx",
@@ -8426,7 +8674,7 @@
       ],
       [
         "src/views/settings/components/Avatar.tsx",
-        200
+        196
       ],
       [
         "src/views/settings/components/DeleteAccountConfirmation.tsx",
@@ -8450,7 +8698,7 @@
       ],
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        76
+        77
       ],
       [
         "src/views/settings/PermissionsSettings.tsx",
@@ -8511,6 +8759,10 @@
       [
         "src/views/public/board/index.tsx",
         86
+      ],
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        50
       ]
     ],
     "translation": "Prøv igen."
@@ -8671,7 +8923,7 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        189
+        185
       ]
     ],
     "translation": "Profilbillede opdateret"
@@ -8763,6 +9015,18 @@
       ]
     ],
     "translation": "Hurtig gevinst"
+  },
+  "LylrdW": {
+    "message": "Read and change your boards, lists, cards and comments, as you",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        80
+      ]
+    ],
+    "translation": "Læse og ændre dine boards, lister, kort og kommentarer som dig"
   },
   "6EWT6T": {
     "message": "Recruitment",
@@ -9195,7 +9459,7 @@
       ],
       [
         "src/views/settings/components/Avatar.tsx",
-        290
+        286
       ]
     ],
     "translation": "Gem"
@@ -9347,6 +9611,18 @@
       ]
     ],
     "translation": "Se, hvad vores brugere siger om Kan"
+  },
+  "WVRZCj": {
+    "message": "See your name and email address",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        82
+      ]
+    ],
+    "translation": "Se dit navn og din e-mailadresse"
   },
   "zYRVNp": {
     "message": "Select a list",
@@ -9599,7 +9875,7 @@
     "origin": [
       [
         "src/views/settings/ApiSettings.tsx",
-        18
+        19
       ]
     ],
     "translation": "Indstillinger | API"
@@ -9803,7 +10079,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        442
+        438
       ]
     ],
     "translation": "Opret konto med "
@@ -10037,6 +10313,18 @@
     ],
     "translation": "Status"
   },
+  "36/5cw": {
+    "message": "Stay connected until you disconnect it",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        85
+      ]
+    ],
+    "translation": "Forblive forbundet, indtil du afbryder den"
+  },
   "hQRttt": {
     "message": "Submit",
     "placeholders": {},
@@ -10080,11 +10368,11 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        220
+        226
       ],
       [
         "src/components/AuthForm.tsx",
-        237
+        243
       ]
     ],
     "translation": "Fuldført"
@@ -10648,7 +10936,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        136
+        137
       ]
     ],
     "translation": "Denne tavle-URL er allerede taget"
@@ -10676,6 +10964,22 @@
       ]
     ],
     "translation": "Dette medlems rettigheder er nulstillet til standardindstillingerne for rollen."
+  },
+  "sNUHMP": {
+    "message": "This request has expired or isn't valid. Start connecting again from the app.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/auth/consent/index.tsx",
+        69
+      ],
+      [
+        "src/views/auth/consent/index.tsx",
+        103
+      ]
+    ],
+    "translation": "Denne anmodning er udløbet eller ugyldig. Start forbindelsen igen fra appen."
   },
   "HQVm6e": {
     "message": "This URL has already been taken",
@@ -10780,7 +11084,7 @@
     "origin": [
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        129
+        130
       ]
     ],
     "translation": "Dette brugernavn til arbejdsområdet er allerede taget"
@@ -11332,7 +11636,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        72
+        73
       ]
     ],
     "translation": "Kunne ikke opdatere tavlens URL"
@@ -11723,6 +12027,18 @@
     "translation": "Ubegrænset antal pladser og avancerede funktioner til voksende teams.",
     "obsolete": true
   },
+  "lSDWmC": {
+    "message": "Unnamed app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/views/settings/components/ConnectedAppList.tsx",
+        73
+      ]
+    ],
+    "translation": "Unavngiven app"
+  },
   "KuVpz+": {
     "message": "Unread",
     "placeholders": {},
@@ -11742,7 +12058,7 @@
     "origin": [
       [
         "src/views/board/components/UpdateBoardSlugForm.tsx",
-        175
+        176
       ],
       [
         "src/views/settings/components/UpdateDisplayNameForm.tsx",
@@ -11758,7 +12074,7 @@
       ],
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        161
+        160
       ]
     ],
     "translation": "Opdater"
@@ -11952,7 +12268,7 @@
       ],
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        38
+        39
       ]
     ],
     "translation": "URL må kun indeholde bogstaver, tal og bindestreger"
@@ -11980,7 +12296,7 @@
       ],
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        36
+        37
       ]
     ],
     "translation": "URL må højst være 64 tegn"
@@ -11996,7 +12312,7 @@
       ],
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        34
+        35
       ]
     ],
     "translation": "URL skal være mindst 3 tegn lang"
@@ -12068,7 +12384,7 @@
     "origin": [
       [
         "src/views/settings/ApiSettings.tsx",
-        25
+        26
       ]
     ],
     "translation": "Se og administrer dine API-nøgler."
@@ -12356,7 +12672,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        54
+        66
       ]
     ],
     "translation": "Velkommen tilbage"
@@ -12620,7 +12936,7 @@
     "origin": [
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        62
+        63
       ]
     ],
     "translation": "Arbejdsområdets slug er opdateret"
@@ -12632,7 +12948,7 @@
     "origin": [
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        118
+        119
       ],
       [
         "src/views/settings/WorkspaceSettings.tsx",
@@ -12833,7 +13149,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        238
+        244
       ]
     ],
     "translation": "Du er logget ind."
@@ -12845,7 +13161,7 @@
     "origin": [
       [
         "src/components/AuthForm.tsx",
-        221
+        227
       ]
     ],
     "translation": "Din konto er oprettet."
@@ -13121,7 +13437,7 @@
     "origin": [
       [
         "src/views/settings/components/Avatar.tsx",
-        190
+        186
       ]
     ],
     "translation": "Dit profilbillede er blevet opdateret."
@@ -13245,7 +13561,7 @@
     "origin": [
       [
         "src/views/settings/components/UpdateWorkspaceUrlForm.tsx",
-        63
+        64
       ]
     ],
     "translation": "Dit arbejdsområdes slug er blevet opdateret."

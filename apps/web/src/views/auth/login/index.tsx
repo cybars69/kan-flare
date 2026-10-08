@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { authClient } from "@kan/auth/client";
 
@@ -11,6 +11,7 @@ import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import { env } from "~/env";
 import { api } from "~/utils/api";
+import { isOAuthSignIn, oauthResumeUrl } from "~/utils/oauthFlow";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,7 +38,18 @@ export default function LoginPage() {
     (redirect?.startsWith("/invite/") ?? false) ||
     (firstUser?.firstUser ?? false);
 
-  if (data?.user.id) router.push(redirect ?? "/boards");
+  // During an OAuth sign-in (an app connecting to kan-flare), carry on with
+  // the authorization once signed in instead of opening the boards.
+  const oauthSignIn =
+    typeof window !== "undefined" && isOAuthSignIn(window.location.search);
+  useEffect(() => {
+    if (!data?.user.id) return;
+    if (oauthSignIn) {
+      window.location.assign(oauthResumeUrl(window.location.search));
+    } else {
+      void router.push(redirect ?? "/boards");
+    }
+  }, [data?.user.id, oauthSignIn, redirect, router]);
 
   return (
     <>

@@ -8,6 +8,8 @@ import { initAuth } from "@kan/auth/server";
 import { createDrizzleClient } from "@kan/db/client";
 import { createLogger } from "@kan/logger";
 
+import { getBearerToken, resolveOAuthUser } from "./utils/oauth";
+
 const log = createLogger("api");
 
 export interface User {
@@ -133,9 +135,17 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
     );
   }
 
+  // OAuth access tokens (apps connected through kan-flare's OAuth sign-in,
+  // such as MCP clients) act as their user, like API keys.
+  let user: User | null | undefined = session?.user;
+  if (!user) {
+    const token = getBearerToken(headers);
+    if (token) user = await resolveOAuthUser(baseAuth, db, token);
+  }
+
   return createInnerTRPCContext({
     db,
-    user: session?.user,
+    user,
     auth,
     headers,
     transport: "rest",

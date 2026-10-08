@@ -6,14 +6,22 @@ import type { KanClient } from "@kan/mcp/client";
 import { withApiLogging } from "@kan/api/utils/apiLogging";
 import { getApiToken } from "@kan/api/utils/apiToken";
 import {
+  ensureOAuthResources,
+  getAppOrigin,
+  oauthChallenge,
+  resolveOAuthUser,
+} from "@kan/api/utils/oauth";
+import {
   getCachedPaidWorkspaceEligibility,
   setCachedPaidWorkspaceEligibility,
 } from "@kan/api/utils/paidWorkspaceCache";
+import { isOAuthAccessToken } from "@kan/auth";
 import { createKanMcpServer } from "@kan/mcp";
 import { createKanClient, KanApiError } from "@kan/mcp/client";
 import { isPaidWorkspacePlan } from "@kan/shared/utils";
 
 import { env } from "~/env";
+import { auth, db } from "~/server/auth";
 
 interface WorkspaceMembership {
   workspace: { plan: string };
@@ -49,19 +57,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
 
-  const apiToken = getApiToken(req);
-  if (!apiToken) {
-    res.setHeader("WWW-Authenticate", 'Bearer realm="kan"');
-    res.status(401).json({ error: "Missing API key" });
+  // The configured URL, or this request's origin on an unconfigured install.
+  const baseUrl = (env.NEXT_PUBLIC_BASE_URL ?? getAppOrigin()).replace(
+    /\/$/,
+    "",
+  );
+  if (!baseUrl) {
+    res.status(500).json({ error: "The app's URL is not known" });
     return;
   }
 
-  const rawBaseUrl = env.NEXT_PUBLIC_BASE_URL;
-  if (!rawBaseUrl) {
-    res.status(500).json({ error: "NEXT_PUBLIC_BASE_URL is not configured" });
+  // No credentials: point the client at kan-flare's OAuth sign-in (RFC 9728).
+  // API keys (`Authorization: Bearer kan_…`) work too.
+  const apiToken = getApiToken(req);
+  if (!apiToken) {
+    await ensureOAuthResources(db, baseUrl);
+    res.setHeader(
+      "WWW-Authenticate",
+      oauthChallenge("mcp", undefined, baseUrl),
+    );
+    res.status(401).json({ error: "Sign in with OAuth or use an API key" });
     return;
   }
-  const baseUrl = rawBaseUrl.replace(/\/$/, "");
+  // Check OAuth tokens up front, so an expired one gets the challenge that
+  // makes clients refresh or sign in again.
+  if (
+    isOAuthAccessToken(apiToken) &&
+    !(await resolveOAuthUser(auth, db, apiToken))
+  ) {
+    res.setHeader(
+      "WWW-Authenticate",
+      oauthChallenge("mcp", "invalid_token", baseUrl),
+    );
+    res.status(401).json({ error: "Invalid or expired access token" });
+    return;
+  }
 
   // Call our own REST API through the WORKER_SELF_REFERENCE service binding
   // when it exists, so the request stays inside Cloudflare.

@@ -46,6 +46,7 @@ kan-flare runs on Cloudflare Workers with D1. These differ from upstream Kan (No
 - **Background work**: don't leave promises un-awaited. Wrap them in `runInBackground()` (`packages/api/src/utils/background.ts`), or Workers may cut them off after the response.
 - **Env**: `NEXT_PUBLIC_*` values are compiled in at build time when set. Server code reads `process.env` at request time (Worker vars and secrets). Without `NEXT_PUBLIC_BASE_URL`, `apps/web/worker.mjs` uses each request's origin and the browser uses `getBaseUrl()` (`apps/web/src/utils/baseUrl.ts`).
 - **Config**: `wrangler.jsonc` lives at the repo root (the Deploy to Cloudflare button needs it there). Commands run from `apps/web` pass `-c ../../wrangler.jsonc`.
+- **API auth**: REST and MCP requests may carry a session cookie, an API key (`kan_…`) or an OAuth access token (`kan_oat_…`, from kan-flare's OAuth server in `packages/auth/src/oauth.ts`). `createRESTContext` resolves all three to `ctx.user`; don't read `Authorization` headers yourself. New OAuth-related tables come from the Better Auth plugins' schemas, so check the plugin's fields before changing `packages/db/src/schema/oauth.ts`.
 - **Tests**: integration tests run on local D1 (`packages/api/integration-tests/test-db.ts`). Check end to end with `cloudflare-migration/smoke.mjs` against `wrangler dev`.
 
 ## Code Style

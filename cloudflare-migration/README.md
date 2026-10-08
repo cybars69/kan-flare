@@ -11,7 +11,7 @@ This is the working plan for **kan-flare** (`git@github.com:cybars69/kan-flare.g
 
 - **Plan written:** 2026-10-07
 - **Estimate:** 14 phases, 73 tasks, about 20–29 working days for one developer who knows the codebase
-- **Added later:** Phase 14 (features built on top of the port, 8 tasks), so the plan now has 15 phases and 81 tasks
+- **Added later:** Phase 14 (features built on top of the port, 10 tasks), so the plan now has 15 phases and 83 tasks
 
 
 
@@ -22,6 +22,7 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 
 | Date       | Who | What                                                                         |
 | ---------- | --- | ---------------------------------------------------------------------------- |
+| 2026-10-08 | Claude (for Arsalan) | kan-flare is now an OAuth 2.1 server (`14.10`): MCP clients such as Claude sign in through kan-flare's login and a consent screen, and the REST API accepts the same tokens; Settings → API lists connected apps. Better Auth upgraded 1.4.6 → 1.7.7 first (`14.9`). The Worker is now 3.28 MiB compressed, so the Workers Paid plan is required. Unit/integration 278/278, e2e 53/53. |
 | 2026-10-08 | Claude (for Arsalan) | Deploy to Cloudflare button added (`14.8`): `wrangler.jsonc` moved to the repo root and made generic, the app runs without a configured URL, and the README was rewritten. Instance settings (sender, domain) now live in `.env` and the dashboard, not in git. e2e 52/52. |
 | 2026-10-08 | Claude (for Arsalan) | Ready for the first deploy, and Phase 14 added. One-command deploy now ships the secrets with each version (`5.3` done). Staging dropped at the owner's request: one production Worker. Sign-up is closed apart from the first account and email invites; notification emails are off. New: in-app notification bell (paginated) and Web Push for the installed app. MCP over HTTP fixed on Workers. Tests: unit/integration 267/267, e2e 52/52 with no retries; typecheck clean; bundle 2.69 MiB gzipped. |
 | 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 255/255, e2e 48/48 with no retries, typecheck clean, smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
@@ -623,6 +624,8 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 - [x] `14.6` Add Web Push notifications for the installed app (PWA)
 - [ ] `14.7` Notify people when they're assigned to a card
 - [x] `14.8` Add a Deploy to Cloudflare button
+- [x] `14.9` Upgrade Better Auth from 1.4.6 to 1.7.7
+- [x] `14.10` Make kan-flare an OAuth 2.1 server for MCP clients and the REST API
 
 **Status notes (2026-10-08):**
 
@@ -647,6 +650,18 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   - **No configuration needed:** `apps/web/worker.mjs` wraps the OpenNext worker and uses each request's origin when `NEXT_PUBLIC_BASE_URL` isn't set; the browser falls back to its own address (`getBaseUrl()`). The build defaults `NEXT_PUBLIC_ALLOW_CREDENTIALS` and `NEXT_PUBLIC_DISABLE_SIGN_UP` to `true`.
   - **The form:** the root `.dev.vars.example` makes the button ask for `BETTER_AUTH_SECRET` only; `package.json` `cloudflare.bindings` describes each resource.
   - **Checked:** a clean copy with no `.env`, built as Workers Builds would, signed up a first user, refused a second sign-up, and served pages, tRPC and MCP on its own origin. A real click-through needs a Cloudflare account.
+
+- `14.9`: needed for the OAuth Provider plugin.
+  - **Breaking changes handled:** `apiKey` moved to `@better-auth/api-key`, and its owner column became `referenceId`; it's mapped onto the existing `userId` column, so stored keys keep working, plus a new `configId` column (migration `0003`). Generic OIDC sign-in now uses `signIn.social`. `apiKey.list` returns `{ apiKeys, total }`.
+  - **Build:** `better-auth` and `@better-auth/*` are force-traced in `next.config.js`, because their `workerd` export conditions aren't followed by Node file tracing. `@kan/auth` no longer emits declarations: nothing reads them, and 1.7's inferred types reference its nested zod 4.
+- `14.10`: `@better-auth/oauth-provider` and `@better-auth/cimd` (`packages/auth/src/oauth.ts`), with 7 new tables (migration `0004`).
+  - **Tokens:** opaque (`kan_oat_` access, 1 hour; `kan_ort_` refresh, 30 days), so checking one is a single database lookup with no JWKS fetch from the Worker to itself, and revoking works at once. A server-only endpoint, `auth.api.resolveOAuthAccessToken`, turns a token into its user; the REST context and `/api/mcp` use it. API keys keep working.
+  - **Clients:** Client ID Metadata Documents (Claude's default; fetched with the Worker's public-only `fetch`) and open dynamic client registration; PKCE for public clients.
+  - **Resources:** `<origin>/api/mcp` and `<origin>/api/v1` are created on first use from the request's origin, so button deploys work without a configured URL. The `@better-auth/mcp` plugin wasn't used: it needs a fixed resource URL and JWT tokens, and covers MCP only.
+  - **Discovery:** `/.well-known/oauth-protected-resource[/api/mcp|/api/v1]`, `oauth-authorization-server[/api/auth]` and `openid-configuration`, served by `pages/api/oauth/discovery.ts` through rewrites. `/api/mcp` answers 401 with `resource_metadata`, and `invalid_token` for a bad token.
+  - **UI:** the login page carries the signed OAuth request through sign-in (magic links and social sign-in return to it and resume); `/oauth/consent`; **Settings → API → Connected apps**, where disconnecting deletes the consent and revokes the app's tokens in one batch. Translated into all ten languages.
+  - **Tests:** an e2e test plays an MCP client: 401 challenge, discovery, registration, login, consent, code exchange with PKCE, MCP `tools/list`, REST `/users/me`, refresh, remembered consent, deny, and disconnect revoking both tokens. Unit tests cover the CIMD fetch guard, token routing and the login-flow helpers.
+  - **Size:** the Worker grew to 3.28 MiB compressed, over the free plan's 3 MiB, so the Workers Paid plan is now required.
 
 **Files:** `packages/db/src/schema/notifications.ts`, `packages/db/src/repository/{notification,pushSubscription}.repo.ts`, `packages/api/src/routers/{notification,push}.ts`, `packages/api/src/utils/{notifications,push}.ts`, `apps/web/src/components/NotificationBell.tsx`, `apps/web/src/hooks/usePushNotifications.ts`, `apps/web/public/sw.js`, `tools/generate-vapid-keys.mjs`
 

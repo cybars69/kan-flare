@@ -14,6 +14,13 @@ vi.mock("@kan/api/trpc-context", () => ({
     .fn()
     .mockRejectedValue(new Error("no auth in tests")),
 }));
+const resolveOAuthAccessToken = vi.hoisted(() =>
+  vi.fn().mockResolvedValue(null),
+);
+vi.mock("~/server/auth", () => ({
+  auth: { api: { resolveOAuthAccessToken } },
+  db: {},
+}));
 vi.mock("@kan/logger", () => ({
   createLogger: vi.fn(() => ({ info: vi.fn(), error: vi.fn() })),
 }));
@@ -59,13 +66,14 @@ function makeReqRes(headers: Record<string, string> = {}) {
     headers: { authorization: "Bearer kan_test_token", ...headers },
   } as unknown as NextApiRequest;
   const statusSpy = vi.fn().mockReturnThis();
+  const setHeaderSpy = vi.fn();
   const res = {
-    setHeader: vi.fn(),
+    setHeader: setHeaderSpy,
     status: statusSpy,
     json: vi.fn(),
     on: vi.fn(),
   } as unknown as NextApiResponse;
-  return { req, res, statusSpy };
+  return { req, res, statusSpy, setHeaderSpy };
 }
 
 describe("POST /api/mcp", () => {
@@ -211,5 +219,44 @@ describe("POST /api/mcp", () => {
     expect(statusSpy).toHaveBeenCalledWith(429);
     expect(statusSpy).not.toHaveBeenCalledWith(500);
     expect(connect).not.toHaveBeenCalled();
+  });
+
+  it("answers a request without credentials with the OAuth challenge", async () => {
+    mockedEnv.mockImplementation((key) => {
+      if (key === "NEXT_PUBLIC_BASE_URL") return "https://kan.example.com";
+    });
+    const { req, res, statusSpy, setHeaderSpy } = makeReqRes();
+    delete (req.headers as Record<string, string>).authorization;
+
+    await handler(req, res);
+
+    expect(statusSpy).toHaveBeenCalledWith(401);
+    expect(setHeaderSpy).toHaveBeenCalledWith(
+      "WWW-Authenticate",
+      expect.stringContaining(
+        'resource_metadata="https://kan.example.com/.well-known/oauth-protected-resource/api/mcp"',
+      ),
+    );
+  });
+
+  it("rejects an unknown OAuth access token with invalid_token", async () => {
+    mockedEnv.mockImplementation((key) => {
+      if (key === "NEXT_PUBLIC_BASE_URL") return "https://kan.example.com";
+    });
+    const { req, res, statusSpy, setHeaderSpy } = makeReqRes({
+      authorization: "Bearer kan_oat_unknown",
+    });
+
+    await handler(req, res);
+
+    expect(resolveOAuthAccessToken).toHaveBeenCalledWith({
+      body: { token: "kan_oat_unknown" },
+    });
+    expect(statusSpy).toHaveBeenCalledWith(401);
+    expect(setHeaderSpy).toHaveBeenCalledWith(
+      "WWW-Authenticate",
+      expect.stringContaining('error="invalid_token"'),
+    );
+    expect(mockedCreateKanClient).not.toHaveBeenCalled();
   });
 });

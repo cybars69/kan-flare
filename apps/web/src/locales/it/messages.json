@@ -100,6 +100,15 @@
     "origin": [["src/components/NotificationBell.tsx", 277]],
     "translation": "{actor} ti ha menzionato in {0}"
   },
+  "llI2Z5": {
+    "message": "{appName} wants to connect",
+    "placeholders": {
+      "appName": ["appName"]
+    },
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 124]],
+    "translation": "{appName} vuole connettersi"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -502,7 +511,7 @@
     "message": "Adjust the square crop to fit your avatar.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 256]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 252]],
     "translation": "Regola il ritaglio quadrato per adattarlo al tuo avatar."
   },
   "U3pytU": {
@@ -583,6 +592,13 @@
     "origin": [["src/views/pricing/components/PricingTiers.tsx", 80]],
     "translation": "Tutte le funzionalità Teams +"
   },
+  "h7peZQ": {
+    "message": "Allow",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 174]],
+    "translation": "Consenti"
+  },
   "Z3krJD": {
     "message": "Allow workspace members to see each other's email addresses",
     "placeholders": {},
@@ -604,6 +620,13 @@
       ["src/views/auth/signup/index.tsx", 98]
     ],
     "translation": "Hai già un account? <0><1>Accedi</1></0>"
+  },
+  "APO08p": {
+    "message": "An app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 77]],
+    "translation": "Un'app"
   },
   "j1+HPc": {
     "message": "An error occurred while connecting your GitHub account.",
@@ -691,7 +714,7 @@
     "message": "API keys",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 22]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 23]],
     "translation": "Chiavi API"
   },
   "j2+d/o": {
@@ -700,6 +723,13 @@
     "comments": [],
     "origin": [["src/views/home/components/Footer.tsx", 31]],
     "translation": "Riferimento API"
+  },
+  "qg7CpQ": {
+    "message": "App disconnected",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 42]],
+    "translation": "App disconnessa"
   },
   "bJZm1W": {
     "message": "Applicants",
@@ -714,6 +744,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/TemplateBoards.tsx", 46]],
     "translation": "Approvazione"
+  },
+  "v3P/A1": {
+    "message": "Apps you allowed to use your account by signing in to kan-flare, such as Claude or other MCP clients. They act as you, like an API key.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/ApiSettings.tsx", 43]],
+    "translation": "App a cui hai consentito di usare il tuo account accedendo a kan-flare, come Claude o altri client MCP. Agiscono come te, come una chiave API."
   },
   "aKJHG+": {
     "message": "Archive board",
@@ -1064,14 +1101,14 @@
     "message": "Board URL can only contain letters, numbers, and hyphens",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 46]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 47]],
     "translation": "L'URL della board può contenere solo lettere, numeri e trattini"
   },
   "gv5kbo": {
     "message": "Board URL cannot exceed 60 characters",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 44]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 45]],
     "translation": "L'URL della board non può superare i 60 caratteri"
   },
   "8+BY11": {
@@ -1085,7 +1122,7 @@
     "message": "Board URL must be at least 3 characters long",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 42]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 43]],
     "translation": "L'URL della board deve contenere almeno 3 caratteri"
   },
   "qzdST2": {
@@ -1408,7 +1445,7 @@
       ["src/views/card/components/DeleteCommentConfirmation.tsx", 77],
       ["src/views/members/components/DeleteMemberConfirmation.tsx", 55],
       ["src/views/onboarding/select-plan/index.tsx", 246],
-      ["src/views/settings/components/Avatar.tsx", 287],
+      ["src/views/settings/components/Avatar.tsx", 283],
       ["src/views/settings/components/ChangePasswordConfirmation.tsx", 206],
       [
         "src/views/settings/components/ClearCustomPermissionsConfirmation.tsx",
@@ -1537,7 +1574,7 @@
     "comments": [],
     "origin": [
       ["src/pages/partner/activate.tsx", 56],
-      ["src/views/auth/login/index.tsx", 54],
+      ["src/views/auth/login/index.tsx", 66],
       ["src/views/auth/signup/index.tsx", 79]
     ],
     "translation": "Controlla la tua casella di posta"
@@ -1622,7 +1659,7 @@
     },
     "comments": [],
     "origin": [
-      ["src/views/auth/login/index.tsx", 59],
+      ["src/views/auth/login/index.tsx", 71],
       ["src/views/auth/signup/index.tsx", 84]
     ],
     "translation": "Clicca sul link che abbiamo inviato a {magicLinkRecipient} per accedere."
@@ -1745,6 +1782,22 @@
     "origin": [["src/views/settings/PermissionsSettings.tsx", 56]],
     "translation": "Configura quali azioni sono consentite per ogni ruolo del workspace. Questi permessi si applicano a tutti i membri con quel ruolo."
   },
+  "7VpPHA": {
+    "message": "Confirm",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 124]],
+    "translation": "Conferma"
+  },
+  "jj3XWn": {
+    "message": "Confirm disconnecting {name}",
+    "placeholders": {
+      "name": ["name"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 120]],
+    "translation": "Conferma la disconnessione di {name}"
+  },
   "86XI28": {
     "message": "Confirm your email preferences:",
     "placeholders": {},
@@ -1768,6 +1821,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/ImportBoardsForm.tsx", 195]],
     "translation": "Connetti"
+  },
+  "STj9Sb": {
+    "message": "Connect an app | kan-flare",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 91]],
+    "translation": "Connetti un'app | kan-flare"
   },
   "3jod3l": {
     "message": "Connect GitHub",
@@ -1803,6 +1863,22 @@
     "comments": [],
     "origin": [["src/views/settings/IntegrationsSettings.tsx", 149]],
     "translation": "Connetti il tuo account Trello per importare le bacheche."
+  },
+  "sk/Z5E": {
+    "message": "Connected {0}",
+    "placeholders": {
+      "0": ["format(app.connectedAt, \"d MMM yyyy\", { locale: dateLocale })"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 102]],
+    "translation": "Connessa il {0}"
+  },
+  "YGP/lN": {
+    "message": "Connected apps",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/ApiSettings.tsx", 40]],
+    "translation": "App connesse"
   },
   "jfC/xh": {
     "message": "Contact",
@@ -1853,7 +1929,7 @@
     "message": "Continue with ",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 442]],
+    "origin": [["src/components/AuthForm.tsx", 438]],
     "translation": "Continua con "
   },
   "gkzAEM": {
@@ -1862,7 +1938,7 @@
       "0": ["key === \"oidc\" ? oidcProviderName : provider.name"]
     },
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 360]],
+    "origin": [["src/components/AuthForm.tsx", 356]],
     "translation": "Continua con {0}"
   },
   "va/3u1": {
@@ -1943,6 +2019,13 @@
       ["src/views/pricing/components/FeatureComparisonTable.tsx", 275]
     ],
     "translation": "Funzionalità principali"
+  },
+  "AoUN3t": {
+    "message": "Couldn't disconnect the app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 49]],
+    "translation": "Impossibile disconnettere l'app"
   },
   "MQNvCg": {
     "message": "Couldn't load notifications.",
@@ -2036,7 +2119,7 @@
     "message": "Create new key",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 30]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 31]],
     "translation": "Crea nuova chiave"
   },
   "0+0/3e": {
@@ -2112,7 +2195,7 @@
     "message": "Crop your avatar",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 253]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 249]],
     "translation": "Ritaglia il tuo avatar"
   },
   "MtNNDo": {
@@ -2382,6 +2465,13 @@
     "origin": [["src/views/card/components/ActivityList.tsx", 267]],
     "translation": "ha eliminato l'elemento della checklist <0>{0}</0>"
   },
+  "cFCKYZ": {
+    "message": "Deny",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 166]],
+    "translation": "Rifiuta"
+  },
   "f8fH8W": {
     "message": "Design",
     "placeholders": {},
@@ -2395,6 +2485,22 @@
     "comments": [],
     "origin": [["src/views/board/components/MoveBoardForm.tsx", 76]],
     "translation": "Area di lavoro di destinazione"
+  },
+  "+K0AvT": {
+    "message": "Disconnect",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 124]],
+    "translation": "Disconnetti"
+  },
+  "C2BaaK": {
+    "message": "Disconnect {name}",
+    "placeholders": {
+      "name": ["name"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 121]],
+    "translation": "Disconnetti {name}"
   },
   "Odv3J6": {
     "message": "Disconnect GitHub",
@@ -2495,7 +2601,7 @@
     "message": "Don't have an account? <0><1>Sign up</1></0>",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 74]],
+    "origin": [["src/views/auth/login/index.tsx", 86]],
     "translation": "Non hai un account? <0><1>Registrati</1></0>"
   },
   "DPfwMq": {
@@ -2606,7 +2712,7 @@
     "comments": [],
     "origin": [
       ["src/views/board/components/BoardDropdown.tsx", 109],
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 116]
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 117]
     ],
     "translation": "Modifica URL bacheca"
   },
@@ -2645,7 +2751,7 @@
     "message": "Edit workspace URL",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 162]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 163]],
     "translation": "Modifica URL workspace"
   },
   "PRofO0": {
@@ -2666,7 +2772,7 @@
     "message": "email",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 443]],
+    "origin": [["src/components/AuthForm.tsx", 439]],
     "translation": "email"
   },
   "O3oNi5": {
@@ -2765,14 +2871,14 @@
     "message": "Enter your email address",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 407]],
+    "origin": [["src/components/AuthForm.tsx", 403]],
     "translation": "Inserisci il tuo indirizzo email"
   },
   "n9V+ps": {
     "message": "Enter your name",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 395]],
+    "origin": [["src/components/AuthForm.tsx", 391]],
     "translation": "Inserisci il tuo nome"
   },
   "0StR7t": {
@@ -2788,7 +2894,7 @@
     "message": "Enter your password",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 421]],
+    "origin": [["src/components/AuthForm.tsx", 417]],
     "translation": "Inserisci la tua password"
   },
   "GpB8YV": {
@@ -2930,7 +3036,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 75]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 76]
     ],
     "translation": "Errore durante l'aggiornamento dell'URL dello workspace"
   },
@@ -2957,8 +3063,8 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/Avatar.tsx", 69],
-      ["src/views/settings/components/Avatar.tsx", 199]
+      ["src/views/settings/components/Avatar.tsx", 68],
+      ["src/views/settings/components/Avatar.tsx", 195]
     ],
     "translation": "Errore durante il caricamento dell'immagine del profilo"
   },
@@ -3053,7 +3159,7 @@
       "0": ["provider.at(0)?.toUpperCase() + provider.slice(1)"]
     },
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 296]],
+    "origin": [["src/components/AuthForm.tsx", 292]],
     "translation": "Impossibile effettuare il login con {0}. Riprova."
   },
   "5ntVtp": {
@@ -3762,6 +3868,29 @@
     "translation": "Invitare membri richiede un piano Team. Verrai reindirizzato per aggiornare il tuo workspace.",
     "obsolete": true
   },
+  "h13Vqq": {
+    "message": "It can no longer access your account.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 43]],
+    "translation": "Non può più accedere al tuo account."
+  },
+  "04ExBZ": {
+    "message": "It will be able to, as {0}:",
+    "placeholders": {
+      "0": ["session.user.email"]
+    },
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 136]],
+    "translation": "Potrà, come {0}:"
+  },
+  "ie0t7Q": {
+    "message": "It will be able to:",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 140]],
+    "translation": "Potrà:"
+  },
   "c9AJhn": {
     "message": "Join workspace",
     "placeholders": {},
@@ -4024,7 +4153,7 @@
     "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 44]],
+    "origin": [["src/views/auth/login/index.tsx", 56]],
     "translation": "Accedi | kan-flare"
   },
   "nOhz3x": {
@@ -4059,7 +4188,7 @@
     "message": "magic link",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 443]],
+    "origin": [["src/components/AuthForm.tsx", 439]],
     "translation": "magic link"
   },
   "DbZgsJ": {
@@ -4448,6 +4577,13 @@
     "origin": [["src/views/boards/components/BoardsList.tsx", 63]],
     "translation": "Nessun {0}"
   },
+  "NG3bk2": {
+    "message": "No apps are connected. When an app such as Claude asks to connect, you'll approve it here in kan-flare.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 64]],
+    "translation": "Nessuna app connessa. Quando un'app come Claude chiede di connettersi, la approvi qui in kan-flare."
+  },
   "tlhgDC": {
     "message": "No archived boards",
     "placeholders": {},
@@ -4459,7 +4595,7 @@
     "message": "No authentication methods are currently available",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 374]],
+    "origin": [["src/components/AuthForm.tsx", 370]],
     "translation": "Nessun metodo di autenticazione attualmente disponibile"
   },
   "2Bu8xj": {
@@ -4627,6 +4763,13 @@
     "origin": [["src/views/settings/WorkspaceSettings.tsx", 88]],
     "translation": "Una volta eliminato il tuo workspace, non si può tornare indietro. Questa azione non può essere annullata."
   },
+  "GurMv/": {
+    "message": "Only allow apps you trust. You can disconnect it at any time under Settings → API → Connected apps.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 179]],
+    "translation": "Consenti solo app di cui ti fidi. Puoi disconnetterla in qualsiasi momento in Impostazioni → API → App connesse."
+  },
   "69b7aE": {
     "message": "Open command menu",
     "placeholders": {},
@@ -4661,7 +4804,7 @@
     "message": "or",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 385]],
+    "origin": [["src/components/AuthForm.tsx", 381]],
     "translation": "o"
   },
   "ZqDqbi": {
@@ -4736,14 +4879,14 @@
     "message": "Password is required to login.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 263]],
+    "origin": [["src/components/AuthForm.tsx", 269]],
     "translation": "La password è richiesta per accedere."
   },
   "tTbref": {
     "message": "Password is required to sign up.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 262]],
+    "origin": [["src/components/AuthForm.tsx", 268]],
     "translation": "La password è richiesta per registrarsi."
   },
   "vwGkYB": {
@@ -4916,21 +5059,21 @@
     "message": "Please enter a valid email address",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 411]],
+    "origin": [["src/components/AuthForm.tsx", 407]],
     "translation": "Inserisci un indirizzo email valido"
   },
   "CJ3zUq": {
     "message": "Please enter a valid name",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 399]],
+    "origin": [["src/components/AuthForm.tsx", 395]],
     "translation": "Inserisci un nome valido"
   },
   "7b2yuC": {
     "message": "Please enter a valid password",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 426]],
+    "origin": [["src/components/AuthForm.tsx", 422]],
     "translation": "Inserisci una password valida"
   },
   "jEw0Mr": {
@@ -4954,7 +5097,7 @@
     "message": "Please select a file to upload.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 70]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 69]],
     "translation": "Seleziona un file da caricare."
   },
   "tyHiOa": {
@@ -4970,7 +5113,7 @@
       ["src/views/board/components/NewListForm.tsx", 94],
       ["src/views/board/components/NewTemplateForm.tsx", 61],
       ["src/views/board/components/NewTemplateForm.tsx", 77],
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 73],
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 74],
       ["src/views/board/components/VisibilityButton.tsx", 57],
       ["src/views/board/index.tsx", 284],
       ["src/views/board/index.tsx", 340],
@@ -5003,13 +5146,13 @@
       ["src/views/members/index.tsx", 70],
       ["src/views/onboarding/workspace-details/index.tsx", 119],
       ["src/views/onboarding/workspace-details/index.tsx", 167],
-      ["src/views/settings/components/Avatar.tsx", 200],
+      ["src/views/settings/components/Avatar.tsx", 196],
       ["src/views/settings/components/DeleteAccountConfirmation.tsx", 40],
       ["src/views/settings/components/DeleteWorkspaceConfirmation.tsx", 46],
       ["src/views/settings/components/UpdateDisplayNameForm.tsx", 55],
       ["src/views/settings/components/UpdateWorkspaceDescriptionForm.tsx", 64],
       ["src/views/settings/components/UpdateWorkspaceNameForm.tsx", 59],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 76],
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 77],
       ["src/views/settings/PermissionsSettings.tsx", 40]
     ],
     "translation": "Riprova più tardi o contatta l'assistenza clienti."
@@ -5036,7 +5179,8 @@
       ["src/views/card/components/Dropdown.tsx", 81],
       ["src/views/card/components/Dropdown.tsx", 100],
       ["src/views/public/board/CardModal.tsx", 45],
-      ["src/views/public/board/index.tsx", 86]
+      ["src/views/public/board/index.tsx", 86],
+      ["src/views/settings/components/ConnectedAppList.tsx", 50]
     ],
     "translation": "Riprova."
   },
@@ -5128,7 +5272,7 @@
     "message": "Profile image updated",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 189]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 185]],
     "translation": "Immagine del profilo aggiornata"
   },
   "4XF0BB": {
@@ -5182,6 +5326,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/TemplateBoards.tsx", 96]],
     "translation": "Quick win"
+  },
+  "LylrdW": {
+    "message": "Read and change your boards, lists, cards and comments, as you",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 80]],
+    "translation": "Leggere e modificare bacheche, liste, schede e commenti, come te"
   },
   "6EWT6T": {
     "message": "Recruitment",
@@ -5438,7 +5589,7 @@
     "origin": [
       ["src/components/YouTubeEmbed/EditYouTubeModal.tsx", 183],
       ["src/views/card/components/Comment.tsx", 202],
-      ["src/views/settings/components/Avatar.tsx", 290]
+      ["src/views/settings/components/Avatar.tsx", 286]
     ],
     "translation": "Salva"
   },
@@ -5530,6 +5681,13 @@
     "comments": [],
     "origin": [["src/views/home/components/Testimonials.tsx", 239]],
     "translation": "Scopri cosa dicono i nostri utenti su Kan"
+  },
+  "WVRZCj": {
+    "message": "See your name and email address",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 82]],
+    "translation": "Vedere il tuo nome e il tuo indirizzo email"
   },
   "zYRVNp": {
     "message": "Select a list",
@@ -5678,7 +5836,7 @@
     "message": "Settings | API",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 18]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 19]],
     "translation": "Impostazioni | API"
   },
   "ADEin1": {
@@ -5798,7 +5956,7 @@
     "message": "Sign up with ",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 442]],
+    "origin": [["src/components/AuthForm.tsx", 438]],
     "translation": "Registrati con "
   },
   "m2nk0i": {
@@ -5941,6 +6099,13 @@
     "origin": [["src/views/settings/components/WebhookList.tsx", 232]],
     "translation": "Stato"
   },
+  "36/5cw": {
+    "message": "Stay connected until you disconnect it",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 85]],
+    "translation": "Restare connessa finché non la disconnetti"
+  },
   "hQRttt": {
     "message": "Submit",
     "placeholders": {},
@@ -5967,8 +6132,8 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/AuthForm.tsx", 220],
-      ["src/components/AuthForm.tsx", 237]
+      ["src/components/AuthForm.tsx", 226],
+      ["src/components/AuthForm.tsx", 243]
     ],
     "translation": "Successo"
   },
@@ -6304,7 +6469,7 @@
     "message": "This board URL has already been taken",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 136]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 137]],
     "translation": "Questo URL della bacheca è già stato utilizzato"
   },
   "mTwGOf": {
@@ -6322,6 +6487,16 @@
       ["src/views/members/components/EditMemberPermissionsModal.tsx", 81]
     ],
     "translation": "I permessi di questo membro sono stati ripristinati ai valori predefiniti del suo ruolo."
+  },
+  "sNUHMP": {
+    "message": "This request has expired or isn't valid. Start connecting again from the app.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      ["src/views/auth/consent/index.tsx", 69],
+      ["src/views/auth/consent/index.tsx", 103]
+    ],
+    "translation": "Questa richiesta è scaduta o non è valida. Ricomincia la connessione dall'app."
   },
   "HQVm6e": {
     "message": "This URL has already been taken",
@@ -6393,7 +6568,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 129]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 130]
     ],
     "translation": "Questo nome utente dello workspace è già stato utilizzato"
   },
@@ -6728,7 +6903,7 @@
     "message": "Unable to update board URL",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 72]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 73]],
     "translation": "Impossibile aggiornare l'URL della board"
   },
   "Wy6pcF": {
@@ -6956,6 +7131,13 @@
     "translation": "Posti illimitati e funzionalità avanzate per team in crescita.",
     "obsolete": true
   },
+  "lSDWmC": {
+    "message": "Unnamed app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 73]],
+    "translation": "App senza nome"
+  },
   "KuVpz+": {
     "message": "Unread",
     "placeholders": {},
@@ -6979,11 +7161,11 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 175],
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 176],
       ["src/views/settings/components/UpdateDisplayNameForm.tsx", 84],
       ["src/views/settings/components/UpdateWorkspaceDescriptionForm.tsx", 94],
       ["src/views/settings/components/UpdateWorkspaceNameForm.tsx", 90],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 161]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 160]
     ],
     "translation": "Aggiorna"
   },
@@ -7100,7 +7282,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 31],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 38]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 39]
     ],
     "translation": "L'URL può contenere solo lettere, numeri e trattini"
   },
@@ -7117,7 +7299,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 29],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 36]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 37]
     ],
     "translation": "L'URL non può superare i 64 caratteri"
   },
@@ -7127,7 +7309,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 27],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 34]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 35]
     ],
     "translation": "L'URL deve contenere almeno 3 caratteri"
   },
@@ -7170,7 +7352,7 @@
     "message": "View and manage your API keys.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 25]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 26]],
     "translation": "Visualizza e gestisci le tue chiavi API."
   },
   "t2nDzl": {
@@ -7351,7 +7533,7 @@
     "message": "Welcome back",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 54]],
+    "origin": [["src/views/auth/login/index.tsx", 66]],
     "translation": "Bentornato"
   },
   "xEbBrW": {
@@ -7520,7 +7702,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 62]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 63]
     ],
     "translation": "Slug del workspace aggiornato"
   },
@@ -7529,7 +7711,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 118],
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 119],
       ["src/views/settings/WorkspaceSettings.tsx", 45]
     ],
     "translation": "URL del workspace"
@@ -7643,14 +7825,14 @@
     "message": "You have been logged in successfully.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 238]],
+    "origin": [["src/components/AuthForm.tsx", 244]],
     "translation": "Hai effettuato l'accesso con successo."
   },
   "mchgzf": {
     "message": "You have been signed up successfully.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 221]],
+    "origin": [["src/components/AuthForm.tsx", 227]],
     "translation": "Ti sei registrato con successo."
   },
   "raHesj": {
@@ -7834,7 +8016,7 @@
     "message": "Your profile image has been updated.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 190]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 186]],
     "translation": "La tua immagine del profilo è stata aggiornata."
   },
   "+jbXzb": {
@@ -7921,7 +8103,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 63]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 64]
     ],
     "translation": "Lo slug del tuo workspace è stato aggiornato."
   },

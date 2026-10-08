@@ -49,7 +49,8 @@ Everything is created for you on the first deploy: there's nothing to provision 
 - **Private by default.** Only the first account (which becomes the admin) and people invited by email can sign up.
 - **Notification bell.** Mentions show in an in-app notification list, with unread counts and infinite scroll.
 - **Push notifications** on the installed app (iPhone and iPad on iOS 16.4+, Android, desktop Chrome and Edge). Tapping one opens the card, and the app icon shows the unread count.
-- **Built-in MCP server.** Connect Claude, Cursor or another AI client to `https://<your-app>/api/mcp` with an API key.
+- **Built-in MCP server with OAuth sign-in.** Add `https://<your-app>/api/mcp` to Claude, Cursor or another AI client and sign in with your kan-flare account. No API keys to copy.
+- **An OAuth 2.1 server.** Any app can connect through kan-flare's sign-in and consent screen, and use the REST API with the token. People see and disconnect their apps under **Settings → API**.
 - **Quiet email.** One switch turns off mention emails, while sign-in links and invites keep working.
 
 ## Deploy
@@ -72,7 +73,7 @@ Optional, afterwards (Worker → **Settings** → **Variables and secrets**, the
 | **Push notifications**                              | Generate a key pair (`pnpm vapid:generate` in a clone, or any VAPID key generator) and add `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` as secrets. |
 | **Social sign-in**                                  | Add the provider's client ID and secret (see [Settings](#settings)).                                                                              |
 
-Requirements: Cloudflare Images must be available on the account. The Workers Paid plan is recommended: the app fits the free plan's 3 MiB limit (about 2.7 MiB), but the free plan's CPU and D1 limits leave little headroom.
+Requirements: the **Workers Paid plan** ($5 a month), because the app is about 3.3 MiB compressed and the free plan allows 3 MiB. Cloudflare Images must also be available on the account.
 
 ### From your machine
 
@@ -120,14 +121,15 @@ Set these in `.env` for `pnpm run deploy`, or under the Worker's **Variables and
 
 ## Connect an AI client (MCP)
 
-kan-flare serves a [Model Context Protocol](https://modelcontextprotocol.io) endpoint, so AI clients can read and manage your boards. Create a key under **Settings → API keys**, then:
+kan-flare serves a [Model Context Protocol](https://modelcontextprotocol.io) endpoint at `https://<your-app>/api/mcp`, so AI clients can read and manage your boards. It's also a standard OAuth 2.1 server, so clients sign in with your kan-flare account.
 
-```
-URL:     https://<your-app>/api/mcp
-Header:  Authorization: Bearer kan_your_api_key
-```
+- **Claude** (Settings → Connectors → Add custom connector): enter the URL and keep the defaults (**Sign in now**, **Use Claude's published identity**). Claude opens kan-flare's sign-in, you approve it on the consent screen, and it's connected.
+- **Claude Code**: `claude mcp add --transport http kan https://<your-app>/api/mcp`, then `/mcp` to sign in.
+- **Other clients** (Cursor, VS Code and others): add the URL as a remote (HTTP) MCP server; they find the sign-in on their own.
 
-In Claude Code: `claude mcp add --transport http kan https://<your-app>/api/mcp --header "Authorization: Bearer kan_…"`. In Claude's custom connector dialog, choose **No sign-in** and add the header. There's no OAuth sign-in: the API key is the sign-in.
+A connected app acts as you, with the same access as an API key. Its access token lasts an hour and it refreshes it for up to 30 days. Disconnect it at any time under **Settings → API → Connected apps**, which revokes its tokens straight away.
+
+API keys still work, for scripts and clients without OAuth: create one under **Settings → API**, then send `Authorization: Bearer kan_…`.
 
 ## Local development
 

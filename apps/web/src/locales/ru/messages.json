@@ -100,6 +100,15 @@
     "origin": [["src/components/NotificationBell.tsx", 277]],
     "translation": "{actor} упомянул(а) вас в {0}"
   },
+  "llI2Z5": {
+    "message": "{appName} wants to connect",
+    "placeholders": {
+      "appName": ["appName"]
+    },
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 124]],
+    "translation": "{appName} хочет подключиться"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -502,7 +511,7 @@
     "message": "Adjust the square crop to fit your avatar.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 256]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 252]],
     "translation": "Отрегулируйте квадратную обрезку для вашего аватара."
   },
   "U3pytU": {
@@ -583,6 +592,13 @@
     "origin": [["src/views/pricing/components/PricingTiers.tsx", 80]],
     "translation": "Все функции Teams +"
   },
+  "h7peZQ": {
+    "message": "Allow",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 174]],
+    "translation": "Разрешить"
+  },
   "Z3krJD": {
     "message": "Allow workspace members to see each other's email addresses",
     "placeholders": {},
@@ -604,6 +620,13 @@
       ["src/views/auth/signup/index.tsx", 98]
     ],
     "translation": "Уже есть аккаунт? <0><1>Войти</1></0>"
+  },
+  "APO08p": {
+    "message": "An app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 77]],
+    "translation": "Приложение"
   },
   "j1+HPc": {
     "message": "An error occurred while connecting your GitHub account.",
@@ -691,7 +714,7 @@
     "message": "API keys",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 22]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 23]],
     "translation": "Ключи API"
   },
   "j2+d/o": {
@@ -700,6 +723,13 @@
     "comments": [],
     "origin": [["src/views/home/components/Footer.tsx", 31]],
     "translation": "Справочник по API"
+  },
+  "qg7CpQ": {
+    "message": "App disconnected",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 42]],
+    "translation": "Приложение отключено"
   },
   "bJZm1W": {
     "message": "Applicants",
@@ -714,6 +744,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/TemplateBoards.tsx", 46]],
     "translation": "Одобрение"
+  },
+  "v3P/A1": {
+    "message": "Apps you allowed to use your account by signing in to kan-flare, such as Claude or other MCP clients. They act as you, like an API key.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/ApiSettings.tsx", 43]],
+    "translation": "Приложения, которым вы разрешили доступ к аккаунту через вход в kan-flare, например Claude или другие MCP-клиенты. Они действуют от вашего имени, как API-ключ."
   },
   "aKJHG+": {
     "message": "Archive board",
@@ -1064,14 +1101,14 @@
     "message": "Board URL can only contain letters, numbers, and hyphens",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 46]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 47]],
     "translation": "URL доски может содержать только буквы, цифры и дефисы"
   },
   "gv5kbo": {
     "message": "Board URL cannot exceed 60 characters",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 44]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 45]],
     "translation": "URL доски не может превышать 60 символов"
   },
   "8+BY11": {
@@ -1085,7 +1122,7 @@
     "message": "Board URL must be at least 3 characters long",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 42]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 43]],
     "translation": "URL доски должен содержать не менее 3 символов"
   },
   "qzdST2": {
@@ -1408,7 +1445,7 @@
       ["src/views/card/components/DeleteCommentConfirmation.tsx", 77],
       ["src/views/members/components/DeleteMemberConfirmation.tsx", 55],
       ["src/views/onboarding/select-plan/index.tsx", 246],
-      ["src/views/settings/components/Avatar.tsx", 287],
+      ["src/views/settings/components/Avatar.tsx", 283],
       ["src/views/settings/components/ChangePasswordConfirmation.tsx", 206],
       [
         "src/views/settings/components/ClearCustomPermissionsConfirmation.tsx",
@@ -1537,7 +1574,7 @@
     "comments": [],
     "origin": [
       ["src/pages/partner/activate.tsx", 56],
-      ["src/views/auth/login/index.tsx", 54],
+      ["src/views/auth/login/index.tsx", 66],
       ["src/views/auth/signup/index.tsx", 79]
     ],
     "translation": "Проверьте свой почтовый ящик"
@@ -1622,7 +1659,7 @@
     },
     "comments": [],
     "origin": [
-      ["src/views/auth/login/index.tsx", 59],
+      ["src/views/auth/login/index.tsx", 71],
       ["src/views/auth/signup/index.tsx", 84]
     ],
     "translation": "Перейдите по ссылке, которую мы отправили на {magicLinkRecipient}, чтобы войти."
@@ -1745,6 +1782,22 @@
     "origin": [["src/views/settings/PermissionsSettings.tsx", 56]],
     "translation": "Настройте, какие действия разрешены для каждой роли в рабочем пространстве. Эти права применяются ко всем участникам с этой ролью."
   },
+  "7VpPHA": {
+    "message": "Confirm",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 124]],
+    "translation": "Подтвердить"
+  },
+  "jj3XWn": {
+    "message": "Confirm disconnecting {name}",
+    "placeholders": {
+      "name": ["name"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 120]],
+    "translation": "Подтвердить отключение {name}"
+  },
   "86XI28": {
     "message": "Confirm your email preferences:",
     "placeholders": {},
@@ -1768,6 +1821,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/ImportBoardsForm.tsx", 195]],
     "translation": "Подключить"
+  },
+  "STj9Sb": {
+    "message": "Connect an app | kan-flare",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 91]],
+    "translation": "Подключение приложения | kan-flare"
   },
   "3jod3l": {
     "message": "Connect GitHub",
@@ -1803,6 +1863,22 @@
     "comments": [],
     "origin": [["src/views/settings/IntegrationsSettings.tsx", 149]],
     "translation": "Подключите ваш аккаунт Trello для импорта досок."
+  },
+  "sk/Z5E": {
+    "message": "Connected {0}",
+    "placeholders": {
+      "0": ["format(app.connectedAt, \"d MMM yyyy\", { locale: dateLocale })"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 102]],
+    "translation": "Подключено {0}"
+  },
+  "YGP/lN": {
+    "message": "Connected apps",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/ApiSettings.tsx", 40]],
+    "translation": "Подключённые приложения"
   },
   "jfC/xh": {
     "message": "Contact",
@@ -1853,7 +1929,7 @@
     "message": "Continue with ",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 442]],
+    "origin": [["src/components/AuthForm.tsx", 438]],
     "translation": "Продолжить с "
   },
   "gkzAEM": {
@@ -1862,7 +1938,7 @@
       "0": ["key === \"oidc\" ? oidcProviderName : provider.name"]
     },
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 360]],
+    "origin": [["src/components/AuthForm.tsx", 356]],
     "translation": "Продолжить с {0}"
   },
   "va/3u1": {
@@ -1943,6 +2019,13 @@
       ["src/views/pricing/components/FeatureComparisonTable.tsx", 275]
     ],
     "translation": "Основные функции"
+  },
+  "AoUN3t": {
+    "message": "Couldn't disconnect the app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 49]],
+    "translation": "Не удалось отключить приложение"
   },
   "MQNvCg": {
     "message": "Couldn't load notifications.",
@@ -2036,7 +2119,7 @@
     "message": "Create new key",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 30]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 31]],
     "translation": "Создать новый ключ"
   },
   "0+0/3e": {
@@ -2112,7 +2195,7 @@
     "message": "Crop your avatar",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 253]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 249]],
     "translation": "Обрежьте свой аватар"
   },
   "MtNNDo": {
@@ -2382,6 +2465,13 @@
     "origin": [["src/views/card/components/ActivityList.tsx", 267]],
     "translation": "удалил(а) элемент чек-листа <0>{0}</0>"
   },
+  "cFCKYZ": {
+    "message": "Deny",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 166]],
+    "translation": "Отклонить"
+  },
   "f8fH8W": {
     "message": "Design",
     "placeholders": {},
@@ -2395,6 +2485,22 @@
     "comments": [],
     "origin": [["src/views/board/components/MoveBoardForm.tsx", 76]],
     "translation": "Рабочее пространство назначения"
+  },
+  "+K0AvT": {
+    "message": "Disconnect",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 124]],
+    "translation": "Отключить"
+  },
+  "C2BaaK": {
+    "message": "Disconnect {name}",
+    "placeholders": {
+      "name": ["name"]
+    },
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 121]],
+    "translation": "Отключить {name}"
   },
   "Odv3J6": {
     "message": "Disconnect GitHub",
@@ -2495,7 +2601,7 @@
     "message": "Don't have an account? <0><1>Sign up</1></0>",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 74]],
+    "origin": [["src/views/auth/login/index.tsx", 86]],
     "translation": "Нет аккаунта? <0><1>Зарегистрируйтесь</1></0>"
   },
   "DPfwMq": {
@@ -2606,7 +2712,7 @@
     "comments": [],
     "origin": [
       ["src/views/board/components/BoardDropdown.tsx", 109],
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 116]
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 117]
     ],
     "translation": "Изменить URL доски"
   },
@@ -2645,7 +2751,7 @@
     "message": "Edit workspace URL",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 162]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 163]],
     "translation": "Изменить URL рабочего пространства"
   },
   "PRofO0": {
@@ -2666,7 +2772,7 @@
     "message": "email",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 443]],
+    "origin": [["src/components/AuthForm.tsx", 439]],
     "translation": "email"
   },
   "O3oNi5": {
@@ -2765,14 +2871,14 @@
     "message": "Enter your email address",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 407]],
+    "origin": [["src/components/AuthForm.tsx", 403]],
     "translation": "Введите адрес электронной почты"
   },
   "n9V+ps": {
     "message": "Enter your name",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 395]],
+    "origin": [["src/components/AuthForm.tsx", 391]],
     "translation": "Введите имя"
   },
   "0StR7t": {
@@ -2788,7 +2894,7 @@
     "message": "Enter your password",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 421]],
+    "origin": [["src/components/AuthForm.tsx", 417]],
     "translation": "Введите пароль"
   },
   "GpB8YV": {
@@ -2930,7 +3036,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 75]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 76]
     ],
     "translation": "Ошибка при обновлении URL рабочего пространства"
   },
@@ -2957,8 +3063,8 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/Avatar.tsx", 69],
-      ["src/views/settings/components/Avatar.tsx", 199]
+      ["src/views/settings/components/Avatar.tsx", 68],
+      ["src/views/settings/components/Avatar.tsx", 195]
     ],
     "translation": "Ошибка при загрузке изображения профиля"
   },
@@ -3053,7 +3159,7 @@
       "0": ["provider.at(0)?.toUpperCase() + provider.slice(1)"]
     },
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 296]],
+    "origin": [["src/components/AuthForm.tsx", 292]],
     "translation": "Не удалось войти через {0}. Пожалуйста, попробуйте ещё раз."
   },
   "5ntVtp": {
@@ -3762,6 +3868,29 @@
     "translation": "Приглашение участников доступно только на тарифе Team. Вы будете перенаправлены для обновления рабочего пространства.",
     "obsolete": true
   },
+  "h13Vqq": {
+    "message": "It can no longer access your account.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 43]],
+    "translation": "У него больше нет доступа к вашему аккаунту."
+  },
+  "04ExBZ": {
+    "message": "It will be able to, as {0}:",
+    "placeholders": {
+      "0": ["session.user.email"]
+    },
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 136]],
+    "translation": "Оно сможет от имени {0}:"
+  },
+  "ie0t7Q": {
+    "message": "It will be able to:",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 140]],
+    "translation": "Оно сможет:"
+  },
   "c9AJhn": {
     "message": "Join workspace",
     "placeholders": {},
@@ -4024,7 +4153,7 @@
     "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 44]],
+    "origin": [["src/views/auth/login/index.tsx", 56]],
     "translation": "Вход | kan-flare"
   },
   "nOhz3x": {
@@ -4059,7 +4188,7 @@
     "message": "magic link",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 443]],
+    "origin": [["src/components/AuthForm.tsx", 439]],
     "translation": "магическая ссылка"
   },
   "DbZgsJ": {
@@ -4448,6 +4577,13 @@
     "origin": [["src/views/boards/components/BoardsList.tsx", 63]],
     "translation": "Нет {0}"
   },
+  "NG3bk2": {
+    "message": "No apps are connected. When an app such as Claude asks to connect, you'll approve it here in kan-flare.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 64]],
+    "translation": "Нет подключённых приложений. Когда приложение вроде Claude попросит подключиться, вы подтвердите это здесь, в kan-flare."
+  },
   "tlhgDC": {
     "message": "No archived boards",
     "placeholders": {},
@@ -4459,7 +4595,7 @@
     "message": "No authentication methods are currently available",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 374]],
+    "origin": [["src/components/AuthForm.tsx", 370]],
     "translation": "В данный момент нет доступных методов аутентификации"
   },
   "2Bu8xj": {
@@ -4627,6 +4763,13 @@
     "origin": [["src/views/settings/WorkspaceSettings.tsx", 88]],
     "translation": "После удаления рабочего пространства возврата не будет. Это действие необратимо."
   },
+  "GurMv/": {
+    "message": "Only allow apps you trust. You can disconnect it at any time under Settings → API → Connected apps.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 179]],
+    "translation": "Разрешайте только приложения, которым доверяете. Отключить его можно в любой момент: Настройки → API → Подключённые приложения."
+  },
   "69b7aE": {
     "message": "Open command menu",
     "placeholders": {},
@@ -4661,7 +4804,7 @@
     "message": "or",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 385]],
+    "origin": [["src/components/AuthForm.tsx", 381]],
     "translation": "или"
   },
   "ZqDqbi": {
@@ -4736,14 +4879,14 @@
     "message": "Password is required to login.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 263]],
+    "origin": [["src/components/AuthForm.tsx", 269]],
     "translation": "Для входа требуется пароль."
   },
   "tTbref": {
     "message": "Password is required to sign up.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 262]],
+    "origin": [["src/components/AuthForm.tsx", 268]],
     "translation": "Для регистрации требуется пароль."
   },
   "vwGkYB": {
@@ -4916,21 +5059,21 @@
     "message": "Please enter a valid email address",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 411]],
+    "origin": [["src/components/AuthForm.tsx", 407]],
     "translation": "Пожалуйста, введите корректный адрес электронной почты"
   },
   "CJ3zUq": {
     "message": "Please enter a valid name",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 399]],
+    "origin": [["src/components/AuthForm.tsx", 395]],
     "translation": "Пожалуйста, введите корректное имя"
   },
   "7b2yuC": {
     "message": "Please enter a valid password",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 426]],
+    "origin": [["src/components/AuthForm.tsx", 422]],
     "translation": "Пожалуйста, введите корректный пароль"
   },
   "jEw0Mr": {
@@ -4954,7 +5097,7 @@
     "message": "Please select a file to upload.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 70]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 69]],
     "translation": "Пожалуйста, выберите файл для загрузки."
   },
   "tyHiOa": {
@@ -4970,7 +5113,7 @@
       ["src/views/board/components/NewListForm.tsx", 94],
       ["src/views/board/components/NewTemplateForm.tsx", 61],
       ["src/views/board/components/NewTemplateForm.tsx", 77],
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 73],
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 74],
       ["src/views/board/components/VisibilityButton.tsx", 57],
       ["src/views/board/index.tsx", 284],
       ["src/views/board/index.tsx", 340],
@@ -5003,13 +5146,13 @@
       ["src/views/members/index.tsx", 70],
       ["src/views/onboarding/workspace-details/index.tsx", 119],
       ["src/views/onboarding/workspace-details/index.tsx", 167],
-      ["src/views/settings/components/Avatar.tsx", 200],
+      ["src/views/settings/components/Avatar.tsx", 196],
       ["src/views/settings/components/DeleteAccountConfirmation.tsx", 40],
       ["src/views/settings/components/DeleteWorkspaceConfirmation.tsx", 46],
       ["src/views/settings/components/UpdateDisplayNameForm.tsx", 55],
       ["src/views/settings/components/UpdateWorkspaceDescriptionForm.tsx", 64],
       ["src/views/settings/components/UpdateWorkspaceNameForm.tsx", 59],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 76],
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 77],
       ["src/views/settings/PermissionsSettings.tsx", 40]
     ],
     "translation": "Пожалуйста, попробуйте позже или обратитесь в службу поддержки."
@@ -5036,7 +5179,8 @@
       ["src/views/card/components/Dropdown.tsx", 81],
       ["src/views/card/components/Dropdown.tsx", 100],
       ["src/views/public/board/CardModal.tsx", 45],
-      ["src/views/public/board/index.tsx", 86]
+      ["src/views/public/board/index.tsx", 86],
+      ["src/views/settings/components/ConnectedAppList.tsx", 50]
     ],
     "translation": "Пожалуйста, попробуйте ещё раз."
   },
@@ -5128,7 +5272,7 @@
     "message": "Profile image updated",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 189]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 185]],
     "translation": "Изображение профиля обновлено"
   },
   "4XF0BB": {
@@ -5182,6 +5326,13 @@
     "comments": [],
     "origin": [["src/views/boards/components/TemplateBoards.tsx", 96]],
     "translation": "Быстрая победа"
+  },
+  "LylrdW": {
+    "message": "Read and change your boards, lists, cards and comments, as you",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 80]],
+    "translation": "Читать и изменять ваши доски, списки, карточки и комментарии от вашего имени"
   },
   "6EWT6T": {
     "message": "Recruitment",
@@ -5438,7 +5589,7 @@
     "origin": [
       ["src/components/YouTubeEmbed/EditYouTubeModal.tsx", 183],
       ["src/views/card/components/Comment.tsx", 202],
-      ["src/views/settings/components/Avatar.tsx", 290]
+      ["src/views/settings/components/Avatar.tsx", 286]
     ],
     "translation": "Сохранить"
   },
@@ -5530,6 +5681,13 @@
     "comments": [],
     "origin": [["src/views/home/components/Testimonials.tsx", 239]],
     "translation": "Посмотрите, что наши пользователи говорят о Kan"
+  },
+  "WVRZCj": {
+    "message": "See your name and email address",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 82]],
+    "translation": "Видеть ваше имя и адрес эл. почты"
   },
   "zYRVNp": {
     "message": "Select a list",
@@ -5678,7 +5836,7 @@
     "message": "Settings | API",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 18]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 19]],
     "translation": "Настройки | API"
   },
   "ADEin1": {
@@ -5798,7 +5956,7 @@
     "message": "Sign up with ",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 442]],
+    "origin": [["src/components/AuthForm.tsx", 438]],
     "translation": "Зарегистрироваться через "
   },
   "m2nk0i": {
@@ -5941,6 +6099,13 @@
     "origin": [["src/views/settings/components/WebhookList.tsx", 232]],
     "translation": "Статус"
   },
+  "36/5cw": {
+    "message": "Stay connected until you disconnect it",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/auth/consent/index.tsx", 85]],
+    "translation": "Оставаться подключённым, пока вы его не отключите"
+  },
   "hQRttt": {
     "message": "Submit",
     "placeholders": {},
@@ -5967,8 +6132,8 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/AuthForm.tsx", 220],
-      ["src/components/AuthForm.tsx", 237]
+      ["src/components/AuthForm.tsx", 226],
+      ["src/components/AuthForm.tsx", 243]
     ],
     "translation": "Успех"
   },
@@ -6304,7 +6469,7 @@
     "message": "This board URL has already been taken",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 136]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 137]],
     "translation": "Этот URL доски уже занят"
   },
   "mTwGOf": {
@@ -6322,6 +6487,16 @@
       ["src/views/members/components/EditMemberPermissionsModal.tsx", 81]
     ],
     "translation": "Права этого участника были сброшены до значений по умолчанию для его роли."
+  },
+  "sNUHMP": {
+    "message": "This request has expired or isn't valid. Start connecting again from the app.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      ["src/views/auth/consent/index.tsx", 69],
+      ["src/views/auth/consent/index.tsx", 103]
+    ],
+    "translation": "Срок действия запроса истёк, или он недействителен. Начните подключение заново из приложения."
   },
   "HQVm6e": {
     "message": "This URL has already been taken",
@@ -6393,7 +6568,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 129]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 130]
     ],
     "translation": "Это имя пользователя рабочей области уже занято"
   },
@@ -6728,7 +6903,7 @@
     "message": "Unable to update board URL",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 72]],
+    "origin": [["src/views/board/components/UpdateBoardSlugForm.tsx", 73]],
     "translation": "Не удалось обновить URL доски"
   },
   "Wy6pcF": {
@@ -6956,6 +7131,13 @@
     "translation": "Неограниченное количество мест и расширенные функции для развивающихся команд.",
     "obsolete": true
   },
+  "lSDWmC": {
+    "message": "Unnamed app",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/views/settings/components/ConnectedAppList.tsx", 73]],
+    "translation": "Приложение без названия"
+  },
   "KuVpz+": {
     "message": "Unread",
     "placeholders": {},
@@ -6979,11 +7161,11 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/board/components/UpdateBoardSlugForm.tsx", 175],
+      ["src/views/board/components/UpdateBoardSlugForm.tsx", 176],
       ["src/views/settings/components/UpdateDisplayNameForm.tsx", 84],
       ["src/views/settings/components/UpdateWorkspaceDescriptionForm.tsx", 94],
       ["src/views/settings/components/UpdateWorkspaceNameForm.tsx", 90],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 161]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 160]
     ],
     "translation": "Обновить"
   },
@@ -7100,7 +7282,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 31],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 38]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 39]
     ],
     "translation": "URL может содержать только буквы, цифры и дефисы"
   },
@@ -7117,7 +7299,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 29],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 36]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 37]
     ],
     "translation": "URL не может превышать 64 символа"
   },
@@ -7127,7 +7309,7 @@
     "comments": [],
     "origin": [
       ["src/components/NewWorkspaceForm.tsx", 27],
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 34]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 35]
     ],
     "translation": "URL должен содержать не менее 3 символов"
   },
@@ -7170,7 +7352,7 @@
     "message": "View and manage your API keys.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/ApiSettings.tsx", 25]],
+    "origin": [["src/views/settings/ApiSettings.tsx", 26]],
     "translation": "Просматривайте и управляйте своими API-ключами."
   },
   "t2nDzl": {
@@ -7351,7 +7533,7 @@
     "message": "Welcome back",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 54]],
+    "origin": [["src/views/auth/login/index.tsx", 66]],
     "translation": "С возвращением"
   },
   "xEbBrW": {
@@ -7520,7 +7702,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 62]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 63]
     ],
     "translation": "Слаг рабочего пространства обновлён"
   },
@@ -7529,7 +7711,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 118],
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 119],
       ["src/views/settings/WorkspaceSettings.tsx", 45]
     ],
     "translation": "URL рабочего пространства"
@@ -7643,14 +7825,14 @@
     "message": "You have been logged in successfully.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 238]],
+    "origin": [["src/components/AuthForm.tsx", 244]],
     "translation": "Вы успешно вошли в систему."
   },
   "mchgzf": {
     "message": "You have been signed up successfully.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/AuthForm.tsx", 221]],
+    "origin": [["src/components/AuthForm.tsx", 227]],
     "translation": "Вы успешно зарегистрировались."
   },
   "raHesj": {
@@ -7834,7 +8016,7 @@
     "message": "Your profile image has been updated.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/settings/components/Avatar.tsx", 190]],
+    "origin": [["src/views/settings/components/Avatar.tsx", 186]],
     "translation": "Ваше изображение профиля было обновлено."
   },
   "+jbXzb": {
@@ -7921,7 +8103,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 63]
+      ["src/views/settings/components/UpdateWorkspaceUrlForm.tsx", 64]
     ],
     "translation": "Слаг вашего рабочего пространства был обновлён."
   },

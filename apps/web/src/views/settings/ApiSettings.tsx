@@ -7,6 +7,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import ApiKeyList from "./components/ApiKeyList";
+import ConnectedAppList from "./components/ConnectedAppList";
 import NewApiKeyModal from "./components/NewApiKeyModal";
 import { RevokeApiKeyConfirmation } from "./components/RevokeApiKeyConfirmation";
 
@@ -32,6 +33,16 @@ export default function ApiSettings() {
         </div>
 
         <ApiKeyList />
+      </div>
+
+      <div className="mb-8 border-t border-light-300 dark:border-dark-300">
+        <h2 className="mb-4 mt-8 text-[14px] font-bold text-neutral-900 dark:text-dark-1000">
+          {t`Connected apps`}
+        </h2>
+        <p className="mb-6 text-sm text-neutral-500 dark:text-dark-900">
+          {t`Apps you allowed to use your account by signing in to kan-flare, such as Claude or other MCP clients. They act as you, like an API key.`}
+        </p>
+        <ConnectedAppList />
       </div>
 
       {/* API-specific modals */}

@@ -17,7 +17,7 @@ There are two ways to deploy: the **Deploy to Cloudflare** button in the [README
 
 ## Before the first deploy
 
-1. **Account and tools.** The Workers Paid plan is recommended: kan-flare fits the free plan's 3 MiB bundle limit (about 2.7 MiB), but the free plan's CPU time and D1 limits leave little headroom. You also need Node.js 20+ and pnpm 9.
+1. **Account and tools.** You need the Workers Paid plan: kan-flare is about 3.3 MiB compressed, over the free plan's 3 MiB limit. You also need Node.js 20+ and pnpm 9.
 
    ```sh
    pnpm install
@@ -107,25 +107,26 @@ Tapping a notification opens the card. The app icon shows the unread count where
 
 For a button deploy, generate the keys in a clone and add `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` as secrets on the Worker. `VAPID_SUBJECT` (optional) is the contact push services see; it defaults to the site's URL.
 
-## MCP server (AI clients)
+## MCP server and OAuth
 
-kan-flare includes an MCP server, so AI clients (Claude, Cursor, Codex, Copilot…) can read and manage boards. Each user creates an API key under **Settings → API keys**. On a self-hosted instance there's no plan requirement.
+kan-flare includes an MCP server at `/api/mcp`, so AI clients (Claude, Cursor, Codex, Copilot…) can read and manage boards. It's also an OAuth 2.1 authorization server (Better Auth's OAuth Provider plugin), so clients sign in with a kan-flare account. Nothing needs configuring.
 
-**Remote (HTTP).** Point the client at your instance:
+**How a client connects:**
 
-```
-URL:     https://kan.example.com/api/mcp
-Header:  Authorization: Bearer kan_your_api_key
-```
+1. It calls `/api/mcp` without credentials and gets `401` with `WWW-Authenticate: Bearer resource_metadata=".../.well-known/oauth-protected-resource/api/mcp"`.
+2. It reads that metadata, then the authorization server's (`/.well-known/oauth-authorization-server/api/auth`).
+3. It identifies itself with a Client ID Metadata Document (a URL it hosts; Claude's default) or registers itself (dynamic client registration). Public clients must use PKCE.
+4. The person signs in on kan-flare's normal login page (any sign-in method) and approves the app on `/oauth/consent`. Consent is remembered for that app.
+5. The client gets an access token (`kan_oat_…`, 1 hour) and a refresh token (`kan_ort_…`, 30 days) and calls `/api/mcp` and the REST API (`/api/v1`) with it.
 
-For example, in Claude Code:
+Connected apps are listed under **Settings → API → Connected apps**; disconnecting one deletes its consent and revokes its tokens at once. Tokens act as the user, like API keys.
 
-```sh
-claude mcp add --transport http kan https://kan.example.com/api/mcp \
-  --header "Authorization: Bearer kan_your_api_key"
-```
+**In clients:**
 
-**Local (stdio).** Use upstream's npm package, pointed at your instance:
+- **Claude** (Settings → Connectors → Add custom connector): the URL, with **Sign in now** and **Use Claude's published identity**.
+- **Claude Code:** `claude mcp add --transport http kan https://kan.example.com/api/mcp`, then `/mcp` to sign in.
+
+**API keys** still work everywhere (`Authorization: Bearer kan_…`, from **Settings → API**), for scripts and clients without OAuth. For a local (stdio) server, use upstream's npm package:
 
 ```json
 {
@@ -142,7 +143,11 @@ claude mcp add --transport http kan https://kan.example.com/api/mcp \
 }
 ```
 
-The HTTP endpoint calls the app's own REST API through the `WORKER_SELF_REFERENCE` service binding, because a Worker can't reliably fetch its own public hostname.
+**Notes:**
+
+- The protected resources (`<origin>/api/mcp` and `<origin>/api/v1`) are registered on first use from the address the request came in on, so a fresh button deploy works on its `workers.dev` address. After moving to a custom domain, set `NEXT_PUBLIC_BASE_URL`; apps connected under the old address have to reconnect.
+- Client metadata documents are fetched with the Worker's public-only `fetch` (`global_fetch_strictly_public`); local and IP-literal hosts are refused.
+- The MCP endpoint calls the app's own REST API through the `WORKER_SELF_REFERENCE` service binding, because a Worker can't reliably fetch its own public hostname.
 
 ## Operating it
 

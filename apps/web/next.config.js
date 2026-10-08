@@ -87,6 +87,35 @@ const config = {
         source: "/settings",
         destination: "/settings/account",
       },
+      // OAuth discovery (kan-flare is an OAuth server for MCP clients and
+      // other apps); see src/pages/api/oauth/discovery.ts.
+      .../** @type {[string, string][]} */ ([
+        [
+          "/.well-known/oauth-protected-resource",
+          "doc=protected-resource&kind=mcp",
+        ],
+        [
+          "/.well-known/oauth-protected-resource/api/mcp",
+          "doc=protected-resource&kind=mcp",
+        ],
+        [
+          "/.well-known/oauth-protected-resource/api/v1",
+          "doc=protected-resource&kind=api",
+        ],
+        ["/.well-known/oauth-authorization-server", "doc=authorization-server"],
+        [
+          "/.well-known/oauth-authorization-server/api/auth",
+          "doc=authorization-server",
+        ],
+        ["/.well-known/openid-configuration", "doc=openid-configuration"],
+        [
+          "/.well-known/openid-configuration/api/auth",
+          "doc=openid-configuration",
+        ],
+      ]).map(([source, query]) => ({
+        source,
+        destination: `/api/oauth/discovery?${query}`,
+      })),
     ];
   },
 };

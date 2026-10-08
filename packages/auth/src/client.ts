@@ -1,6 +1,7 @@
 import type { BetterAuthClientPlugin } from "better-auth";
 import type { BetterFetchOption } from "better-auth/react";
 import { apiKeyClient } from "@better-auth/api-key/client";
+import { oauthProviderClient } from "@better-auth/oauth-provider/client";
 import { stripeClient } from "@better-auth/stripe/client";
 import { magicLinkClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
@@ -30,6 +31,8 @@ export const authClient = createAuthClient({
     }),
     magicLinkClient(),
     apiKeyClient(),
+    // Carries the signed OAuth request through sign-in on the login page.
+    oauthProviderClient(),
     socialProvidersPluginClient,
   ],
 });

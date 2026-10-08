@@ -14,6 +14,7 @@ import { createLogger } from "@kan/logger";
 import { generateUID } from "@kan/shared/utils";
 import { createStripeClient } from "@kan/stripe";
 
+import { createOAuthPlugins, isOAuthAccessToken } from "./oauth";
 import { socialProvidersPlugin } from "./providers";
 
 const log = createLogger("auth");
@@ -24,7 +25,9 @@ export function getApiKeyFromHeaders(
   const authorization = headers?.get("authorization");
   const bearerMatch = authorization?.match(/^Bearer (.+)$/i);
   if (bearerMatch) {
-    return bearerMatch[1] ?? null;
+    const token = bearerMatch[1] ?? null;
+    // OAuth access tokens are resolved separately, not as API keys.
+    return token && isOAuthAccessToken(token) ? null : token;
   }
   return headers?.get("x-api-key") ?? null;
 }
@@ -69,6 +72,7 @@ async function cancelWorkspaceAccess(
 export function createPlugins(db: dbClient) {
   return [
     socialProvidersPlugin(),
+    ...createOAuthPlugins(),
     ...(process.env.NEXT_PUBLIC_KAN_ENV === "cloud"
       ? [
           stripe({
