@@ -11,7 +11,7 @@ This is the working plan for **kan-flare** (`git@github.com:cybars69/kan-flare.g
 
 - **Plan written:** 2026-10-07
 - **Estimate:** 14 phases, 73 tasks, about 20–29 working days for one developer who knows the codebase
-- **Added later:** Phase 14 (features built on top of the port, 7 tasks), so the plan now has 15 phases and 80 tasks
+- **Added later:** Phase 14 (features built on top of the port, 8 tasks), so the plan now has 15 phases and 81 tasks
 
 
 
@@ -22,7 +22,8 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 
 | Date       | Who | What                                                                         |
 | ---------- | --- | ---------------------------------------------------------------------------- |
-| 2026-10-08 | Claude (for Arsalan) | Ready for the first deploy, and Phase 14 added. One-command deploy now ships the secrets with each version (`5.3` done). Staging dropped at the owner's request: one production Worker on the `tasks.example.com` custom domain. Sign-up is closed apart from the first account and email invites; notification emails are off. New: in-app notification bell (paginated) and Web Push for the installed app. MCP over HTTP fixed on Workers. Tests: unit/integration 267/267, e2e 52/52 with no retries; typecheck clean; bundle 2.69 MiB gzipped. |
+| 2026-10-08 | Claude (for Arsalan) | Deploy to Cloudflare button added (`14.8`): `wrangler.jsonc` moved to the repo root and made generic, the app runs without a configured URL, and the README was rewritten. Instance settings (sender, domain) now live in `.env` and the dashboard, not in git. e2e 52/52. |
+| 2026-10-08 | Claude (for Arsalan) | Ready for the first deploy, and Phase 14 added. One-command deploy now ships the secrets with each version (`5.3` done). Staging dropped at the owner's request: one production Worker. Sign-up is closed apart from the first account and email invites; notification emails are off. New: in-app notification bell (paginated) and Web Push for the installed app. MCP over HTTP fixed on Workers. Tests: unit/integration 267/267, e2e 52/52 with no retries; typecheck clean; bundle 2.69 MiB gzipped. |
 | 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 255/255, e2e 48/48 with no retries, typecheck clean, smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
 | 2026-10-08 | Claude (for Arsalan) | Phase 0 done except new icon artwork (`0.3`). Remotes repointed, `workers` branch created, renamed to kan-flare, `NOTICE` added, billing routes removed. Build, tests and a local run checked. |
 | 2026-10-07 | —   | Plan finalised. D1 chosen over Hyperdrive so no external Postgres is needed. |
@@ -47,7 +48,7 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 | `next/image`                                          | Change     | Custom loader on Cloudflare image transformations, with converted variants stored in R2.                                                                                     |
 | Sign-up                                               | Change     | Closed by default: only the first account (who becomes admin) and people invited by email can sign up.                                                                         |
 | Notifications                                         | Change     | Mention emails off (`DISABLE_NOTIFICATION_EMAILS`). Mentions show in an in-app bell and as Web Push on installed apps. Sign-in, invite and reset emails still send.          |
-| Environments and domain                               | Change     | One production Worker on the `tasks.example.com` Custom Domain, declared in `wrangler.jsonc`. Staging was dropped: the app is for internal use only.                         |
+| Environments and domain                               | Change     | One production Worker; staging dropped. `wrangler.jsonc` is generic so the Deploy to Cloudflare button works for anyone; custom domains are attached in the dashboard. |
 | Upstream sync                                         | Accepted   | No PRs to upstream, to avoid hurting Kan's hosted business. Upstream fixes outside `packages/db` still merge; schema and query changes are ported to SQLite by hand.         |
 
 
@@ -316,8 +317,8 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   3. Deploys with `--secrets-file`, so the secrets ship with the new version. The file is a private temp copy holding only real secrets: non-empty values from `.env`, not `NEXT_PUBLIC_*`, not names set as `vars`. It's deleted afterwards, even if the deploy fails. Values are never printed. Missing D1, R2 and other resources are created here.
   4. Migrates again, which creates the tables on the first deploy.
 - `5.3`: done by the deploy itself (above). `pnpm --filter @kan/web secrets:push` (with `--dry-run`) updates secrets between deploys via `wrangler secret bulk`. Non-secret settings (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`) are `vars` in `wrangler.jsonc`.
-- `5.4`: built, then removed on 2026-10-08 at the owner's request, since kan-flare is only used internally in production. `wrangler.jsonc` now describes one Worker, served on the `tasks.example.com` Custom Domain (`routes` with `"custom_domain": true`); deploy attaches it with its DNS record and certificate.
-  - **Local runs:** because of that route, `wrangler dev` rewrites requests to `tasks.example.com` unless started with `--local-upstream localhost:<port>`, and sign-in then fails with "Invalid origin". The e2e harness and `DEPLOY.md` pass the flag.
+- `5.4`: built, then removed on 2026-10-08 at the owner's request: kan-flare runs as one production Worker. Custom domains are attached in the dashboard, where deploys leave them alone, so `wrangler.jsonc` has no `routes` and stays generic for the deploy button (`14.8`).
+  - **Local runs:** with a `routes` entry, `wrangler dev` rewrites requests to that host unless started with `--local-upstream localhost:<port>`, and sign-in then fails with "Invalid origin". The e2e harness and `DEPLOY.md` pass the flag.
 - `5.5`: D1 Time Travel is always on, with no setting to enable. It keeps 30 days of history on the paid plan and 7 on the free plan.
   - **To restore:** `wrangler d1 time-travel restore kan-flare --timestamp=<RFC3339 or unix>`.
   - **To find a bookmark first:** `wrangler d1 time-travel info kan-flare --timestamp=<…>`.
@@ -611,22 +612,23 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 ### Phase 14: Features beyond the port
 
-**Goal:** kan-flare fits a small private team's use: closed sign-up, quiet email, notifications in the app and on phones.
+**Goal:** kan-flare suits a small private team: closed sign-up, quiet email, notifications in the app and on phones, and a one-click deploy.
 **Estimate:** 1.5–2 days (added after the plan; built 2026-10-08)
 
 - [x] `14.1` Close sign-up: the first account (who becomes admin) and email invitees only
 - [x] `14.2` Add a switch to turn off mention emails, keeping sign-in, invite and reset emails
-- [x] `14.3` Serve production on the `tasks.example.com` Custom Domain
+- [x] `14.3` Serve production on a custom domain
 - [x] `14.4` Make the HTTP MCP server work on Workers, with API-key auth
 - [x] `14.5` Add an in-app notification bell with a paginated list
 - [x] `14.6` Add Web Push notifications for the installed app (PWA)
 - [ ] `14.7` Notify people when they're assigned to a card
+- [x] `14.8` Add a Deploy to Cloudflare button
 
 **Status notes (2026-10-08):**
 
 - `14.1`: `NEXT_PUBLIC_DISABLE_SIGN_UP=true`. A public `user.isFirstUser` query and an auth hook allow sign-up while no user exists; the login and sign-up pages follow it. Invitees can sign up because of their pending invitation; invite links don't work while sign-up is closed.
-- `14.2`: `DISABLE_NOTIFICATION_EMAILS=true` in `vars`. Sender: "Kan Flare <no-reply@tasks.example.com>".
-- `14.3`: see `5.4` above for the route and the `--local-upstream` caveat.
+- `14.2`: `DISABLE_NOTIFICATION_EMAILS=true`, set per instance in `.env` (or on the Worker), like the sender `EMAIL_FROM`.
+- `14.3`: first declared as a Custom Domain route in `wrangler.jsonc`, then moved to the dashboard so the committed config stays generic (see `5.4` and `14.8`).
 - `14.4`: see Phase 12's later fixes. Claude's custom connector: choose "No sign-in" and add an `Authorization: Bearer kan_…` header.
 - `14.5`: a bell above the user menu, in the sidebar and the mobile drawer.
   - **API:** `notification.list` is keyset-paginated (cursor = `publicId`, 20 per page, newest first) and joins card, board, workspace and author in the same query. It hides notifications for deleted cards and for workspaces the user has left. Also `unreadCount`, `markRead` and `markAllRead`.
@@ -639,6 +641,12 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   - **Client:** `public/sw.js` shows the notification, opens the card on tap and sets the app icon badge; it caches nothing. Logging out unsubscribes the device.
   - **Tests:** integration tests decrypt the pushes as a browser would (RFC 8291) and verify the VAPID signature. E2e tests deliver a push to the service worker over CDP, and cover the switch and logout. Real delivery to a phone still needs the deployed app.
 - `14.7`: deferred at the owner's request. Assigning someone only adds a "member added" entry to the card's activity feed.
+- `14.8`: the README's button points at `https://github.com/cybars69/kan-flare/tree/workers`. The button only reads the directory its URL names, so:
+  - **Root config:** `wrangler.jsonc` moved from `apps/web` to the repo root (paths updated; `apps/web` commands pass `-c ../../wrangler.jsonc`; `next dev` uses the same local state as `pnpm db:migrate`). It holds no instance settings, and `keep_vars` keeps variables added in the dashboard.
+  - **Root scripts:** `pnpm run build` builds only and `pnpm run deploy` deploys (`tools/deploy.mjs`; in Workers Builds it reuses the build). The old Turbo build is `pnpm build:packages`.
+  - **No configuration needed:** `apps/web/worker.mjs` wraps the OpenNext worker and uses each request's origin when `NEXT_PUBLIC_BASE_URL` isn't set; the browser falls back to its own address (`getBaseUrl()`). The build defaults `NEXT_PUBLIC_ALLOW_CREDENTIALS` and `NEXT_PUBLIC_DISABLE_SIGN_UP` to `true`.
+  - **The form:** the root `.dev.vars.example` makes the button ask for `BETTER_AUTH_SECRET` only; `package.json` `cloudflare.bindings` describes each resource.
+  - **Checked:** a clean copy with no `.env`, built as Workers Builds would, signed up a first user, refused a second sign-up, and served pages, tRPC and MCP on its own origin. A real click-through needs a Cloudflare account.
 
 **Files:** `packages/db/src/schema/notifications.ts`, `packages/db/src/repository/{notification,pushSubscription}.repo.ts`, `packages/api/src/routers/{notification,push}.ts`, `packages/api/src/utils/{notifications,push}.ts`, `apps/web/src/components/NotificationBell.tsx`, `apps/web/src/hooks/usePushNotifications.ts`, `apps/web/public/sw.js`, `tools/generate-vapid-keys.mjs`
 
