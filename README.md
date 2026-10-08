@@ -52,7 +52,7 @@ See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 kan-flare runs entirely on Cloudflare: Workers for the app, D1 for the database, R2 for files, Cloudflare Images for image resizing, Email Service for mail, and Workers Rate Limiting. One command builds, provisions anything missing and deploys:
 
 ```bash
-pnpm --filter @kan/web deploy
+pnpm --filter @kan/web run deploy
 ```
 
 See [DEPLOY.md](./DEPLOY.md) for first-time setup (email domain, secrets, build settings), backups and local development.

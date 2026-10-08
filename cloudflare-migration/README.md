@@ -305,7 +305,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Status notes (2026-10-08):**
 
 - **Deferred:** `5.1` and `5.2` (the GitHub Actions deploy workflow and repository secrets) are put off for a few weeks at the owner's request. Deploys run from a machine for now.
-- **One-command deploy:** `pnpm --filter @kan/web deploy` builds, then runs `deploy:built`, which does three things:
+- **One-command deploy:** `pnpm --filter @kan/web run deploy` builds, then runs `deploy:built`, which does three things:
   1. Migrates D1 if the database already exists. On the first deploy it doesn't, so this step prints a note and carries on.
   2. Runs `opennextjs-cloudflare deploy`. On the first run, this provisions the D1 database, because the binding has no `database_id`.
   3. Migrates again. This is a no-op when nothing is pending.

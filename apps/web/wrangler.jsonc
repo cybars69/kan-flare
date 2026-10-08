@@ -13,7 +13,7 @@
   // NEXT_PUBLIC_BASE_URL in .env; example.com must be in this account.
   "routes": [{ "pattern": "tasks.example.com", "custom_domain": true }],
   // Non-secret runtime settings. Secrets (BETTER_AUTH_SECRET, OAuth client
-  // secrets…) come from .env and are uploaded by `pnpm --filter @kan/web deploy`.
+  // secrets…) come from .env and are uploaded by `pnpm --filter @kan/web run deploy`.
   "vars": {
     "EMAIL_FROM": "Kan Flare <no-reply@tasks.example.com>",
     "DISABLE_NOTIFICATION_EMAILS": "true",

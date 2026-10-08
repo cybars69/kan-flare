@@ -69,7 +69,7 @@ DISABLE_NOTIFICATION_EMAILS=true    # no mention emails
 ## Deploy
 
 ```sh
-pnpm --filter @kan/web deploy
+pnpm --filter @kan/web run deploy
 ```
 
 This runs `tools/deploy.mjs`, which:

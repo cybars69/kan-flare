@@ -2,8 +2,8 @@
 /**
  * Builds and deploys kan-flare to Cloudflare in one command.
  *
- *   pnpm --filter @kan/web deploy                  # production
- *   pnpm --filter @kan/web deploy --skip-build     # reuse .open-next
+ *   pnpm --filter @kan/web run deploy                  # production
+ *   pnpm --filter @kan/web run deploy --skip-build     # reuse .open-next
  *
  * 1. Build with OpenNext (NEXT_PUBLIC_* come from the repo-root .env).
  * 2. If the D1 database exists, apply pending migrations before the new code

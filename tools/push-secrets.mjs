@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Updates the Worker's secrets from the repo-root .env without deploying.
- * `pnpm --filter @kan/web deploy` already uploads them with each version, so
+ * `pnpm --filter @kan/web run deploy` already uploads them with each version, so
  * use this only to change a secret between deploys.
  *
  *   pnpm --filter @kan/web secrets:push              # production
