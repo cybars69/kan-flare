@@ -11,6 +11,7 @@ This is the working plan for **kan-flare** (`git@github.com:cybars69/kan-flare.g
 
 - **Plan written:** 2026-10-07
 - **Estimate:** 14 phases, 73 tasks, about 20–29 working days for one developer who knows the codebase
+- **Added later:** Phase 14 (features built on top of the port, 7 tasks), so the plan now has 15 phases and 80 tasks
 
 
 
@@ -21,6 +22,7 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 
 | Date       | Who | What                                                                         |
 | ---------- | --- | ---------------------------------------------------------------------------- |
+| 2026-10-08 | Claude (for Arsalan) | Ready for the first deploy, and Phase 14 added. One-command deploy now ships the secrets with each version (`5.3` done). Staging dropped at the owner's request: one production Worker on the `tasks.example.com` custom domain. Sign-up is closed apart from the first account and email invites; notification emails are off. New: in-app notification bell (paginated) and Web Push for the installed app. MCP over HTTP fixed on Workers. Tests: unit/integration 267/267, e2e 52/52 with no retries; typecheck clean; bundle 2.69 MiB gzipped. |
 | 2026-10-08 | Claude (for Arsalan) | Phases 1–11 done; 12 and 13 done except the items that need a real Cloudflare deploy (OAuth/Trello credentials, cold-start time, release tag). The app runs fully on Workers + D1 + R2 + Images + Email Service + Rate Limiting. Unit/integration 255/255, e2e 48/48 with no retries, typecheck clean, smoke test passing, bundle 2.77 MiB. The GitHub Actions deploy workflow is deferred. |
 | 2026-10-08 | Claude (for Arsalan) | Phase 0 done except new icon artwork (`0.3`). Remotes repointed, `workers` branch created, renamed to kan-flare, `NOTICE` added, billing routes removed. Build, tests and a local run checked. |
 | 2026-10-07 | —   | Plan finalised. D1 chosen over Hyperdrive so no external Postgres is needed. |
@@ -43,6 +45,9 @@ Add a line when you finish a phase or make a decision that changes the plan. New
 | `pino`, `pino-pretty`, Axiom                          | Change     | A small console-based logger with the same `createLogger` API. Morgan was considered, but it's an HTTP request logger for Express servers and doesn't replace an app logger. |
 | `next-runtime-env` + `bootstrap.cjs`                  | Change     | Public values set at build time; server values from Worker vars and secrets.                                                                                                 |
 | `next/image`                                          | Change     | Custom loader on Cloudflare image transformations, with converted variants stored in R2.                                                                                     |
+| Sign-up                                               | Change     | Closed by default: only the first account (who becomes admin) and people invited by email can sign up.                                                                         |
+| Notifications                                         | Change     | Mention emails off (`DISABLE_NOTIFICATION_EMAILS`). Mentions show in an in-app bell and as Web Push on installed apps. Sign-in, invite and reset emails still send.          |
+| Environments and domain                               | Change     | One production Worker on the `tasks.example.com` Custom Domain, declared in `wrangler.jsonc`. Staging was dropped: the app is for internal use only.                         |
 | Upstream sync                                         | Accepted   | No PRs to upstream, to avoid hurting Kan's hosted business. Upstream fixes outside `packages/db` still merge; schema and query changes are ported to SQLite by hand.         |
 
 
@@ -298,23 +303,23 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 - [ ] `5.1` Add `.github/workflows/deploy.yml`: install, test, `wrangler d1 migrations apply --remote`, build, `wrangler deploy`
 - [ ] `5.2` Store `CLOUDFLARE_API_TOKEN` and the account ID as repository secrets
-- [ ] `5.3` Push server secrets with `wrangler secret put`
-- [x] `5.4` Add a staging environment with its own D1 database
+- [x] `5.3` Push server secrets with `wrangler secret put`
+- [x] `5.4` Add a staging environment with its own D1 database (dropped later at the owner's request; see notes)
 - [x] `5.5` Turn on D1 Time Travel for point-in-time restore, and write down the restore command
 
 **Status notes (2026-10-08):**
 
 - **Deferred:** `5.1` and `5.2` (the GitHub Actions deploy workflow and repository secrets) are put off for a few weeks at the owner's request. Deploys run from a machine for now.
-- **One-command deploy:** `pnpm --filter @kan/web run deploy` builds, then runs `deploy:built`, which does three things:
-  1. Migrates D1 if the database already exists. On the first deploy it doesn't, so this step prints a note and carries on.
-  2. Runs `opennextjs-cloudflare deploy`. On the first run, this provisions the D1 database, because the binding has no `database_id`.
-  3. Migrates again. This is a no-op when nothing is pending.
-
-  `deploy:staging` does the same against `--env staging`. `CI=true` skips Wrangler's confirmation prompt.
-- `5.3`: not done yet, because it writes to the Cloudflare account. Before the first deploy, run `wrangler secret put BETTER_AUTH_SECRET` from `apps/web`, adding `--env staging` for staging. Do the same for any OAuth client secrets in use. Non-secret values go in `vars` in `wrangler.jsonc`.
-- `5.4`: `env.staging` in `wrangler.jsonc` has its own Worker (`kan-flare-staging`), its own self-reference and its own D1 database (`kan-flare-staging`), all provisioned on its first deploy. Wrangler environments don't inherit bindings, so every binding added later must also be added under `env.staging`. A dry run with `--env staging` resolves all bindings.
+- **One-command deploy:** `pnpm --filter @kan/web run deploy` runs `tools/deploy.mjs`. (Use `run`: `pnpm deploy` is a built-in pnpm command.) It:
+  1. Builds with OpenNext, reading `NEXT_PUBLIC_*` from the repo-root `.env`.
+  2. Migrates D1 if the database already exists, and stops if a migration fails.
+  3. Deploys with `--secrets-file`, so the secrets ship with the new version. The file is a private temp copy holding only real secrets: non-empty values from `.env`, not `NEXT_PUBLIC_*`, not names set as `vars`. It's deleted afterwards, even if the deploy fails. Values are never printed. Missing D1, R2 and other resources are created here.
+  4. Migrates again, which creates the tables on the first deploy.
+- `5.3`: done by the deploy itself (above). `pnpm --filter @kan/web secrets:push` (with `--dry-run`) updates secrets between deploys via `wrangler secret bulk`. Non-secret settings (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`) are `vars` in `wrangler.jsonc`.
+- `5.4`: built, then removed on 2026-10-08 at the owner's request, since kan-flare is only used internally in production. `wrangler.jsonc` now describes one Worker, served on the `tasks.example.com` Custom Domain (`routes` with `"custom_domain": true`); deploy attaches it with its DNS record and certificate.
+  - **Local runs:** because of that route, `wrangler dev` rewrites requests to `tasks.example.com` unless started with `--local-upstream localhost:<port>`, and sign-in then fails with "Invalid origin". The e2e harness and `DEPLOY.md` pass the flag.
 - `5.5`: D1 Time Travel is always on, with no setting to enable. It keeps 30 days of history on the paid plan and 7 on the free plan.
-  - **To restore:** `wrangler d1 time-travel restore kan-flare --timestamp=<RFC3339 or unix>`. Add `--env staging` for staging.
+  - **To restore:** `wrangler d1 time-travel restore kan-flare --timestamp=<RFC3339 or unix>`.
   - **To find a bookmark first:** `wrangler d1 time-travel info kan-flare --timestamp=<…>`.
 - **Logs:** `observability.logs.enabled` is on, so Worker logs show in the dashboard. Phase 8 makes them structured.
 - **Bundle size:** with `pg` and PGlite gone, the Worker is **3.7 MiB gzipped** (19 MiB raw), down from 6.75 MiB.
@@ -325,7 +330,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 **Files:** `.github/workflows/deploy.yml` (new), `apps/web/wrangler.jsonc`
 
-**Done when:** A push to `main` deploys to staging with no manual steps; a tag deploys to production.
+**Done when:** A push to `main` deploys to staging with no manual steps; a tag deploys to production. (Until the workflow exists: one command from a machine deploys production.)
 
 ### Phase 6: Storage on R2 bindings
 
@@ -341,7 +346,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 **Status notes (2026-10-08):**
 
-- `6.1`: there are two R2 bindings, `AVATARS` and `ATTACHMENTS`. Production uses the buckets `kan-flare-avatars` and `kan-flare-attachments`; staging uses `kan-flare-staging-*`. Wrangler creates them on first deploy, so nothing is created by hand.
+- `6.1`: there are two R2 bindings, `AVATARS` and `ATTACHMENTS`. The buckets are `kan-flare-avatars` and `kan-flare-attachments`. Wrangler creates them on first deploy, so nothing is created by hand.
 - `6.2`: `packages/shared/src/utils/s3.ts` is replaced by `storage.ts`, exported as the server-only subpath `@kan/shared/storage`. It isn't part of `@kan/shared/utils`, so the browser bundle can't pull it in.
   - **Functions:** `getBucket`, `isStorageConfigured`, `putObject`, `getObject`, `deleteObject`, `signFileUrl`, `verifyFileSignature`, `generateUploadUrl`, `generateAvatarUrl` and `generateAttachmentUrl`.
   - **Streamed uploads:** `putObject` streams through the Workers runtime's `FixedLengthStream`, because R2 needs a streamed body's length up front. Under `next dev` on Node, where that class doesn't exist, it buffers instead.
@@ -482,7 +487,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   - **Response headers:** `X-Image-Cache: hit|miss|bypass`, `Vary: Accept`, the sandbox policy and `nosniff`. Avatars, static and external images are publicly cacheable for a day; attachments are private.
 - `10.3`: `src/utils/image-loader.ts` is the custom `next/image` loader, set with `images.loader: "custom"` in `next.config.js`. The old `remotePatterns` and OIDC block are gone, because the route decides what's allowed. All six components keep using `next/image` unchanged.
 - `10.4`: deleting an attachment, uploading an avatar, or copying a social-login avatar deletes that image's variants. Variants share a per-source prefix (`deleteImageVariants` in `@kan/shared/storage`).
-- **Bindings:** `images` (`IMAGES`) and the `IMAGE_VARIANTS` bucket, for both production and staging. Nothing needs creating by hand.
+- **Bindings:** `images` (`IMAGES`) and the `IMAGE_VARIANTS` bucket. Nothing needs creating by hand.
 - **Billing:** image transformations are billed per unique transformation each month, which storing variants keeps low. Locally, `wrangler dev` uses a simplified Images simulator (width, height, rotate and format only).
 - **Checked:**
   - Unit tests round-trip the loader's encoding, including signed URLs and non-ASCII names.
@@ -572,7 +577,12 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
   - **Lint in the web app:** across files changed since upstream, the only errors on changed lines were 5 in my image and avatar routes, now fixed.
   - **Typecheck:** fully clean, 21/21. Upstream's `views/board/index.tsx:902` error is fixed by typing the board output schema's `visibility` as `z.enum(["public", "private"])`.
   - **Turbo env:** `BETTER_AUTH_URL`, `DISABLE_RATE_LIMIT` and `SUBSCRIBER_*` were read without being declared in `turbo.json`, and are now declared.
-- `12.6`: half done. The bundle is **2.77 MiB gzipped**. Cold-start time needs a real deployment and is still to be measured.
+- **Later runs (2026-10-08):** unit and integration tests 267/267; Playwright 52/52 with retries off, including the new notification-bell and push tests (push tests use Chromium's full headless mode, because the default headless shell reports notification permission as denied).
+- **Later fixes:**
+  - **MCP over HTTP:** the Node transport lost the `Accept` header under OpenNext; `/api/mcp` now uses the Web-standard transport and calls the app's REST API through the `WORKER_SELF_REFERENCE` service binding. 46 tools verified.
+  - **False OAuth sign-in in MCP clients:** `/.well-known/oauth-*` fell through to the app page and answered 200, so Claude's connector offered an OAuth sign-in that can't work. They now return 404 on every host; MCP uses API keys (`Authorization: Bearer kan_…`).
+  - **Mention notification lost when email failed:** the in-app notification is now recorded first, then the push and email go out.
+- `12.6`: half done. The bundle is **2.69 MiB gzipped** (with the notification and push features). Cold-start time needs a real deployment and is still to be measured.
 
 **Done when:** The e2e suite passes against staging, and staging runs for a few days with no new errors.
 
@@ -588,7 +598,7 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 
 **Status notes (2026-10-08):**
 
-- `13.1`: `DEPLOY.md` covers prerequisites (plan, email domain, Images), build-time and runtime settings, the one-command deploy, staging, custom domains, logs, backups, migrations, local development and tests. `pnpm dev` (`next dev` with local bindings) was checked: sign-up and tRPC work against local D1.
+- `13.1`: `DEPLOY.md` covers prerequisites (plan, email domain, Images), build-time and runtime settings, closed sign-up and email, the one-command deploy, the custom domain, push notifications, the MCP server, logs, backups, migrations, local development and tests. `pnpm dev` (`next dev` with local bindings) was checked: sign-up and tRPC work against local D1.
 - `13.2`: `.env.example`, `turbo.json`, the README's environment table, `AGENTS.md` and `apps/web/.dev.vars.example` are updated. The README's Docker/Railway section is replaced with a Cloudflare section, and its fork note points to `DEPLOY.md`. `AGENTS.md` has a new "Cloudflare Runtime Rules" section for future contributors and agents.
 - `13.3`: removed `apps/web/Dockerfile`, `apps/web/entrypoint.sh`, `docker-compose.yml`, `cloud/docker-compose.yml`, `.dockerignore` and `.github/workflows/docker-publish.yml`.
   - **Still to update** (deferred with the CI work): `.github/workflows/e2e.yml` still provisions Postgres and MinIO.
@@ -598,6 +608,41 @@ Phases are in build order. Task numbers (`3.2` means Phase 3, task 2) stay fixed
 **Files:** `README.md`, `.env.example`, `turbo.json`, `docker-compose.yml`, `apps/web/Dockerfile`
 
 **Done when:** A clean Cloudflare account can deploy kan-flare by following the README.
+
+### Phase 14: Features beyond the port
+
+**Goal:** kan-flare fits a small private team's use: closed sign-up, quiet email, notifications in the app and on phones.
+**Estimate:** 1.5–2 days (added after the plan; built 2026-10-08)
+
+- [x] `14.1` Close sign-up: the first account (who becomes admin) and email invitees only
+- [x] `14.2` Add a switch to turn off mention emails, keeping sign-in, invite and reset emails
+- [x] `14.3` Serve production on the `tasks.example.com` Custom Domain
+- [x] `14.4` Make the HTTP MCP server work on Workers, with API-key auth
+- [x] `14.5` Add an in-app notification bell with a paginated list
+- [x] `14.6` Add Web Push notifications for the installed app (PWA)
+- [ ] `14.7` Notify people when they're assigned to a card
+
+**Status notes (2026-10-08):**
+
+- `14.1`: `NEXT_PUBLIC_DISABLE_SIGN_UP=true`. A public `user.isFirstUser` query and an auth hook allow sign-up while no user exists; the login and sign-up pages follow it. Invitees can sign up because of their pending invitation; invite links don't work while sign-up is closed.
+- `14.2`: `DISABLE_NOTIFICATION_EMAILS=true` in `vars`. Sender: "Kan Flare <no-reply@tasks.example.com>".
+- `14.3`: see `5.4` above for the route and the `--local-upstream` caveat.
+- `14.4`: see Phase 12's later fixes. Claude's custom connector: choose "No sign-in" and add an `Authorization: Bearer kan_…` header.
+- `14.5`: a bell above the user menu, in the sidebar and the mobile drawer.
+  - **API:** `notification.list` is keyset-paginated (cursor = `publicId`, 20 per page, newest first) and joins card, board, workspace and author in the same query. It hides notifications for deleted cards and for workspaces the user has left. Also `unreadCount`, `markRead` and `markAllRead`.
+  - **Speed:** a new `workspace_members (userId, workspaceId)` index (migration `0001`) makes the membership check an index seek. The query plan has no scans or sorts.
+  - **UI:** infinite scroll, optimistic mark-read (56 ms for "Mark all as read"), and loading, empty and error states. The badge polls once a minute while the tab is visible, and on focus. Translated into all ten languages.
+  - **Note:** only mentions create notifications. The workspace types (added, removed, role changed) exist but nothing creates them yet.
+- `14.6`: mentions arrive as push notifications on devices that turn them on from the bell, in the installed app only (iOS 16.4+, Android, desktop Chrome and Edge).
+  - **Server:** a `push_subscription` table (migration `0002`; one row per device; re-subscribing moves it to the current user) and `push.config`, `push.subscribe` and `push.unsubscribe`. Sent from the Worker with `@block65/webcrypto-web-push` (aes128gcm and VAPID, which Apple requires). Subscriptions answered with 404 or 410 are deleted. Only Apple, Google, Mozilla and Microsoft push hosts are accepted.
+  - **Keys:** `node tools/generate-vapid-keys.mjs` writes `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to `.env` without printing them, and deploy uploads them as secrets. Regenerating them drops every device's subscription.
+  - **Client:** `public/sw.js` shows the notification, opens the card on tap and sets the app icon badge; it caches nothing. Logging out unsubscribes the device.
+  - **Tests:** integration tests decrypt the pushes as a browser would (RFC 8291) and verify the VAPID signature. E2e tests deliver a push to the service worker over CDP, and cover the switch and logout. Real delivery to a phone still needs the deployed app.
+- `14.7`: deferred at the owner's request. Assigning someone only adds a "member added" entry to the card's activity feed.
+
+**Files:** `packages/db/src/schema/notifications.ts`, `packages/db/src/repository/{notification,pushSubscription}.repo.ts`, `packages/api/src/routers/{notification,push}.ts`, `packages/api/src/utils/{notifications,push}.ts`, `apps/web/src/components/NotificationBell.tsx`, `apps/web/src/hooks/usePushNotifications.ts`, `apps/web/public/sw.js`, `tools/generate-vapid-keys.mjs`
+
+**Done when:** A mention shows in the recipient's bell and as a push on their installed app, and tapping it opens the card.
 
 ## Risks to watch
 
