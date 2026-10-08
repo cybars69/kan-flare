@@ -272,22 +272,12 @@ export function Auth({
     setIsLoginWithProviderPending(provider);
     setLoginError(null);
 
-    let error;
-    if (provider === "oidc") {
-      // Use oauth2 signin for OIDC provider
-      const result = await authClient.signIn.oauth2({
-        providerId: "oidc",
-        callbackURL,
-      });
-      error = result.error;
-    } else {
-      // Use social signin for traditional social providers
-      const result = await authClient.signIn.social({
-        provider,
-        callbackURL,
-      });
-      error = result.error;
-    }
+    // Built-in and generic OIDC providers share the social sign-in flow
+    // (Better Auth 1.7+).
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL,
+    });
 
     setIsLoginWithProviderPending(null);
 

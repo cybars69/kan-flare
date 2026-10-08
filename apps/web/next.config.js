@@ -34,6 +34,11 @@ const config = {
       "../../node_modules/uncrypto/**",
       "../../node_modules/@react-email/render/**",
       "../../node_modules/stripe/**",
+      // Better Auth 1.7 resolves "workerd" export conditions (e.g.
+      // @better-auth/core/instrumentation → pure.index.mjs) that Node-based
+      // tracing doesn't follow.
+      "../../node_modules/better-auth/dist/**",
+      "../../node_modules/@better-auth/**",
     ],
   },
 

@@ -1,7 +1,14 @@
 {
   "extends": "@kan/tsconfig/internal-package.json",
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    // Consumers import ./src directly (see package.json exports), so no
+    // declarations are emitted. Better Auth 1.7's inferred types reference
+    // its own nested zod and can't be written to .d.ts files.
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true
   },
   "include": ["*.ts", "src"],
   "exclude": ["node_modules"]

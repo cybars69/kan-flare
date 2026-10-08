@@ -49,6 +49,8 @@ export const verification = sqliteTable("verification", {
 
 export const apikey = sqliteTable("apiKey", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  // Better Auth 1.7 api-key: which key configuration issued it.
+  configId: text("configId").notNull().default("default"),
   name: text("name"),
   start: text("start"),
   prefix: text("prefix"),

@@ -1,5 +1,7 @@
+import type { GenericOAuthUserInfo } from "better-auth/plugins/generic-oauth";
+import { apiKey } from "@better-auth/api-key";
 import { stripe } from "@better-auth/stripe";
-import { apiKey, genericOAuth } from "better-auth/plugins";
+import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { magicLink } from "better-auth/plugins/magic-link";
 
 import type { dbClient } from "@kan/db/client";
@@ -159,6 +161,9 @@ export function createPlugins(db: dbClient) {
         ]
       : []),
     apiKey({
+      // Better Auth 1.7 renamed the owner column to referenceId; existing
+      // keys keep using the userId column.
+      schema: { apikey: { fields: { referenceId: "userId" } } },
       enableSessionForAPIKeys: true,
       customAPIKeyGetter: (ctx) => getApiKeyFromHeaders(ctx.headers),
       rateLimit: {
@@ -253,35 +258,31 @@ export function createPlugins(db: dbClient) {
                 discoveryUrl: process.env.OIDC_DISCOVERY_URL,
                 scopes: ["openid", "email", "profile"],
                 pkce: true,
-                mapProfileToUser: (profile: {
-                  name?: string;
-                  display_name?: string;
-                  preferred_username?: string;
-                  given_name?: string;
-                  family_name?: string;
-                  email?: string;
-                  email_verified?: boolean;
-                  sub?: string;
-                  picture?: string;
-                  avatar?: string;
-                }) => {
+                mapProfileToUser: (profile: GenericOAuthUserInfo) => {
                   log.debug({ profile }, "OIDC profile received");
+                  // Providers name these fields differently; read the ones
+                  // that are strings.
+                  const str = (value: unknown) =>
+                    typeof value === "string" && value.trim() !== ""
+                      ? value
+                      : undefined;
+                  const givenName = str(profile.given_name);
+                  const familyName = str(profile.family_name);
 
                   const name =
-                    profile.name ??
-                    profile.display_name ??
-                    profile.preferred_username ??
-                    (profile.given_name && profile.family_name
-                      ? `${profile.given_name} ${profile.family_name}`.trim()
-                      : (profile.given_name ?? profile.family_name)) ??
-                    profile.sub ??
-                    "";
+                    str(profile.name) ??
+                    str(profile.display_name) ??
+                    str(profile.preferred_username) ??
+                    (givenName && familyName
+                      ? `${givenName} ${familyName}`.trim()
+                      : (givenName ?? familyName)) ??
+                    (profile.sub != null ? String(profile.sub) : "");
 
                   return {
-                    email: profile.email,
-                    name: name,
-                    emailVerified: profile.email_verified ?? false,
-                    image: profile.picture ?? profile.avatar ?? null,
+                    email: str(profile.email),
+                    name,
+                    emailVerified: profile.email_verified === true,
+                    image: str(profile.picture) ?? str(profile.avatar),
                   };
                 },
               },
