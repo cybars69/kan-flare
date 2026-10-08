@@ -81,6 +81,25 @@
     "origin": [["src/views/board/index.tsx", 887]],
     "translation": "{0} no encontrado"
   },
+  "AYSOV1": {
+    "message": "{actor} mentioned you",
+    "placeholders": {
+      "actor": ["actor"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 263]],
+    "translation": "{actor} te mencionó"
+  },
+  "+s7v8w": {
+    "message": "{actor} mentioned you on {0}",
+    "placeholders": {
+      "0": ["item.cardTitle"],
+      "actor": ["actor"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 262]],
+    "translation": "{actor} te mencionó en {0}"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -582,7 +601,7 @@
     "comments": [],
     "origin": [
       ["src/pages/partner/activate.tsx", 96],
-      ["src/views/auth/signup/index.tsx", 90]
+      ["src/views/auth/signup/index.tsx", 98]
     ],
     "translation": "¿Ya tienes una cuenta? <0><1>Inicia sesión</1></0>"
   },
@@ -1091,7 +1110,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/SideNavigation.tsx", 98],
+      ["src/components/SideNavigation.tsx", 99],
       ["src/views/boards/index.tsx", 58],
       ["src/views/boards/index.tsx", 63],
       ["src/views/pricing/components/FeatureComparisonTable.tsx", 83]
@@ -1518,8 +1537,8 @@
     "comments": [],
     "origin": [
       ["src/pages/partner/activate.tsx", 56],
-      ["src/views/auth/login/index.tsx", 43],
-      ["src/views/auth/signup/index.tsx", 71]
+      ["src/views/auth/login/index.tsx", 54],
+      ["src/views/auth/signup/index.tsx", 79]
     ],
     "translation": "Revisa tu bandeja de entrada"
   },
@@ -1603,8 +1622,8 @@
     },
     "comments": [],
     "origin": [
-      ["src/views/auth/login/index.tsx", 48],
-      ["src/views/auth/signup/index.tsx", 76]
+      ["src/views/auth/login/index.tsx", 59],
+      ["src/views/auth/signup/index.tsx", 84]
     ],
     "translation": "Haz clic en el enlace que hemos enviado a {magicLinkRecipient} para iniciar sesión."
   },
@@ -1925,6 +1944,13 @@
     ],
     "translation": "Funciones principales"
   },
+  "MQNvCg": {
+    "message": "Couldn't load notifications.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 210]],
+    "translation": "No se pudieron cargar las notificaciones."
+  },
   "b9XOHo": {
     "message": "Create {0}",
     "placeholders": {
@@ -2198,7 +2224,7 @@
     "message": "Dark",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 158]],
+    "origin": [["src/components/UserMenu.tsx", 159]],
     "translation": "Oscuro"
   },
   "cp1rsD": {
@@ -2449,7 +2475,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/UserMenu.tsx", 209],
+      ["src/components/UserMenu.tsx", 210],
       ["src/views/boards/components/TemplateBoards.tsx", 24],
       ["src/views/boards/components/TemplateBoards.tsx", 30],
       ["src/views/boards/components/TemplateBoards.tsx", 36],
@@ -2462,7 +2488,7 @@
     "message": "Don't have an account? <0><1>Sign up</1></0>",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 63]],
+    "origin": [["src/views/auth/login/index.tsx", 74]],
     "translation": "¿No tienes una cuenta? <0><1>Regístrate</1></0>"
   },
   "DPfwMq": {
@@ -3100,7 +3126,7 @@
     "comments": [],
     "origin": [
       ["src/components/FeedbackModal.tsx", 59],
-      ["src/components/UserMenu.tsx", 217]
+      ["src/components/UserMenu.tsx", 218]
     ],
     "translation": "Comentarios"
   },
@@ -3227,7 +3253,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/auth/signup/index.tsx", 71],
+      ["src/views/auth/signup/index.tsx", 79],
       ["src/views/home/components/Cta.tsx", 61],
       ["src/views/home/components/Header.tsx", 106],
       ["src/views/pricing/components/PricingTiers.tsx", 29],
@@ -3335,7 +3361,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/SideNavigation.tsx", 106],
+      ["src/components/SideNavigation.tsx", 107],
       ["src/pages/404.tsx", 44]
     ],
     "translation": "Ir a tableros"
@@ -3351,21 +3377,21 @@
     "message": "Go to members",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/SideNavigation.tsx", 130]],
+    "origin": [["src/components/SideNavigation.tsx", 131]],
     "translation": "Ir a miembros"
   },
   "1WuwiM": {
     "message": "Go to settings",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/SideNavigation.tsx", 142]],
+    "origin": [["src/components/SideNavigation.tsx", 143]],
     "translation": "Ir a configuración"
   },
   "csFbe+": {
     "message": "Go to templates",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/SideNavigation.tsx", 118]],
+    "origin": [["src/components/SideNavigation.tsx", 119]],
     "translation": "Ir a plantillas"
   },
   "SUvm1Y": {
@@ -3886,7 +3912,7 @@
     "message": "Light",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 172]],
+    "origin": [["src/components/UserMenu.tsx", 173]],
     "translation": "Claro"
   },
   "TCt/8K": {
@@ -3970,18 +3996,25 @@
     "origin": [["src/views/card/components/ActivityList.tsx", 579]],
     "translation": "Cargando..."
   },
+  "Pwqkdw": {
+    "message": "Loading…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 245]],
+    "translation": "Cargando…"
+  },
   "dhq0/w": {
     "message": "Login | kan-flare",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 33]],
+    "origin": [["src/views/auth/login/index.tsx", 44]],
     "translation": "Iniciar sesión | kan-flare"
   },
   "nOhz3x": {
     "message": "Logout",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 227]],
+    "origin": [["src/components/UserMenu.tsx", 228]],
     "translation": "Cerrar sesión"
   },
   "vuxdLS": {
@@ -4028,6 +4061,13 @@
       ["src/views/board/components/CardContextMenu.tsx", 38]
     ],
     "translation": "Gestionar miembros"
+  },
+  "onllUU": {
+    "message": "Mark all as read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 188]],
+    "translation": "Marcar todo como leído"
   },
   "IDvohQ": {
     "message": "marked a checklist item as incomplete",
@@ -4103,7 +4143,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/SideNavigation.tsx", 122],
+      ["src/components/SideNavigation.tsx", 123],
       ["src/views/board/components/Filters.tsx", 151],
       ["src/views/board/components/NewCardForm.tsx", 487],
       ["src/views/card/components/MemberSelector.tsx", 116],
@@ -4497,6 +4537,27 @@
     "comments": [],
     "origin": [["src/views/settings/components/WebhookList.tsx", 196]],
     "translation": "No hay webhooks configurados. Agregue un webhook para recibir notificaciones."
+  },
+  "iDNBZe": {
+    "message": "Notifications",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      ["src/components/NotificationBell.tsx", 45],
+      ["src/components/NotificationBell.tsx", 47],
+      ["src/components/NotificationBell.tsx", 61],
+      ["src/components/NotificationBell.tsx", 180]
+    ],
+    "translation": "Notificaciones"
+  },
+  "B57lj7": {
+    "message": "Notifications ({badge} unread)",
+    "placeholders": {
+      "badge": ["badge"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 47]],
+    "translation": "Notificaciones ({badge} sin leer)"
   },
   "9h7RDh": {
     "message": "Offer",
@@ -5568,7 +5629,7 @@
     "comments": [],
     "origin": [
       ["src/components/SettingsLayout.tsx", 102],
-      ["src/components/SideNavigation.tsx", 134]
+      ["src/components/SideNavigation.tsx", 135]
     ],
     "translation": "Configuración"
   },
@@ -5625,7 +5686,7 @@
     "message": "Shortcuts",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 187]],
+    "origin": [["src/components/UserMenu.tsx", 188]],
     "translation": "Atajos"
   },
   "5lWFkC": {
@@ -5680,8 +5741,8 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/views/auth/signup/index.tsx", 36],
-      ["src/views/auth/signup/index.tsx", 61]
+      ["src/views/auth/signup/index.tsx", 44],
+      ["src/views/auth/signup/index.tsx", 69]
     ],
     "translation": "Registrarse | kan-flare"
   },
@@ -5689,14 +5750,14 @@
     "message": "Sign up disabled",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/signup/index.tsx", 46]],
+    "origin": [["src/views/auth/signup/index.tsx", 54]],
     "translation": "Registro deshabilitado"
   },
   "s6iE/c": {
     "message": "Sign up is currently disabled. Please try again later.",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/signup/index.tsx", 49]],
+    "origin": [["src/views/auth/signup/index.tsx", 57]],
     "translation": "El registro está actualmente deshabilitado. Por favor, inténtalo de nuevo más tarde."
   },
   "6FDocz": {
@@ -5767,6 +5828,13 @@
     "origin": [["src/views/board/components/NewCardForm.tsx", 332]],
     "translation": "Error en algunos archivos adjuntos"
   },
+  "C6+ZRl": {
+    "message": "Someone",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 257]],
+    "translation": "Alguien"
+  },
   "J9+zIR": {
     "message": "Something went wrong during activation. Please try again.",
     "placeholders": {},
@@ -5812,9 +5880,9 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/SideNavigation.tsx", 228],
-      ["src/components/SideNavigation.tsx", 229],
-      ["src/components/SideNavigation.tsx", 239]
+      ["src/components/SideNavigation.tsx", 233],
+      ["src/components/SideNavigation.tsx", 234],
+      ["src/components/SideNavigation.tsx", 244]
     ],
     "translation": "Iniciar prueba gratuita"
   },
@@ -5894,7 +5962,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/UserMenu.tsx", 198],
+      ["src/components/UserMenu.tsx", 199],
       ["src/views/pricing/components/FeatureComparisonTable.tsx", 295]
     ],
     "translation": "Soporte"
@@ -5910,7 +5978,7 @@
     "message": "System",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 144]],
+    "origin": [["src/components/UserMenu.tsx", 145]],
     "translation": "Sistema"
   },
   "KM6m8p": {
@@ -5985,7 +6053,7 @@
     "placeholders": {},
     "comments": [],
     "origin": [
-      ["src/components/SideNavigation.tsx", 110],
+      ["src/components/SideNavigation.tsx", 111],
       ["src/views/boards/index.tsx", 58],
       ["src/views/boards/index.tsx", 63],
       ["src/views/home/components/Features.tsx", 115]
@@ -6159,7 +6227,7 @@
     "message": "Theme",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/components/UserMenu.tsx", 131]],
+    "origin": [["src/components/UserMenu.tsx", 132]],
     "translation": "Tema"
   },
   "Yf9FAx": {
@@ -6393,6 +6461,13 @@
     "comments": [],
     "origin": [["src/views/home/components/Logos.tsx", 67]],
     "translation": "Confiado por equipos ágiles<0/>de todo el mundo"
+  },
+  "KDw4GX": {
+    "message": "Try again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 216]],
+    "translation": "Reintentar"
   },
   "bZSICm": {
     "message": "Unable to add checklist item",
@@ -6847,6 +6922,13 @@
     "translation": "Plazas ilimitadas y funciones avanzadas para equipos en crecimiento.",
     "obsolete": true
   },
+  "KuVpz+": {
+    "message": "Unread",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 311]],
+    "translation": "No leído"
+  },
   "SMaFdc": {
     "message": "Unsubscribe",
     "placeholders": {},
@@ -7235,7 +7317,7 @@
     "message": "Welcome back",
     "placeholders": {},
     "comments": [],
-    "origin": [["src/views/auth/login/index.tsx", 43]],
+    "origin": [["src/views/auth/login/index.tsx", 54]],
     "translation": "Bienvenido de nuevo"
   },
   "xEbBrW": {
@@ -7569,6 +7651,31 @@
     ],
     "translation": "Iniciaste sesión sin contraseña. Establece una contraseña para habilitar el inicio de sesión con contraseña."
   },
+  "C/cKKx": {
+    "message": "You were added to {workspace}",
+    "placeholders": {
+      "workspace": ["workspace"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 265]],
+    "translation": "Te añadieron a {workspace}"
+  },
+  "XqiWz0": {
+    "message": "You were removed from {workspace}",
+    "placeholders": {
+      "workspace": ["workspace"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 267]],
+    "translation": "Te eliminaron de {workspace}"
+  },
+  "KS7iJH": {
+    "message": "You're all caught up.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 222]],
+    "translation": "Estás al día."
+  },
   "2SePRT": {
     "message": "You've been invited to join a workspace on kan.bn.",
     "placeholders": {},
@@ -7702,6 +7809,15 @@
     "comments": [],
     "origin": [["src/views/boards/components/ImportBoardsForm.tsx", 230]],
     "translation": "Tus proyectos han sido importados."
+  },
+  "e+zH5w": {
+    "message": "Your role in {workspace} changed",
+    "placeholders": {
+      "workspace": ["workspace"]
+    },
+    "comments": [],
+    "origin": [["src/components/NotificationBell.tsx", 269]],
+    "translation": "Tu rol en {workspace} cambió"
   },
   "CJWDTP": {
     "message": "Your Trello account has been disconnected.",

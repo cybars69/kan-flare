@@ -95,7 +95,13 @@ export const workspaceMembers = sqliteTable("workspace_members", {
     { onDelete: "restrict" },
   ),
   status: text("status", { enum: memberStatuses }).default("invited").notNull(),
-});
+}, (table) => [
+  // Membership lookups by user (notification visibility, access checks).
+  index("workspace_members_user_workspace_idx").on(
+    table.userId,
+    table.workspaceId,
+  ),
+]);
 
 export const workspaceMembersRelations = relations(
   workspaceMembers,

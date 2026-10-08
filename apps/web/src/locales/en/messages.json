@@ -145,6 +145,41 @@
     ],
     "translation": "{0} not found"
   },
+  "AYSOV1": {
+    "message": "{actor} mentioned you",
+    "placeholders": {
+      "actor": [
+        "actor"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        263
+      ]
+    ],
+    "translation": "{actor} mentioned you"
+  },
+  "+s7v8w": {
+    "message": "{actor} mentioned you on {0}",
+    "placeholders": {
+      "0": [
+        "item.cardTitle"
+      ],
+      "actor": [
+        "actor"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        262
+      ]
+    ],
+    "translation": "{actor} mentioned you on {0}"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -984,7 +1019,7 @@
       ],
       [
         "src/views/auth/signup/index.tsx",
-        90
+        98
       ]
     ],
     "translation": "Already have an account? <0><1>Sign in</1></0>"
@@ -1820,7 +1855,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        98
+        99
       ],
       [
         "src/views/boards/index.tsx",
@@ -2560,11 +2595,11 @@
       ],
       [
         "src/views/auth/login/index.tsx",
-        43
+        54
       ],
       [
         "src/views/auth/signup/index.tsx",
-        71
+        79
       ]
     ],
     "translation": "Check your inbox"
@@ -2688,11 +2723,11 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        48
+        59
       ],
       [
         "src/views/auth/signup/index.tsx",
-        76
+        84
       ]
     ],
     "translation": "Click on the link we've sent to {magicLinkRecipient} to sign in."
@@ -3220,6 +3255,18 @@
     ],
     "translation": "Core features"
   },
+  "MQNvCg": {
+    "message": "Couldn't load notifications.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        210
+      ]
+    ],
+    "translation": "Couldn't load notifications."
+  },
   "b9XOHo": {
     "message": "Create {0}",
     "placeholders": {
@@ -3675,7 +3722,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        158
+        159
       ]
     ],
     "translation": "Dark"
@@ -4112,7 +4159,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        209
+        210
       ],
       [
         "src/views/boards/components/TemplateBoards.tsx",
@@ -4144,7 +4191,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        63
+        74
       ]
     ],
     "translation": "Don't have an account? <0><1>Sign up</1></0>"
@@ -5194,7 +5241,7 @@
       ],
       [
         "src/components/UserMenu.tsx",
-        217
+        218
       ]
     ],
     "translation": "Feedback"
@@ -5414,7 +5461,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        71
+        79
       ],
       [
         "src/views/home/components/Cta.tsx",
@@ -5602,7 +5649,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        106
+        107
       ],
       [
         "src/pages/404.tsx",
@@ -5630,7 +5677,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        130
+        131
       ]
     ],
     "translation": "Go to members"
@@ -5642,7 +5689,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        142
+        143
       ]
     ],
     "translation": "Go to settings"
@@ -5654,7 +5701,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        118
+        119
       ]
     ],
     "translation": "Go to templates"
@@ -6526,7 +6573,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        172
+        173
       ]
     ],
     "translation": "Light"
@@ -6663,6 +6710,18 @@
     ],
     "translation": "Loading..."
   },
+  "Pwqkdw": {
+    "message": "Loading…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        245
+      ]
+    ],
+    "translation": "Loading…"
+  },
   "dhq0/w": {
     "message": "Login | kan-flare",
     "placeholders": {},
@@ -6670,7 +6729,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        33
+        44
       ]
     ],
     "translation": "Login | kan-flare"
@@ -6682,7 +6741,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        227
+        228
       ]
     ],
     "translation": "Logout"
@@ -6762,6 +6821,18 @@
       ]
     ],
     "translation": "Manage members"
+  },
+  "onllUU": {
+    "message": "Mark all as read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        188
+      ]
+    ],
+    "translation": "Mark all as read"
   },
   "IDvohQ": {
     "message": "marked a checklist item as incomplete",
@@ -6890,7 +6961,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        122
+        123
       ],
       [
         "src/views/board/components/Filters.tsx",
@@ -7573,6 +7644,46 @@
       ]
     ],
     "translation": "No webhooks configured. Add a webhook to receive notifications."
+  },
+  "iDNBZe": {
+    "message": "Notifications",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        45
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        47
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        61
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        180
+      ]
+    ],
+    "translation": "Notifications"
+  },
+  "B57lj7": {
+    "message": "Notifications ({badge} unread)",
+    "placeholders": {
+      "badge": [
+        "badge"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        47
+      ]
+    ],
+    "translation": "Notifications ({badge} unread)"
   },
   "9h7RDh": {
     "message": "Offer",
@@ -9486,7 +9597,7 @@
       ],
       [
         "src/components/SideNavigation.tsx",
-        134
+        135
       ]
     ],
     "translation": "Settings"
@@ -9582,7 +9693,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        187
+        188
       ]
     ],
     "translation": "Shortcuts"
@@ -9674,11 +9785,11 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        36
+        44
       ],
       [
         "src/views/auth/signup/index.tsx",
-        61
+        69
       ]
     ],
     "translation": "Sign up | kan-flare"
@@ -9690,7 +9801,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        46
+        54
       ]
     ],
     "translation": "Sign up disabled"
@@ -9702,7 +9813,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        49
+        57
       ]
     ],
     "translation": "Sign up is currently disabled. Please try again later."
@@ -9819,6 +9930,18 @@
     ],
     "translation": "Some attachments failed"
   },
+  "C6+ZRl": {
+    "message": "Someone",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        257
+      ]
+    ],
+    "translation": "Someone"
+  },
   "J9+zIR": {
     "message": "Something went wrong during activation. Please try again.",
     "placeholders": {},
@@ -9887,15 +10010,15 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        228
+        233
       ],
       [
         "src/components/SideNavigation.tsx",
-        229
+        234
       ],
       [
         "src/components/SideNavigation.tsx",
-        239
+        244
       ]
     ],
     "translation": "Start free trial"
@@ -10020,7 +10143,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        198
+        199
       ],
       [
         "src/views/pricing/components/FeatureComparisonTable.tsx",
@@ -10048,7 +10171,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        144
+        145
       ]
     ],
     "translation": "System"
@@ -10176,7 +10299,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        110
+        111
       ],
       [
         "src/views/boards/index.tsx",
@@ -10471,7 +10594,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        131
+        132
       ]
     ],
     "translation": "Theme"
@@ -10847,6 +10970,18 @@
       ]
     ],
     "translation": "Trusted by fast-moving teams<0/>around the world"
+  },
+  "KDw4GX": {
+    "message": "Try again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        216
+      ]
+    ],
+    "translation": "Try again"
   },
   "bZSICm": {
     "message": "Unable to add checklist item",
@@ -11610,6 +11745,18 @@
     "translation": "Unlimited seats and advanced features for growing teams.",
     "obsolete": true
   },
+  "KuVpz+": {
+    "message": "Unread",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        311
+      ]
+    ],
+    "translation": "Unread"
+  },
   "SMaFdc": {
     "message": "Unsubscribe",
     "placeholders": {},
@@ -12261,7 +12408,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        43
+        54
       ]
     ],
     "translation": "Welcome back"
@@ -12818,6 +12965,50 @@
     ],
     "translation": "You signed in without a password. Set a password to enable password-based login."
   },
+  "C/cKKx": {
+    "message": "You were added to {workspace}",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        265
+      ]
+    ],
+    "translation": "You were added to {workspace}"
+  },
+  "XqiWz0": {
+    "message": "You were removed from {workspace}",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        267
+      ]
+    ],
+    "translation": "You were removed from {workspace}"
+  },
+  "KS7iJH": {
+    "message": "You're all caught up.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        222
+      ]
+    ],
+    "translation": "You're all caught up."
+  },
   "2SePRT": {
     "message": "You've been invited to join a workspace on kan.bn.",
     "placeholders": {},
@@ -13037,6 +13228,22 @@
       ]
     ],
     "translation": "Your projects have been imported."
+  },
+  "e+zH5w": {
+    "message": "Your role in {workspace} changed",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        269
+      ]
+    ],
+    "translation": "Your role in {workspace} changed"
   },
   "CJWDTP": {
     "message": "Your Trello account has been disconnected.",

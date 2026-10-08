@@ -145,6 +145,41 @@
     ],
     "translation": "{0} blev ikke fundet"
   },
+  "AYSOV1": {
+    "message": "{actor} mentioned you",
+    "placeholders": {
+      "actor": [
+        "actor"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        263
+      ]
+    ],
+    "translation": "{actor} nævnte dig"
+  },
+  "+s7v8w": {
+    "message": "{actor} mentioned you on {0}",
+    "placeholders": {
+      "0": [
+        "item.cardTitle"
+      ],
+      "actor": [
+        "actor"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        262
+      ]
+    ],
+    "translation": "{actor} nævnte dig på {0}"
+  },
   "0xWkkH": {
     "message": "{boardCount, plural, one {Import board (1)} other {Import boards ({boardCount})}}",
     "placeholders": {
@@ -984,7 +1019,7 @@
       ],
       [
         "src/views/auth/signup/index.tsx",
-        90
+        98
       ]
     ],
     "translation": "Har du allerede en konto? <0><1>Log ind</1></0>"
@@ -1820,7 +1855,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        98
+        99
       ],
       [
         "src/views/boards/index.tsx",
@@ -2560,11 +2595,11 @@
       ],
       [
         "src/views/auth/login/index.tsx",
-        43
+        54
       ],
       [
         "src/views/auth/signup/index.tsx",
-        71
+        79
       ]
     ],
     "translation": "Tjek din indbakke"
@@ -2688,11 +2723,11 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        48
+        59
       ],
       [
         "src/views/auth/signup/index.tsx",
-        76
+        84
       ]
     ],
     "translation": "Klik på linket, vi har sendt til {magicLinkRecipient}, for at logge ind."
@@ -3207,6 +3242,18 @@
     ],
     "translation": "Kernefunktioner"
   },
+  "MQNvCg": {
+    "message": "Couldn't load notifications.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        210
+      ]
+    ],
+    "translation": "Notifikationer kunne ikke indlæses."
+  },
   "b9XOHo": {
     "message": "Create {0}",
     "placeholders": {
@@ -3649,7 +3696,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        158
+        159
       ]
     ],
     "translation": "Mørk"
@@ -4073,7 +4120,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        209
+        210
       ],
       [
         "src/views/boards/components/TemplateBoards.tsx",
@@ -4105,7 +4152,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        63
+        74
       ]
     ],
     "translation": "Har du ikke en konto? <0><1>Opret konto</1></0>"
@@ -5142,7 +5189,7 @@
       ],
       [
         "src/components/UserMenu.tsx",
-        217
+        218
       ]
     ],
     "translation": "Feedback"
@@ -5362,7 +5409,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        71
+        79
       ],
       [
         "src/views/home/components/Cta.tsx",
@@ -5550,7 +5597,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        106
+        107
       ],
       [
         "src/pages/404.tsx",
@@ -5578,7 +5625,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        130
+        131
       ]
     ],
     "translation": "Gå til medlemmer"
@@ -5590,7 +5637,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        142
+        143
       ]
     ],
     "translation": "Gå til indstillinger"
@@ -5602,7 +5649,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        118
+        119
       ]
     ],
     "translation": "Gå til skabeloner"
@@ -6448,7 +6495,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        172
+        173
       ]
     ],
     "translation": "Lys"
@@ -6585,6 +6632,18 @@
     ],
     "translation": "Indlæser..."
   },
+  "Pwqkdw": {
+    "message": "Loading…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        245
+      ]
+    ],
+    "translation": "Indlæser…"
+  },
   "dhq0/w": {
     "message": "Login | kan-flare",
     "placeholders": {},
@@ -6592,7 +6651,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        33
+        44
       ]
     ],
     "translation": "Login | kan-flare"
@@ -6604,7 +6663,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        227
+        228
       ]
     ],
     "translation": "Log ud"
@@ -6684,6 +6743,18 @@
       ]
     ],
     "translation": "Administrer medlemmer"
+  },
+  "onllUU": {
+    "message": "Mark all as read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        188
+      ]
+    ],
+    "translation": "Markér alle som læst"
   },
   "IDvohQ": {
     "message": "marked a checklist item as incomplete",
@@ -6812,7 +6883,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        122
+        123
       ],
       [
         "src/views/board/components/Filters.tsx",
@@ -7495,6 +7566,46 @@
       ]
     ],
     "translation": "Ingen webhooks konfigureret. Tilføj en webhook for at modtage notifikationer."
+  },
+  "iDNBZe": {
+    "message": "Notifications",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        45
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        47
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        61
+      ],
+      [
+        "src/components/NotificationBell.tsx",
+        180
+      ]
+    ],
+    "translation": "Notifikationer"
+  },
+  "B57lj7": {
+    "message": "Notifications ({badge} unread)",
+    "placeholders": {
+      "badge": [
+        "badge"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        47
+      ]
+    ],
+    "translation": "Notifikationer ({badge} ulæste)"
   },
   "9h7RDh": {
     "message": "Offer",
@@ -9408,7 +9519,7 @@
       ],
       [
         "src/components/SideNavigation.tsx",
-        134
+        135
       ]
     ],
     "translation": "Indstillinger"
@@ -9504,7 +9615,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        187
+        188
       ]
     ],
     "translation": "Genveje"
@@ -9596,11 +9707,11 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        36
+        44
       ],
       [
         "src/views/auth/signup/index.tsx",
-        61
+        69
       ]
     ],
     "translation": "Opret konto | kan-flare"
@@ -9612,7 +9723,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        46
+        54
       ]
     ],
     "translation": "Oprettelse af konto deaktiveret"
@@ -9624,7 +9735,7 @@
     "origin": [
       [
         "src/views/auth/signup/index.tsx",
-        49
+        57
       ]
     ],
     "translation": "Oprettelse af konto er midlertidigt deaktiveret. Prøv igen senere."
@@ -9741,6 +9852,18 @@
     ],
     "translation": ""
   },
+  "C6+ZRl": {
+    "message": "Someone",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        257
+      ]
+    ],
+    "translation": "Nogen"
+  },
   "J9+zIR": {
     "message": "Something went wrong during activation. Please try again.",
     "placeholders": {},
@@ -9809,15 +9932,15 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        228
+        233
       ],
       [
         "src/components/SideNavigation.tsx",
-        229
+        234
       ],
       [
         "src/components/SideNavigation.tsx",
-        239
+        244
       ]
     ],
     "translation": "Start gratis prøveperiode"
@@ -9942,7 +10065,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        198
+        199
       ],
       [
         "src/views/pricing/components/FeatureComparisonTable.tsx",
@@ -9970,7 +10093,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        144
+        145
       ]
     ],
     "translation": "System"
@@ -10098,7 +10221,7 @@
     "origin": [
       [
         "src/components/SideNavigation.tsx",
-        110
+        111
       ],
       [
         "src/views/boards/index.tsx",
@@ -10393,7 +10516,7 @@
     "origin": [
       [
         "src/components/UserMenu.tsx",
-        131
+        132
       ]
     ],
     "translation": "Tema"
@@ -10769,6 +10892,18 @@
       ]
     ],
     "translation": "Betroet af teams med højt tempo<0/>over hele verden"
+  },
+  "KDw4GX": {
+    "message": "Try again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        216
+      ]
+    ],
+    "translation": "Prøv igen"
   },
   "bZSICm": {
     "message": "Unable to add checklist item",
@@ -11532,6 +11667,18 @@
     "translation": "Ubegrænset antal pladser og avancerede funktioner til voksende teams.",
     "obsolete": true
   },
+  "KuVpz+": {
+    "message": "Unread",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        311
+      ]
+    ],
+    "translation": "Ulæst"
+  },
   "EkH9pt": {
     "message": "Update",
     "placeholders": {},
@@ -12153,7 +12300,7 @@
     "origin": [
       [
         "src/views/auth/login/index.tsx",
-        43
+        54
       ]
     ],
     "translation": "Velkommen tilbage"
@@ -12671,6 +12818,50 @@
     ],
     "translation": "Du loggede ind uden en adgangskode. Indstil en adgangskode for at aktivere login med adgangskode."
   },
+  "C/cKKx": {
+    "message": "You were added to {workspace}",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        265
+      ]
+    ],
+    "translation": "Du blev tilføjet til {workspace}"
+  },
+  "XqiWz0": {
+    "message": "You were removed from {workspace}",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        267
+      ]
+    ],
+    "translation": "Du blev fjernet fra {workspace}"
+  },
+  "KS7iJH": {
+    "message": "You're all caught up.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        222
+      ]
+    ],
+    "translation": "Du er helt opdateret."
+  },
   "2SePRT": {
     "message": "You've been invited to join a workspace on kan.bn.",
     "placeholders": {},
@@ -12890,6 +13081,22 @@
       ]
     ],
     "translation": "Dine projekter er blevet importeret."
+  },
+  "e+zH5w": {
+    "message": "Your role in {workspace} changed",
+    "placeholders": {
+      "workspace": [
+        "workspace"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/components/NotificationBell.tsx",
+        269
+      ]
+    ],
+    "translation": "Din rolle i {workspace} blev ændret"
   },
   "CJWDTP": {
     "message": "Your Trello account has been disconnected.",
