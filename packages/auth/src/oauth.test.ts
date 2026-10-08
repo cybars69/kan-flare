@@ -10,8 +10,8 @@ describe("fetchClientMetadataResource", () => {
     "https://metadata.internal/client.json",
     "https://127.0.0.1/client.json",
     "https://[::1]/client.json",
-  ])("refuses %s", (url) => {
-    expect(() => fetchClientMetadataResource(url)).toThrow(TypeError);
+  ])("refuses %s", async (url) => {
+    await expect(fetchClientMetadataResource(url)).rejects.toThrow(TypeError);
   });
 
   it("fetches public HTTPS metadata documents", async () => {
@@ -19,8 +19,30 @@ describe("fetchClientMetadataResource", () => {
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response("{}"));
     const url = "https://claude.ai/oauth/mcp-oauth-client-metadata";
-    await fetchClientMetadataResource(url);
-    expect(fetchMock).toHaveBeenCalledWith(new URL(url), undefined);
+    await fetchClientMetadataResource(url, {
+      redirect: "error",
+      headers: { accept: "application/json" },
+    });
+    // Workers' fetch rejects redirect: "error", so it's sent as "manual".
+    expect(fetchMock).toHaveBeenCalledWith(new URL(url), {
+      redirect: "manual",
+      headers: { accept: "application/json" },
+    });
+    fetchMock.mockRestore();
+  });
+
+  it("refuses a metadata document that redirects", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://elsewhere.example/" },
+      }),
+    );
+    await expect(
+      fetchClientMetadataResource("https://claude.ai/oauth/metadata", {
+        redirect: "error",
+      }),
+    ).rejects.toThrow("must not redirect");
     fetchMock.mockRestore();
   });
 });

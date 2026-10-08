@@ -116,7 +116,7 @@ const oauthTokenResolver = () =>
  * keeps fetch on the public internet; obvious local targets are refused here
  * as well, since Node (tests, `next dev`) has no such guard.
  */
-export const fetchClientMetadataResource: ClientMetadataResourceFetch = (
+export const fetchClientMetadataResource: ClientMetadataResourceFetch = async (
   input,
   init,
 ) => {
@@ -134,7 +134,14 @@ export const fetchClientMetadataResource: ClientMetadataResourceFetch = (
   ) {
     throw new TypeError("Client metadata documents must use a public hostname");
   }
-  return fetch(url, init);
+  // The cimd plugin asks for `redirect: "error"`, which Workers' fetch rejects
+  // (it supports only "follow" and "manual"). Fetch with "manual" and refuse
+  // any redirect here, which keeps the same rule.
+  const response = await fetch(url, { ...init, redirect: "manual" });
+  if (response.status >= 300 && response.status < 400) {
+    throw new TypeError("Client metadata documents must not redirect");
+  }
+  return response;
 };
 
 export const createOAuthPlugins = () => [
