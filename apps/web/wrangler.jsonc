@@ -8,6 +8,10 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Serve production on a Custom Domain (custom_domain: true), not a zone
+  // route: wrangler deploy creates the DNS record and certificate. Must match
+  // NEXT_PUBLIC_BASE_URL in .env; example.com must be in this account.
+  "routes": [{ "pattern": "tasks.example.com", "custom_domain": true }],
   // Non-secret runtime settings. Secrets (BETTER_AUTH_SECRET, OAuth client
   // secrets…) come from .env and are uploaded by `pnpm --filter @kan/web deploy`.
   "vars": {
@@ -73,6 +77,9 @@
   "env": {
     "staging": {
       "name": "kan-flare-staging",
+      // Don't inherit production's custom domain; staging uses workers.dev
+      // unless a domain of its own is added here.
+      "routes": [],
       "vars": {
         "EMAIL_FROM": "Kan Flare <no-reply@tasks.example.com>",
         "DISABLE_NOTIFICATION_EMAILS": "true",
