@@ -39,16 +39,15 @@ None of these need creating by hand. Bindings without IDs are provisioned by `wr
    BETTER_AUTH_SECRET=...               # also needed at build for env validation
    ```
 
-5. **Runtime secrets and settings.** These are read by the Worker at request time. Set secrets once, from `apps/web`:
+5. **Runtime secrets and settings.** Everything in `.env` that isn't `NEXT_PUBLIC_*` (`BETTER_AUTH_SECRET`, `EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, OAuth secrets…) is read by the Worker at request time. Push them all as Worker secrets in one go:
 
    ```sh
-   npx wrangler secret put BETTER_AUTH_SECRET
-   npx wrangler secret put EMAIL_FROM           # e.g. "kan-flare <hello@mail.example.com>"
-   # plus any OAuth/OIDC client secrets you use, e.g.
-   npx wrangler secret put GOOGLE_CLIENT_SECRET
+   pnpm --filter @kan/web secrets:push --dry-run   # lists the names it would push
+   pnpm --filter @kan/web secrets:push             # production
+   pnpm --filter @kan/web secrets:push --env staging
    ```
 
-   Non-secret settings (`EMAIL_FROM`, `LOG_LEVEL`, OAuth client IDs…) can go in `vars` in `wrangler.jsonc` instead. The README's environment variable table lists them all.
+   This runs `tools/push-secrets.mjs`, which skips `NEXT_PUBLIC_*` and empty values and passes values to `wrangler secret bulk` on stdin, so they're never printed. Run it again whenever you change a runtime value. If the Worker doesn't exist yet, run it right after the first deploy.
 
 ## Closed sign-up and email
 
