@@ -12,7 +12,7 @@ import { unstable_readConfig } from "wrangler";
 export const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const webDir = join(repoRoot, "apps/web");
 
-/** The Wrangler config for production, or for `env` (e.g. "staging"). */
+/** The Wrangler config (optionally for a named Wrangler `env`). */
 export const readWranglerConfig = (env) =>
   unstable_readConfig({ config: join(webDir, "wrangler.jsonc"), env });
 

@@ -15,7 +15,6 @@
     "typecheck": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "node ../../tools/deploy.mjs",
-    "deploy:staging": "node ../../tools/deploy.mjs --env staging",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts && node -e \"const f='cloudflare-env.d.ts',fs=require('fs');fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/Service<typeof import\\(\\\"\\.\\/\\.open-next\\/worker\\\"\\)\\.default>/g,'Service').replace(/typeof import\\(\\\"\\.\\/\\.open-next\\/worker\\\"\\)/g,'unknown'))\"",
     "secrets:push": "node ../../tools/push-secrets.mjs",

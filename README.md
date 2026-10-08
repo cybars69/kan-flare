@@ -55,7 +55,7 @@ kan-flare runs entirely on Cloudflare: Workers for the app, D1 for the database,
 pnpm --filter @kan/web deploy
 ```
 
-See [DEPLOY.md](./DEPLOY.md) for first-time setup (email domain, secrets, build settings), staging, backups and local development.
+See [DEPLOY.md](./DEPLOY.md) for first-time setup (email domain, secrets, build settings), backups and local development.
 
 ## Local Development 🧑‍💻
 

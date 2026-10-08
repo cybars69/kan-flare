@@ -40,14 +40,14 @@ None of these need creating by hand. Bindings without IDs are provisioned by `wr
    ```
 
 5. **Runtime settings.** These are read by the Worker at request time:
-   - **Non-secret values** (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`, OAuth client IDs…) go in `vars` in `apps/web/wrangler.jsonc`. There's a block for production and one under `env.staging`.
+   - **Non-secret values** (`EMAIL_FROM`, `DISABLE_NOTIFICATION_EMAILS`, `LOG_LEVEL`, OAuth client IDs…) go in `vars` in `apps/web/wrangler.jsonc`.
    - **Secrets** (`BETTER_AUTH_SECRET`, OAuth client secrets…) stay in `.env`. Each deploy uploads them with the new version: every non-empty, non-`NEXT_PUBLIC_*` value that isn't already a var.
 
    To change a secret without deploying:
 
    ```sh
    pnpm --filter @kan/web secrets:push --dry-run   # lists the names it would push
-   pnpm --filter @kan/web secrets:push             # add --env staging for staging
+   pnpm --filter @kan/web secrets:push
    ```
 
 ## Closed sign-up and email
@@ -81,15 +81,7 @@ This runs `tools/deploy.mjs`, which:
 
 Use this instead of passing `--secrets-file .env` yourself. The raw file would upload every `NEXT_PUBLIC_*` and empty value as a secret, and would clash with names set in `vars`.
 
-Staging is a separate Worker with its own database and buckets:
-
-```sh
-pnpm --filter @kan/web deploy:staging   # or: deploy --env staging
-```
-
-Staging and production each need their own build, because `NEXT_PUBLIC_*` values are compiled in. Set the staging values in the environment before running `deploy:staging`.
-
-Production is served on the Custom Domain `tasks.example.com`, declared in `wrangler.jsonc` (`routes` with `"custom_domain": true`). `wrangler deploy` attaches it and creates the DNS record and certificate, as long as `example.com` is a zone in the same Cloudflare account. Keep it in step with `NEXT_PUBLIC_BASE_URL`. Staging sets `"routes": []` so it never takes the domain over.
+Production is served on the Custom Domain `tasks.example.com`, declared in `wrangler.jsonc` (`routes` with `"custom_domain": true`). `wrangler deploy` attaches it and creates the DNS record and certificate, as long as `example.com` is a zone in the same Cloudflare account. Keep it in step with `NEXT_PUBLIC_BASE_URL`.
 
 ## MCP server (AI clients)
 

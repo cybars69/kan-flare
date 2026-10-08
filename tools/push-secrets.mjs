@@ -5,7 +5,6 @@
  * use this only to change a secret between deploys.
  *
  *   pnpm --filter @kan/web secrets:push              # production
- *   pnpm --filter @kan/web secrets:push --env staging
  *   pnpm --filter @kan/web secrets:push --dry-run    # list names only
  *
  * Values go to `wrangler secret bulk` on stdin; they are never printed.
