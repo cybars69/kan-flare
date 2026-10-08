@@ -89,7 +89,8 @@ pnpm dev
 | Variable                                  | Description                                               | Required                                    | Example                                                     |
 | ----------------------------------------- | --------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------- |
 | `EMAIL_FROM`                              | Sender address on a domain onboarded to Email Service     | For Email                                   | `"Kan <hello@mail.kan.bn>"`                                 |
-| `NEXT_PUBLIC_DISABLE_EMAIL`               | To disable all email features                             | For Email                                   | `true`                                                      |
+| `NEXT_PUBLIC_DISABLE_EMAIL`               | Hide magic-link sign-in and email invites                 | For Email                                   | `true`                                                      |
+| `DISABLE_NOTIFICATION_EMAILS`             | Stop mention emails (sign-in and invite emails still send) | For Email                                   | `true`                                                      |
 | `NEXT_PUBLIC_BASE_URL`                    | Base URL of your installation                             | Yes                                         | `http://localhost:3000`                                     |
 | `NEXT_API_BODY_SIZE_LIMIT`                | Maximum API request body size (defaults to 1mb)           | No                                          | `50mb`                                                      |
 | `BETTER_AUTH_ALLOWED_DOMAINS`             | Comma-separated list of allowed domains for OIDC logins   | For OIDC/Social login                       | `example.com,subsidiary.com`                                |
@@ -108,7 +109,7 @@ pnpm dev
 | `TRELLO_APP_API_SECRET`                   | Trello app API secret                                     | For Trello import                           | `xxx`                                                       |
 | `AVATAR_UPLOAD_LIMIT`                      | Maximum avatar file size in bytes                         | For file uploads                            | `2097152` (2MB)                                             |
 | `NEXT_PUBLIC_ALLOW_CREDENTIALS`           | Allow email & password login                              | For authentication                          | `true`                                                      |
-| `NEXT_PUBLIC_DISABLE_SIGN_UP`             | Disable sign up                                           | For authentication                          | `false`                                                     |
+| `NEXT_PUBLIC_DISABLE_SIGN_UP`             | Disable sign up, except for the first account and email invitees | For authentication                          | `false`                                                     |
 | `NEXT_PUBLIC_WHITE_LABEL_HIDE_POWERED_BY` | Hide “Powered by kan.bn” on public boards (self-host)     | For white labelling                         | `true`                                                      |
 | `KAN_ADMIN_API_KEY`                       | Admin API key for stats and admin endpoints               | For admin/monitoring                        | `your-secret-admin-key`                                     |
 | `LOG_LEVEL`                               | Log verbosity level (debug, info, warn, error)            | No (defaults to debug in dev, info in prod) | `info`                                                      |

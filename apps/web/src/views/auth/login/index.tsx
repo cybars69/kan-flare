@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { env } from "~/env";
 import { useState } from "react";
 
 import { authClient } from "@kan/auth/client";
@@ -10,6 +9,8 @@ import { authClient } from "@kan/auth/client";
 import { Auth } from "~/components/AuthForm";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
+import { env } from "~/env";
+import { api } from "~/utils/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,6 +26,16 @@ export default function LoginPage() {
   };
 
   const { data } = authClient.useSession();
+
+  // Sign-up stays available until the first account exists.
+  const { data: firstUser } = api.user.isFirstUser.useQuery(undefined, {
+    enabled: isSignUpDisabled,
+  });
+
+  const showSignUpLink =
+    !isSignUpDisabled ||
+    (redirect?.startsWith("/invite/") ?? false) ||
+    (firstUser?.firstUser ?? false);
 
   if (data?.user.id) router.push(redirect ?? "/boards");
 
@@ -58,7 +69,7 @@ export default function LoginPage() {
                 </div>
               </div>
             )}
-            {(!isSignUpDisabled || redirect?.startsWith("/invite/")) && (
+            {showSignUpLink && (
               <p className="mt-4 text-sm text-light-1000 dark:text-dark-1000">
                 <Trans>
                   Don't have an account?{" "}

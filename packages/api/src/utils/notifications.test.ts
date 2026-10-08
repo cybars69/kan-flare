@@ -136,6 +136,30 @@ describe("sendMentionEmails", () => {
     );
   });
 
+  it("skips mention emails but keeps the in-app notification when notification emails are off", async () => {
+    vi.stubEnv("DISABLE_NOTIFICATION_EMAILS", "true");
+    try {
+      await sendMentionEmails({
+        db,
+        cardPublicId: "card-public-id",
+        previousHtml: null,
+        nextHtml: mention(mentionedMemberPublicId),
+        commenterUserId: authorUserId,
+        commentId: 21,
+      });
+    } finally {
+      vi.stubEnv("DISABLE_NOTIFICATION_EMAILS", "");
+    }
+
+    expect(mocks.sendEmail).not.toHaveBeenCalled();
+    expect(mocks.createNotification).toHaveBeenCalledWith(db, {
+      type: "mention",
+      userId: "mentioned-user-id",
+      cardId: 42,
+      commentId: 21,
+    });
+  });
+
   it("does not record a notification when email delivery fails", async () => {
     const error = new Error("SMTP rejected the message");
     mocks.sendEmail.mockRejectedValue(error);

@@ -4,9 +4,26 @@ import { z } from "zod";
 import * as userRepo from "@kan/db/repository/user.repo";
 import { generateAvatarUrl } from "@kan/shared/storage";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
+  isFirstUser: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/users/first-user",
+        summary: "Check whether the first account can be created",
+        description:
+          "True while no user exists. With sign-up disabled, the first person may still sign up; they become the admin of the workspace they create.",
+        tags: ["Users"],
+        protect: false,
+      },
+    })
+    .input(z.void())
+    .output(z.object({ firstUser: z.boolean() }))
+    .query(async ({ ctx }) => ({
+      firstUser: (await userRepo.getCount(ctx.db)) === 0,
+    })),
   getUser: protectedProcedure
     .meta({
       openapi: {

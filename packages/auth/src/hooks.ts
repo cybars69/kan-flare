@@ -41,7 +41,9 @@ export function createDatabaseHooks(db: dbClient) {
               "invited",
             );
 
-            if (!pendingInvitation) {
+            // Sign-up is closed to everyone except invitees and the very
+            // first account, so a fresh install can still be set up.
+            if (!pendingInvitation && (await userRepo.getCount(db)) > 0) {
               return Promise.resolve(false);
             }
 

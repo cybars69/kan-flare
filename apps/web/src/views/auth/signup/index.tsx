@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { env } from "~/env";
 import { useState } from "react";
 
 import { authClient } from "@kan/auth/client";
@@ -10,6 +9,8 @@ import { authClient } from "@kan/auth/client";
 import { Auth } from "~/components/AuthForm";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
+import { env } from "~/env";
+import { api } from "~/utils/api";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -30,7 +31,14 @@ export default function SignUpPage() {
 
   const isInviteFlow = redirect?.startsWith("/invite/");
 
-  if (isSignUpDisabled && !isInviteFlow) {
+  // With sign-up disabled, the first account can still be created; that
+  // person sets up the first workspace and invites everyone else.
+  const firstUser = api.user.isFirstUser.useQuery(undefined, {
+    enabled: isSignUpDisabled && !isInviteFlow,
+  });
+  if (isSignUpDisabled && !isInviteFlow && firstUser.isPending) return null;
+
+  if (isSignUpDisabled && !isInviteFlow && !firstUser.data?.firstUser) {
     return (
       <>
         <PageHead title={t`Sign up | kan-flare`} />

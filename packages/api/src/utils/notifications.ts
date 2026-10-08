@@ -1,4 +1,3 @@
-
 import type { dbClient } from "@kan/db/client";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as memberRepo from "@kan/db/repository/member.repo";
@@ -98,25 +97,30 @@ export async function sendMentionEmails({
         // Skip pending members (no userId) - they can be mentioned but won't receive emails
         if (!userId || !email) return;
 
-        try {
-          await sendEmail(
-            email,
-            `${commenterName} mentioned you in a comment on ${cardTitle}`,
-            "MENTION",
-            {
-              commenterName,
-              boardName,
-              cardTitle,
-              cardUrl,
-            },
-          );
-          log.info({ email, cardPublicId }, "Mention email sent");
-        } catch (error) {
-          log.error(
-            { err: error, email, cardPublicId },
-            "Failed to send mention email",
-          );
-          return;
+        // DISABLE_NOTIFICATION_EMAILS turns off mention emails only; sign-in,
+        // invite and password-reset emails still go out, and the in-app
+        // notification is still recorded.
+        if (process.env.DISABLE_NOTIFICATION_EMAILS?.toLowerCase() !== "true") {
+          try {
+            await sendEmail(
+              email,
+              `${commenterName} mentioned you in a comment on ${cardTitle}`,
+              "MENTION",
+              {
+                commenterName,
+                boardName,
+                cardTitle,
+                cardUrl,
+              },
+            );
+            log.info({ email, cardPublicId }, "Mention email sent");
+          } catch (error) {
+            log.error(
+              { err: error, email, cardPublicId },
+              "Failed to send mention email",
+            );
+            return;
+          }
         }
 
         try {

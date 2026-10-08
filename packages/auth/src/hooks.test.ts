@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as memberRepo from "@kan/db/repository/member.repo";
+import * as userRepo from "@kan/db/repository/user.repo";
 
 import { createDatabaseHooks } from "./hooks";
 
@@ -12,6 +13,8 @@ vi.mock("@kan/db/repository/member.repo", () => ({
 
 vi.mock("@kan/db/repository/user.repo", () => ({
   update: vi.fn(),
+  // Existing users by default; the first-user test overrides this.
+  getCount: vi.fn(() => Promise.resolve(1)),
 }));
 
 vi.mock("@kan/email", () => ({
@@ -97,6 +100,17 @@ describe("createDatabaseHooks", () => {
         "test@example.com",
         "invited",
       );
+    });
+
+    it("allows the very first account when sign-up is disabled", async () => {
+      mockEnv.mockImplementation((key: string) =>
+        key === "NEXT_PUBLIC_DISABLE_SIGN_UP" ? "true" : undefined,
+      );
+      mockGetByEmailAndStatus.mockResolvedValue(undefined);
+      vi.mocked(userRepo.getCount).mockResolvedValueOnce(0);
+
+      const result = await hooks.user.create.before(fakeUser, {});
+      expect(result).toBe(true);
     });
 
     it("allows sign-up when disabled but user has a pending invitation", async () => {
