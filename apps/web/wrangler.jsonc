@@ -6,16 +6,16 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
   "observability": {
-    "logs": { "enabled": true },
+    "logs": { "enabled": true }
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "kan-flare",
-    },
+      "service": "kan-flare"
+    }
   ],
   "d1_databases": [
     {
@@ -23,8 +23,8 @@
       "database_name": "kan-flare",
       // No database_id: `wrangler deploy` provisions the database on first
       // deploy and reuses it afterwards. Local dev uses .wrangler/state.
-      "migrations_dir": "../../packages/db/migrations",
-    },
+      "migrations_dir": "../../packages/db/migrations"
+    }
   ],
   // Buckets are created on first deploy when they don't exist yet.
   "r2_buckets": [
@@ -33,8 +33,8 @@
     // Resized/converted images made by /api/image.
     {
       "binding": "IMAGE_VARIANTS",
-      "bucket_name": "kan-flare-image-variants",
-    },
+      "bucket_name": "kan-flare-image-variants"
+    }
   ],
   // Cloudflare Images, used by /api/image to resize and convert. Billed per
   // unique transformation; variants are stored in R2 so each is made once.
@@ -49,18 +49,18 @@
     {
       "name": "RATE_LIMIT_100",
       "namespace_id": "1100",
-      "simple": { "limit": 100, "period": 60 },
+      "simple": { "limit": 100, "period": 60 }
     },
     {
       "name": "RATE_LIMIT_300",
       "namespace_id": "1300",
-      "simple": { "limit": 300, "period": 60 },
+      "simple": { "limit": 300, "period": 60 }
     },
     {
       "name": "RATE_LIMIT_600",
       "namespace_id": "1600",
-      "simple": { "limit": 600, "period": 60 },
-    },
+      "simple": { "limit": 600, "period": 60 }
+    }
   ],
   // Bindings are not inherited by environments: add each one to env.staging.
   "env": {
@@ -69,46 +69,46 @@
       "services": [
         {
           "binding": "WORKER_SELF_REFERENCE",
-          "service": "kan-flare-staging",
-        },
+          "service": "kan-flare-staging"
+        }
       ],
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "kan-flare-staging",
-          "migrations_dir": "../../packages/db/migrations",
-        },
+          "migrations_dir": "../../packages/db/migrations"
+        }
       ],
       "send_email": [{ "name": "EMAIL" }],
       "r2_buckets": [
         { "binding": "AVATARS", "bucket_name": "kan-flare-staging-avatars" },
         {
           "binding": "ATTACHMENTS",
-          "bucket_name": "kan-flare-staging-attachments",
+          "bucket_name": "kan-flare-staging-attachments"
         },
         {
           "binding": "IMAGE_VARIANTS",
-          "bucket_name": "kan-flare-staging-image-variants",
-        },
+          "bucket_name": "kan-flare-staging-image-variants"
+        }
       ],
       "images": { "binding": "IMAGES" },
       "ratelimits": [
         {
           "name": "RATE_LIMIT_100",
           "namespace_id": "2100",
-          "simple": { "limit": 100, "period": 60 },
+          "simple": { "limit": 100, "period": 60 }
         },
         {
           "name": "RATE_LIMIT_300",
           "namespace_id": "2300",
-          "simple": { "limit": 300, "period": 60 },
+          "simple": { "limit": 300, "period": 60 }
         },
         {
           "name": "RATE_LIMIT_600",
           "namespace_id": "2600",
-          "simple": { "limit": 600, "period": 60 },
-        },
-      ],
-    },
-  },
+          "simple": { "limit": 600, "period": 60 }
+        }
+      ]
+    }
+  }
 }

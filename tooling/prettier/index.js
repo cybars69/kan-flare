@@ -31,6 +31,13 @@ const config = {
   importOrderTypeScriptVersion: "4.4.0",
   overrides: [
     {
+      // Keep JSONC strict-JSON-compatible (no trailing commas), e.g. wrangler.jsonc.
+      files: "*.jsonc",
+      options: {
+        trailingComma: "none",
+      },
+    },
+    {
       files: "*.json.hbs",
       options: {
         parser: "json",
