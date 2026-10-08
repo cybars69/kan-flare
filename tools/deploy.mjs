@@ -89,6 +89,7 @@ if (skippedAsVars.length) {
     `  Not uploading as secrets (they are vars): ${skippedAsVars.join(", ")}`,
   );
 }
+let deployed = false;
 const secretsDir = mkdtempSync(join(tmpdir(), "kan-flare-secrets-"));
 const secretsFile = join(secretsDir, "secrets.json");
 try {
@@ -97,13 +98,23 @@ try {
   console.log(
     `\n▶ Deploying with ${names.length} secret(s): ${names.join(", ") || "none"}`,
   );
-  run("opennextjs-cloudflare", [
-    "deploy",
-    ...envArgs,
-    ...(names.length ? ["--secrets-file", secretsFile] : []),
-  ]);
+  deployed = run(
+    "opennextjs-cloudflare",
+    [
+      "deploy",
+      ...envArgs,
+      ...(names.length ? ["--secrets-file", secretsFile] : []),
+    ],
+    // Don't exit from inside run(): process.exit skips `finally`, which
+    // would leave the secrets file behind.
+    { allowFailure: true },
+  );
 } finally {
   rmSync(secretsDir, { recursive: true, force: true });
+}
+if (!deployed) {
+  console.error("\n✘ Deploy failed; nothing was migrated after it.");
+  process.exit(1);
 }
 
 console.log(`\n▶ Migrating ${database} after deploy`);
