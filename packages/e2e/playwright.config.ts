@@ -35,6 +35,8 @@ const betterAuthSecret =
 const sharedVars: Record<string, string> = {
   BETTER_AUTH_SECRET: betterAuthSecret,
   DISABLE_RATE_LIMIT: "true",
+  // wrangler.jsonc turns these off for production; mention-email.spec needs them.
+  DISABLE_NOTIFICATION_EMAILS: "false",
   EMAIL_FROM: "kan-flare e2e <e2e@kan-test.local>",
   TRELLO_API_URL: `http://127.0.0.1:${trelloMockPort}`,
   TRELLO_APP_API_KEY: "e2e-mock-trello-key",
@@ -142,7 +144,9 @@ export default defineConfig({
             `rm -rf ${wranglerState}`,
             "pnpm --filter @kan/web exec opennextjs-cloudflare build",
             `pnpm --filter @kan/web exec wrangler d1 migrations apply kan-flare --local --persist-to ${wranglerState}`,
-            `pnpm --filter @kan/web exec wrangler dev --port ${port} --inspector-port 9459 --persist-to ${wranglerState} ${Object.entries(
+            // --local-upstream: without it, wrangler dev rewrites requests to the
+            // production custom domain in wrangler.jsonc, and auth rejects the origin.
+            `pnpm --filter @kan/web exec wrangler dev --port ${port} --local-upstream localhost:${port} --inspector-port 9459 --persist-to ${wranglerState} ${Object.entries(
               { ...sharedVars, NEXT_PUBLIC_BASE_URL: baseURL },
             )
               .map(([key, value]) => `--var ${key}:${JSON.stringify(value)}`)

@@ -144,8 +144,10 @@ To run the real Workers build locally:
 
 ```sh
 cd apps/web
-npx opennextjs-cloudflare build && npx wrangler dev
+npx opennextjs-cloudflare build && npx wrangler dev --local-upstream localhost:8787
 ```
+
+`--local-upstream` matters: because `wrangler.jsonc` declares the `tasks.example.com` custom domain, plain `wrangler dev` rewrites every request to that host, and sign-in then fails with "Invalid origin".
 
 Mail isn't sent locally. `wrangler dev` writes each message under `apps/web/.wrangler/tmp/email/` and logs where it put it.
 
