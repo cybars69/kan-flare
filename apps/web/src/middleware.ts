@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+
 import { env } from "~/env";
 
 const MCP_HOSTNAMES = new Set(["mcp.kan.bn", "mcp-staging.kan.bn"]);
@@ -26,11 +27,10 @@ function resolveLoginUrl(request: NextRequest) {
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0];
 
-  if (
-    host &&
-    MCP_HOSTNAMES.has(host) &&
-    OAUTH_DISCOVERY_PATHS.has(request.nextUrl.pathname)
-  ) {
+  // There is no OAuth server; MCP uses API keys. Answer discovery requests
+  // with 404 on every host, or the catch-all workspace page answers 200 with
+  // HTML and MCP clients wrongly offer an OAuth sign-in.
+  if (OAUTH_DISCOVERY_PATHS.has(request.nextUrl.pathname)) {
     return new NextResponse(null, { status: 404 });
   }
 

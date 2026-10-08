@@ -114,18 +114,16 @@ describe("middleware", () => {
     },
   );
 
-  it("does not 404 OAuth discovery paths on the main app domain", () => {
-    mockedEnv.mockImplementation((key) => {
-      if (key === "NEXT_PUBLIC_KAN_ENV") return "cloud";
-    });
-
+  it("returns 404 for OAuth discovery paths on the main app domain too", () => {
+    // No OAuth server exists; without this the workspace page answers 200
+    // and MCP clients wrongly offer an OAuth sign-in.
     const response = middleware(
       new NextRequest(
-        "http://localhost:3000/.well-known/oauth-protected-resource",
-        { headers: { host: "kan.bn" } },
+        "https://tasks.example.com/.well-known/oauth-protected-resource",
+        { headers: { host: "tasks.example.com" } },
       ),
     );
 
-    expect(response.status).not.toBe(404);
+    expect(response.status).toBe(404);
   });
 });
